@@ -22,11 +22,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/python/python.min.js"></script>
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <style>
-        .CodeMirror { height: 100%; font-family: monospace; }
+        .CodeMirror { height: 100%; font-family: monospace; background: #222222; }
         .file-tree, .file-tree ul { list-style-type: none; padding-left: 1rem; }
         .file-tree li { cursor: pointer; }
-        .file-tree .delete-item-btn { display: none; }
+        .file-tree .delete-item-btn { display: none; opacity: 0.5; }
         .file-tree li:hover .delete-item-btn { display: inline; }
+        .file-tree .delete-item-btn:hover { opacity: 1; }
+        .tab-link.active { background-color: #333333; }
     </style>
 </head>
 <body class="font-sans flex flex-col h-screen bg-gray-101010">
@@ -37,12 +39,13 @@
     </header>
 
     <div class="flex flex-grow overflow-hidden">
-        <aside class="w-64 bg-gray-222/80 backdrop-blur-sm border-r border-gray-800 flex flex-col">
+        <!-- Left Panel: File Browser / Packages -->
+        <aside class="w-64 bg-gray-222 border-r border-gray-800 flex flex-col">
             <div class="flex border-b border-gray-800">
-                <button class="tab-link flex-1 p-2 text-center bg-gray-333" onclick="openTab(event, 'files')">Files</button>
-                <button class="tab-link flex-1 p-2 text-center" onclick="openTab(event, 'packages')">Packages</button>
+                <button class="tab-link active flex-1 p-2 text-center text-sm" onclick="openTab(event, 'files')">Files</button>
+                <button class="tab-link flex-1 p-2 text-center text-sm" onclick="openTab(event, 'packages')">Packages</button>
             </div>
-            <div class="p-4 flex-grow overflow-y-auto">
+            <div class="p-2 flex-grow overflow-y-auto">
                 <div id="files" class="tab-content">
                     <div class="flex justify-end mb-2">
                         <button id="create-file-btn" class="px-2 py-1 text-xs bg-gray-700 rounded hover:bg-gray-600" title="New File">+</button>
@@ -53,7 +56,7 @@
                         {% for name, content in tree.items() %}
                             {% set new_path = path + '/' + name if path else name %}
                             <li class="my-1 p-1 rounded hover:bg-gray-800 flex justify-between items-center {% if content is mapping %}folder-item{% else %}file-item{% endif %}" data-path="{{ new_path }}">
-                                <span>
+                                <span class="truncate">
                                     {% if content is mapping %}&#128193;{% else %}&#128196;{% endif %} {{ name }}
                                 </span>
                                 <button class="delete-item-btn text-red-500 font-bold" data-path="{{ new_path }}">&times;</button>
@@ -69,7 +72,7 @@
 
                 <div id="packages" class="tab-content" style="display: none;">
                     <div class="flex mb-2">
-                        <input type="text" id="package-name" placeholder="Package name" class="flex-grow bg-gray-800 border border-gray-700 rounded-l-md py-1 px-2 text-sm focus:outline-none">
+                        <input type="text" id="package-name" placeholder="Package name" class="flex-grow bg-gray-800 border border-gray-700 rounded-l-md py-1 px-2 text-sm focus:outline-none focus:ring-1 focus:ring-white">
                         <button id="install-package-btn" class="bg-gray-700 rounded-r-md px-3 hover:bg-gray-600 text-sm">Install</button>
                     </div>
                     <ul class="package-list text-sm">
@@ -84,16 +87,21 @@
             </div>
         </aside>
 
-        <main class="flex-grow flex flex-col">
+        <!-- Right Panel: Editor / Console -->
+        <main class="flex-grow flex flex-col bg-gray-222">
             <div class="flex-grow relative">
                 <button id="save-button" style="display:none;" class="absolute top-2 right-2 z-10 bg-white text-gray-101010 px-4 py-1 rounded-md text-sm font-semibold hover:bg-gray-200">Save</button>
                 <div id="editor-container" class="absolute inset-0"></div>
             </div>
             <div class="console h-48 flex-shrink-0 bg-gray-101010 border-t border-gray-800 p-2 font-mono text-xs overflow-y-auto">
-                <pre class="whitespace-pre-wrap">-- Console output --</pre>
+                <pre class="whitespace-pre-wrap text-gray-400">-- Console output --</pre>
             </div>
         </main>
     </div>
+
+    <footer class="fixed bottom-0 left-0 right-0 p-4 text-center text-xs text-gray-600 pointer-events-none">
+        <p>Sycord for Developers.</p>
+    </footer>
 
     <script>
         const botId = "{{ bot._id }}";
@@ -162,17 +170,20 @@
 
         function openTab(evt, tabName) {
             document.querySelectorAll('.tab-content').forEach(tc => tc.style.display = 'none');
-            document.querySelectorAll('.tab-link').forEach(tl => tl.classList.remove('bg-gray-333'));
+            document.querySelectorAll('.tab-link').forEach(tl => tl.classList.remove('active'));
             document.getElementById(tabName).style.display = 'block';
-            evt.currentTarget.classList.add('bg-gray-333');
+            evt.currentTarget.classList.add('active');
         }
 
         const consoleEl = document.querySelector('.console pre');
         const socket = io.connect('/editor');
         socket.on('connect', () => socket.emit('join', { bot_id: botId }));
         socket.on('log', (msg) => {
+            if(consoleEl.innerText.includes('-- Console output --')){
+                consoleEl.innerText = "";
+            }
             const logEntry = document.createElement('p');
-            logEntry.textContent = msg.data;
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${msg.data}`;
             consoleEl.appendChild(logEntry);
             consoleEl.scrollTop = consoleEl.scrollHeight;
         });
@@ -201,8 +212,5 @@
             });
         });
     </script>
-    <footer class="fixed bottom-0 left-0 right-0 p-4 text-center text-xs text-gray-600">
-        <p>Sycord for Developers.</p>
-    </footer>
 </body>
 </html>
