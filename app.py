@@ -88,6 +88,7 @@ def callback():
     access_token = token_data.get("access_token")
 
     if not access_token:
+        print(f"Error getting access token from Discord: {token_data}")
         return "Failed to retrieve access token.", 400
 
     headers = {
