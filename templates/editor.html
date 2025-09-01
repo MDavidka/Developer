@@ -1,65 +1,41 @@
 <!DOCTYPE html>
-<html lang="en" class="bg-gray-101010 text-white">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ bot.name }} - Sycord Editor</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        gray: { '101010': '#101010', '222': '#222222', '333': '#333333', '888': '#888888' }
-                    }
-                }
-            }
-        }
-    </script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/dracula.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/python/python.min.js"></script>
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-    <style>
-        .CodeMirror { height: 100%; font-family: monospace; background: #222222; }
-        .file-tree, .file-tree ul { list-style-type: none; padding-left: 1rem; }
-        .file-tree li { cursor: pointer; }
-        .file-tree .delete-item-btn { display: none; opacity: 0.5; }
-        .file-tree li:hover .delete-item-btn { display: inline; }
-        .file-tree .delete-item-btn:hover { opacity: 1; }
-        .tab-link.active { background-color: #333333; }
-    </style>
 </head>
-<body class="font-sans flex flex-col h-screen bg-gray-101010">
-
-    <header class="p-4 flex justify-between items-center border-b border-gray-800 flex-shrink-0">
-        <h1 class="text-xl font-bold">Editing: {{ bot.name }}</h1>
-        <a href="{{ url_for('dashboard') }}" class="text-sm text-gray-400 hover:text-white">Back to Dashboard</a>
+<body>
+    <header class="editor-header">
+        <h1>Editing: {{ bot.name }}</h1>
+        <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
     </header>
 
-    <div class="flex flex-grow overflow-hidden">
-        <!-- Left Panel: File Browser / Packages -->
-        <aside class="w-64 bg-gray-222 border-r border-gray-800 flex flex-col">
-            <div class="flex border-b border-gray-800">
-                <button class="tab-link active flex-1 p-2 text-center text-sm" onclick="openTab(event, 'files')">Files</button>
-                <button class="tab-link flex-1 p-2 text-center text-sm" onclick="openTab(event, 'packages')">Packages</button>
+    <div class="editor-container">
+        <aside class="editor-left-panel">
+            <div class="editor-tabs">
+                <button class="tab-link active" onclick="openTab(event, 'files')">Files</button>
+                <button class="tab-link" onclick="openTab(event, 'packages')">Packages</button>
             </div>
-            <div class="p-2 flex-grow overflow-y-auto">
+            <div class="file-browser-content">
                 <div id="files" class="tab-content">
-                    <div class="flex justify-end mb-2">
-                        <button id="create-file-btn" class="px-2 py-1 text-xs bg-gray-700 rounded hover:bg-gray-600" title="New File">+</button>
-                        <button id="create-folder-btn" class="ml-1 px-2 py-1 text-xs bg-gray-700 rounded hover:bg-gray-600" title="New Folder">&#128194;</button>
+                    <div>
+                        <button id="create-file-btn" title="New File">+</button>
+                        <button id="create-folder-btn" title="New Folder">&#128194;</button>
                     </div>
                     {% macro render_file_tree(tree, path='') %}
-                    <ul class="file-tree text-sm">
+                    <ul class="file-tree">
                         {% for name, content in tree.items() %}
                             {% set new_path = path + '/' + name if path else name %}
-                            <li class="my-1 p-1 rounded hover:bg-gray-800 flex justify-between items-center {% if content is mapping %}folder-item{% else %}file-item{% endif %}" data-path="{{ new_path }}">
-                                <span class="truncate">
-                                    {% if content is mapping %}&#128193;{% else %}&#128196;{% endif %} {{ name }}
-                                </span>
-                                <button class="delete-item-btn text-red-500 font-bold" data-path="{{ new_path }}">&times;</button>
+                            <li data-path="{{ new_path }}" class="{% if content is mapping %}folder-item{% else %}file-item{% endif %}">
+                                <span>{% if content is mapping %}&#128193;{% else %}&#128196;{% endif %} {{ name }}</span>
+                                <button class="delete-item-btn" data-path="{{ new_path }}">&times;</button>
                             </li>
                             {% if content is mapping %}
                                 <li>{{ render_file_tree(content, new_path) }}</li>
@@ -69,17 +45,16 @@
                     {% endmacro %}
                     {{ render_file_tree(bot.files_tree) }}
                 </div>
-
                 <div id="packages" class="tab-content" style="display: none;">
-                    <div class="flex mb-2">
-                        <input type="text" id="package-name" placeholder="Package name" class="flex-grow bg-gray-800 border border-gray-700 rounded-l-md py-1 px-2 text-sm focus:outline-none focus:ring-1 focus:ring-white">
-                        <button id="install-package-btn" class="bg-gray-700 rounded-r-md px-3 hover:bg-gray-600 text-sm">Install</button>
+                    <div>
+                        <input type="text" id="package-name" placeholder="Package name">
+                        <button id="install-package-btn">Install</button>
                     </div>
-                    <ul class="package-list text-sm">
+                    <ul>
                         {% for package in bot.packages %}
-                            <li class="my-1 p-1 rounded flex justify-between items-center hover:bg-gray-800">
+                            <li>
                                 {{ package }}
-                                <button class="uninstall-package-btn text-red-500 font-bold" data-package="{{ package }}">&times;</button>
+                                <button class="uninstall-package-btn" data-package="{{ package }}">&times;</button>
                             </li>
                         {% endfor %}
                     </ul>
@@ -87,19 +62,18 @@
             </div>
         </aside>
 
-        <!-- Right Panel: Editor / Console -->
-        <main class="flex-grow flex flex-col bg-gray-222">
-            <div class="flex-grow relative">
-                <button id="save-button" style="display:none;" class="absolute top-2 right-2 z-10 bg-white text-gray-101010 px-4 py-1 rounded-md text-sm font-semibold hover:bg-gray-200">Save</button>
-                <div id="editor-container" class="absolute inset-0"></div>
+        <main class="editor-main-panel">
+            <div class="editor-area">
+                <button id="save-button" style="display:none;" class="button">Save</button>
+                <div id="editor-container"></div>
             </div>
-            <div class="console h-48 flex-shrink-0 bg-gray-101010 border-t border-gray-800 p-2 font-mono text-xs overflow-y-auto">
-                <pre class="whitespace-pre-wrap text-gray-400">-- Console output --</pre>
+            <div class="console">
+                <pre>-- Console output --</pre>
             </div>
         </main>
     </div>
 
-    <footer class="fixed bottom-0 left-0 right-0 p-4 text-center text-xs text-gray-600 pointer-events-none">
+    <footer>
         <p>Sycord for Developers.</p>
     </footer>
 

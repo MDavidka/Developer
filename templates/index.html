@@ -1,58 +1,27 @@
 <!DOCTYPE html>
-<html lang="en" class="bg-gray-101010 text-white">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sycord for Developers</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        gray: { '101010': '#101010' }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        .sycord-title-center {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            transition: all 0.5s ease-in-out;
-        }
-        .sycord-title-top {
-            top: 25%;
-        }
-        .login-button {
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-            transition-delay: 0.3s;
-        }
-        .login-button-visible {
-            opacity: 1;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center font-sans overflow-hidden">
+<body>
 
     {% if current_user.is_authenticated %}
-        <div class="text-center">
-            <h1 class="text-4xl font-bold mb-4">Welcome, {{ current_user.username }}</h1>
-            <div class="space-x-4">
-                <a href="{{ url_for('dashboard') }}" class="bg-white text-gray-101010 px-6 py-2 rounded-md hover:bg-gray-200">Go to Dashboard</a>
-                <a href="{{ url_for('logout') }}" class="border border-white px-6 py-2 rounded-md hover:bg-white hover:text-gray-101010">Logout</a>
+        <div class="welcome-container">
+            <h1>Welcome, {{ current_user.username }}</h1>
+            <div class="actions">
+                <a href="{{ url_for('dashboard') }}" class="button">Go to Dashboard</a>
+                <a href="{{ url_for('logout') }}" class="button button-secondary">Logout</a>
             </div>
         </div>
     {% else %}
         <div id="sycord-title" class="sycord-title-center">
-            <h1 class="text-5xl font-bold animate-pulse">Sycord</h1>
+            <h1>Sycord</h1>
         </div>
-        <div id="login-container" class="text-center mt-48">
-             <a id="login-button" href="{{ url_for('login') }}" class="login-button bg-white text-gray-101010 px-8 py-3 rounded-md font-semibold hover:bg-gray-200">Login with Discord</a>
+        <div id="login-container">
+             <a id="login-button" href="{{ url_for('login') }}" class="button login-button">Login with Discord</a>
         </div>
     {% endif %}
 
