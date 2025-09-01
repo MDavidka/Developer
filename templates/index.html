@@ -6,7 +6,7 @@
     <title>Sycord for Developers</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body>
+<body class="login-page-container">
 
     {% if current_user.is_authenticated %}
         <div class="welcome-container">
@@ -20,7 +20,7 @@
         <div id="sycord-title" class="sycord-title-center">
             <h1>Sycord</h1>
         </div>
-        <div id="login-container">
+        <div class="login-container">
              <a id="login-button" href="{{ url_for('login') }}" class="button login-button">Login with Discord</a>
         </div>
     {% endif %}
@@ -30,11 +30,9 @@
             const userIsAuthenticated = {{ current_user.is_authenticated|tojson }};
             if (!userIsAuthenticated) {
                 setTimeout(() => {
-                    const title = document.getElementById('sycord-title');
-                    const loginButton = document.getElementById('login-button');
-                    title.classList.add('sycord-title-top');
-                    loginButton.classList.add('login-button-visible');
-                }, 1500); // Animation starts after 1.5 seconds
+                    document.getElementById('sycord-title').classList.add('sycord-title-top');
+                    document.getElementById('login-button').classList.add('login-button-visible');
+                }, 1000);
             }
         });
     </script>

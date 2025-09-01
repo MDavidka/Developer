@@ -11,8 +11,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/python/python.min.js"></script>
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 </head>
-<body>
-    <header class="editor-header">
+<body class="app-container">
+    <header class="app-header">
         <h1>Editing: {{ bot.name }}</h1>
         <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
     </header>
@@ -25,7 +25,7 @@
             </div>
             <div class="file-browser-content">
                 <div id="files" class="tab-content">
-                    <div>
+                    <div class="file-actions">
                         <button id="create-file-btn" title="New File">+</button>
                         <button id="create-folder-btn" title="New Folder">&#128194;</button>
                     </div>
@@ -46,14 +46,14 @@
                     {{ render_file_tree(bot.files_tree) }}
                 </div>
                 <div id="packages" class="tab-content" style="display: none;">
-                    <div>
+                    <div class="package-manager">
                         <input type="text" id="package-name" placeholder="Package name">
-                        <button id="install-package-btn">Install</button>
+                        <button id="install-package-btn" class="button">Install</button>
                     </div>
-                    <ul>
+                    <ul class="package-list">
                         {% for package in bot.packages %}
                             <li>
-                                {{ package }}
+                                <span>{{ package }}</span>
                                 <button class="uninstall-package-btn" data-package="{{ package }}">&times;</button>
                             </li>
                         {% endfor %}
