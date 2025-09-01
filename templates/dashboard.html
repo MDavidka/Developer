@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-gray-101010 text-white">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sycord for Developers</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gray: { '101010': '#101010', '222': '#222222' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans">
+    <div id="create-bot-modal" class="fixed inset-0 bg-black bg-opacity-75 backdrop-blur-sm flex items-center justify-center" style="display:none;">
+        <div class="bg-gray-222 bg-opacity-80 p-8 rounded-lg shadow-lg w-full max-w-md border border-gray-700">
+            <h3 class="text-2xl font-bold mb-4">Create a New Bot</h3>
+            <form action="{{ url_for('create_bot') }}" method="post" class="space-y-4">
+                <div>
+                    <label for="bot_name" class="block text-sm font-medium text-gray-400">Bot Name</label>
+                    <input type="text" id="bot_name" name="bot_name" required class="mt-1 block w-full bg-gray-101010 border border-gray-700 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50">
+                </div>
+                <div>
+                    <label for="startup_command" class="block text-sm font-medium text-gray-400">Startup Command</label>
+                    <input type="text" id="startup_command" name="startup_command" required class="mt-1 block w-full bg-gray-101010 border border-gray-700 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50">
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" id="cancel-create-bot" class="px-4 py-2 rounded-md border border-gray-700 hover:bg-gray-700">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded-md bg-white text-gray-101010 font-semibold hover:bg-gray-200">Create Bot</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <header class="p-4 flex justify-between items-center border-b border-gray-800">
+        <h1 class="text-xl font-bold">Sycord Dashboard</h1>
+        <div class="flex items-center space-x-4">
+            <span>Welcome, {{ user.username }}!</span>
+            <a href="{{ url_for('logout') }}" class="text-sm text-gray-400 hover:text-white">Logout</a>
+        </div>
+    </header>
+
+    <main class="p-8">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold">Your Bots</h2>
+            <div class="flex space-x-4">
+                <input type="search" placeholder="Search bots..." class="bg-gray-800 border border-gray-700 rounded-md py-2 px-4 focus:outline-none focus:ring-white focus:border-white">
+                <button id="create-bot-btn" class="bg-white text-gray-101010 px-4 py-2 rounded-md font-semibold hover:bg-gray-200">Create New Bot</button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% if bots %}
+                {% for bot in bots %}
+                    <div class="bg-gray-222 rounded-lg shadow-lg p-6 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold mb-2">{{ bot.name }}</h3>
+                            <p class="text-sm text-gray-400 mb-4">
+                                Status:
+                                <span class="px-2 py-1 rounded-full text-xs font-semibold {{ 'bg-green-500 text-white' if bot.status == 'online' else 'bg-gray-600 text-gray-300' }}">
+                                    {{ bot.status }}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="flex space-x-2 mt-4">
+                            <a href="{{ url_for('editor', bot_id=bot._id) }}" class="flex-grow text-center bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-md">Edit</a>
+                            <button class="start-bot-btn flex-grow bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-md" data-bot-id="{{ bot._id }}">Start</button>
+                            <button class="stop-bot-btn flex-grow bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-md" data-bot-id="{{ bot._id }}">Stop</button>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-span-full text-center py-12 bg-gray-222 rounded-lg">
+                    <p class="text-gray-400">You don't have any bots yet. Create one to get started.</p>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <footer class="fixed bottom-0 left-0 right-0 p-4 text-center text-xs text-gray-600">
+        <p>Sycord for Developers.</p>
+    </footer>
+
+    <script>
+        document.getElementById('create-bot-btn').addEventListener('click', () => {
+            document.getElementById('create-bot-modal').style.display = 'flex';
+        });
+        document.getElementById('cancel-create-bot').addEventListener('click', () => {
+            document.getElementById('create-bot-modal').style.display = 'none';
+        });
+
+        document.querySelectorAll('.start-bot-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const botId = btn.dataset.botId;
+                await fetch(`/api/bot/${botId}/start`, { method: 'POST' });
+                location.reload();
+            });
+        });
+
+        document.querySelectorAll('.stop-bot-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const botId = btn.dataset.botId;
+                await fetch(`/api/bot/${botId}/stop`, { method: 'POST' });
+                location.reload();
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-gray-101010 text-white">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sycord for Developers</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gray: {
+                            '101010': '#101010',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen flex items-center justify-center font-sans">
+    <div id="splash-screen" class="fixed inset-0 bg-gray-101010 flex items-center justify-center z-50">
+        <h1 class="text-4xl font-bold animate-pulse">Sycord</h1>
+    </div>
+
+    <div class="text-center">
+        <h1 class="text-4xl font-bold mb-4">Welcome to Sycord for Developers</h1>
+        {% if current_user.is_authenticated %}
+            <p class="text-lg mb-6">Welcome, {{ current_user.username }}!</p>
+            <div class="space-x-4">
+                <a href="{{ url_for('dashboard') }}" class="bg-white text-gray-101010 px-6 py-2 rounded-md hover:bg-gray-200">Go to Dashboard</a>
+                <a href="{{ url_for('logout') }}" class="border border-white px-6 py-2 rounded-md hover:bg-white hover:text-gray-101010">Logout</a>
+            </div>
+        {% else %}
+            <p class="text-lg mb-6">The modern, minimalistic developer portal for managing Discord bots.</p>
+            <a href="{{ url_for('login') }}" class="bg-white text-gray-101010 px-8 py-3 rounded-md font-semibold hover:bg-gray-200">Login with Discord</a>
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!sessionStorage.getItem('splashed')) {
+                const splash = document.getElementById('splash-screen');
+                setTimeout(() => {
+                    splash.style.transition = 'opacity 1s';
+                    splash.style.opacity = '0';
+                    setTimeout(() => {
+                        splash.style.display = 'none';
+                    }, 1000);
+                }, 2000); // Show splash for 2 seconds
+                sessionStorage.setItem('splashed', 'true');
+            } else {
+                document.getElementById('splash-screen').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

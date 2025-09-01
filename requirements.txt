@@ -1,0 +1,8 @@
+Flask
+python-dotenv
+requests
+pymongo
+Flask-Login
+Flask-SocketIO
+mongomock
+pytest
