@@ -89,6 +89,9 @@
         .file-tree li {
             padding: 0.25rem 0;
             cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .file-tree li:hover {
             background: #333;
@@ -118,6 +121,31 @@
         }
         .button-2:hover {
             background: #555;
+        }
+        .editor-toolbar {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .package-list {
+            list-style: none;
+            padding: 0;
+        }
+        .package-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.25rem 0;
+        }
+        .package-list li:hover {
+            background: #333;
+        }
+        .console-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: #aaa;
         }
     </style>
 </head>
@@ -220,7 +248,6 @@
     </main>
 
     <script>
-        // JavaScript remains the same as in your original code
         const botId = "{{ bot._id }}";
         let currentFilePath = null;
         let selectedFolderPath = '';
@@ -233,7 +260,7 @@
         const fileBrowserView = document.getElementById('file-browser-view');
         const fileEditorView = document.getElementById('file-editor-view');
 
-        // Tab switching logic
+        // Main Tab Switcher
         document.querySelectorAll('input[name="main-tab"]').forEach(radio => {
             radio.addEventListener('change', function() {
                 document.querySelectorAll('.main-tab-content').forEach(tc => tc.classList.remove('active'));
@@ -241,7 +268,146 @@
             });
         });
 
-        // Rest of your JavaScript logic...
+        // Files Tab Logic
+        document.querySelectorAll('.file-item').forEach(item => {
+            item.addEventListener('click', async (e) => {
+                if (e.target.classList.contains('delete-item-btn')) return;
+                fileBrowserView.style.display = 'none';
+                fileEditorView.style.display = 'flex';
+                const path = item.dataset.path;
+                currentFilePath = path;
+                const response = await fetch(`/api/bot/${botId}/file?path=${path}`);
+                const data = await response.json();
+                if (response.ok) {
+                    editor.setValue(data.content);
+                    saveButton.style.display = 'block';
+                    editor.refresh();
+                } else { alert('Error: ' + data.error); }
+            });
+        });
+
+        document.getElementById('back-to-files-btn').addEventListener('click', () => {
+            fileEditorView.style.display = 'none';
+            fileBrowserView.style.display = 'block';
+        });
+
+        saveButton.addEventListener('click', async () => {
+            if (!currentFilePath) return;
+            const response = await fetch(`/api/bot/${botId}/file?path=${currentFilePath}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: editor.getValue() })
+            });
+            const data = await response.json();
+            if (response.ok && data.success) { alert('File saved successfully!'); }
+            else { alert('Error saving file.'); }
+        });
+
+        document.querySelectorAll('.folder-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                document.querySelectorAll('.folder-item.selected').forEach(f => f.classList.remove('selected'));
+                item.classList.add('selected');
+                selectedFolderPath = item.dataset.path;
+            });
+        });
+
+        document.getElementById('create-file-btn').addEventListener('click', () => handleCreate('file'));
+        document.getElementById('create-folder-btn').addEventListener('click', () => handleCreate('folder'));
+
+        document.querySelectorAll('.delete-item-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const path = e.target.dataset.path;
+                if (confirm(`Are you sure you want to delete ${path}?`)) {
+                    const response = await fetch(`/api/bot/${botId}/files/delete`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ path: path })
+                    });
+                    if (response.ok) { location.reload(); }
+                    else { alert('Error deleting item.'); }
+                }
+            });
+        });
+
+        async function handleCreate(type) {
+            const name = prompt(`Enter the name for the new ${type}:`);
+            if (name) {
+                const path = selectedFolderPath ? `${selectedFolderPath}/${name}` : name;
+                const response = await fetch(`/api/bot/${botId}/files/create`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path: path, type: type })
+                });
+                if (response.ok) { location.reload(); }
+                else { alert(`Error creating ${type}.`); }
+            }
+        }
+
+        // Console Tab Logic
+        const consoleEl = document.querySelector('.console.full-screen pre');
+        const socket = io.connect('/editor');
+        socket.on('connect', () => socket.emit('join', { bot_id: botId }));
+        socket.on('log', (msg) => {
+            if(consoleEl.innerText.includes('-- Console output --')){
+                consoleEl.innerText = "";
+            }
+            const logEntry = document.createElement('p');
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${msg.data}`;
+            consoleEl.appendChild(logEntry);
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+        });
+
+        document.querySelectorAll('.start-bot-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const botId = btn.dataset.botId;
+                await fetch(`/api/bot/${botId}/start`, { method: 'POST' });
+            });
+        });
+        document.querySelectorAll('.stop-bot-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const botId = btn.dataset.botId;
+                await fetch(`/api/bot/${botId}/stop`, { method: 'POST' });
+            });
+        });
+
+        // Settings Tab Logic
+        document.getElementById('startup-command-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const command = e.target.elements.startup_command.value;
+            const response = await fetch(`/api/bot/${botId}/startup`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ startup_command: command })
+            });
+            if (response.ok) {
+                alert('Startup command saved!');
+            } else {
+                alert('Error saving startup command.');
+            }
+        });
+        document.getElementById('install-package-btn').addEventListener('click', async () => {
+            const packageName = document.getElementById('package-name').value;
+            if (packageName) {
+                await fetch(`/api/bot/${botId}/packages/install`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ package_name: packageName })
+                });
+                location.reload();
+            }
+        });
+        document.querySelectorAll('.uninstall-package-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const packageName = e.target.dataset.package;
+                await fetch(`/api/bot/${botId}/packages/uninstall`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ package_name: packageName })
+                });
+                location.reload();
+            });
+        });
     </script>
 </body>
 </html>
