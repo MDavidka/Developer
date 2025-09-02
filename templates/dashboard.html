@@ -39,23 +39,18 @@
         <main class="app-main">
             <div class="dashboard-toolbar">
                 <h2>Your Bots</h2>
-                <div>
-                    <input type="search" placeholder="Search bots..." class="search-input">
-                    <button id="create-bot-btn" class="button">Create New Bot</button>
-                </div>
+                <button id="create-bot-btn" class="button">Create New Bot</button>
             </div>
 
             <div class="bot-grid">
                 {% if bots %}
                     {% for bot in bots %}
-                        <div class="bot-card">
-                            <div>
-                                <h3>{{ bot.name }}</h3>
-                                <p class="status">
-                                    <span class="dot {{ 'online' if bot.status == 'online' else 'offline' }}"></span>
-                                    <span>{{ bot.status }}</span>
-                                </p>
-                            </div>
+                        <div class="card bot-card">
+                            <h3>{{ bot.name }}</h3>
+                            <p class="status">
+                                <span class="dot {{ 'online' if bot.status == 'online' else 'offline' }}"></span>
+                                <span>{{ bot.status }}</span>
+                            </p>
                             <div class="actions">
                                 <a href="{{ url_for('editor', bot_id=bot._id) }}" class="button button-secondary">Edit</a>
                                 <button class="start-bot-btn button button-secondary" data-bot-id="{{ bot._id }}">Start</button>
@@ -64,7 +59,7 @@
                         </div>
                     {% endfor %}
                 {% else %}
-                    <div class="empty-state">
+                    <div class="card empty-state">
                         <p>You don't have any bots yet.</p>
                         <button id="create-bot-btn-empty" class="button">Create One</button>
                     </div>
@@ -84,7 +79,6 @@
         function hideCreateModal() {
             document.getElementById('create-bot-modal').style.display = 'none';
         }
-
         document.getElementById('create-bot-btn').addEventListener('click', showCreateModal);
         const emptyCreateBtn = document.getElementById('create-bot-btn-empty');
         if (emptyCreateBtn) {
@@ -99,7 +93,6 @@
                 location.reload();
             });
         });
-
         document.querySelectorAll('.stop-bot-btn').forEach(btn => {
             btn.addEventListener('click', async () => {
                 const botId = btn.dataset.botId;

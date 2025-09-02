@@ -13,11 +13,11 @@
 </head>
 <body class="app-container">
     <header class="app-header">
-        <div class="header-left">
+        <div>
             <button id="mobile-menu-btn" class="mobile-menu-button">&#9776;</button>
             <h1>Editing: {{ bot.name }}</h1>
         </div>
-        <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+        <a href="{{ url_for('dashboard') }}" class="button button-secondary">Back to Dashboard</a>
     </header>
 
     <div class="editor-container">
@@ -75,10 +75,6 @@
             </div>
         </main>
     </div>
-
-    <footer>
-        <p>Sycord for Developers.</p>
-    </footer>
 
     <script>
         const botId = "{{ bot._id }}";

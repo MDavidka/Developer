@@ -9,7 +9,7 @@
 <body class="login-page-container">
 
     {% if current_user.is_authenticated %}
-        <div class="welcome-container">
+        <div>
             <h1>Welcome, {{ current_user.username }}</h1>
             <div class="actions">
                 <a href="{{ url_for('dashboard') }}" class="button">Go to Dashboard</a>
@@ -17,11 +17,9 @@
             </div>
         </div>
     {% else %}
-        <div id="sycord-title" class="sycord-title-center">
-            <h1>Sycord</h1>
-        </div>
-        <div class="login-container">
-             <a id="login-button" href="{{ url_for('login') }}" class="button login-button">Login with Discord</a>
+        <h1 id="sycord-title" class="sycord-title-center">Sycord</h1>
+        <div id="login-container" class="login-container">
+             <a href="{{ url_for('login') }}" class="button">Login with Discord</a>
         </div>
     {% endif %}
 
@@ -31,8 +29,8 @@
             if (!userIsAuthenticated) {
                 setTimeout(() => {
                     document.getElementById('sycord-title').classList.add('sycord-title-top');
-                    document.getElementById('login-button').classList.add('login-button-visible');
-                }, 1000);
+                    document.getElementById('login-container').classList.add('login-container-visible');
+                }, 500);
             }
         });
     </script>
