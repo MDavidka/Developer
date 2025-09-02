@@ -17,15 +17,24 @@
         <a href="{{ url_for('dashboard') }}" class="button-2">Back to Dashboard</a>
     </header>
 
-    <div class="main-editor-tabs">
-        <button class="main-tab-link active" onclick="openMainTab(event, 'console-tab')">Console</button>
-        <button class="main-tab-link" onclick="openMainTab(event, 'files-tab')">Files</button>
-        <button class="main-tab-link" onclick="openMainTab(event, 'settings-tab')">Settings</button>
+    <div class="radio-inputs">
+        <label class="radio">
+            <input type="radio" name="main-tab" value="console-tab" checked="">
+            <span class="name">Console</span>
+        </label>
+        <label class="radio">
+            <input type="radio" name="main-tab" value="files-tab">
+            <span class="name">Files</span>
+        </label>
+        <label class="radio">
+            <input type="radio" name="main-tab" value="settings-tab">
+            <span class="name">Settings</span>
+        </label>
     </div>
 
     <main class="editor-main-content">
         <!-- Console Tab -->
-        <div id="console-tab" class="main-tab-content">
+        <div id="console-tab" class="main-tab-content active">
             <div class="console-actions">
                 <button class="start-bot-btn button-2" data-bot-id="{{ bot._id }}">Start</button>
                 <button class="stop-bot-btn button-2" data-bot-id="{{ bot._id }}">Stop</button>
@@ -41,33 +50,35 @@
 
         <!-- Files Tab -->
         <div id="files-tab" class="main-tab-content" style="display: none;">
-            <div class="editor-container">
-                <aside id="left-panel" class="editor-left-panel">
-                    <div class="file-browser-content">
-                        <!-- File Tree will be rendered here -->
-                        {% macro render_file_tree(tree, path='') %}
-                        <ul class="file-tree">
-                            {% for name, content in tree.items() %}
-                                {% set new_path = path + '/' + name if path else name %}
-                                <li data-path="{{ new_path }}" class="{% if content is mapping %}folder-item{% else %}file-item{% endif %}">
-                                    <span>{% if content is mapping %}&#128193;{% else %}&#128196;{% endif %} {{ name }}</span>
-                                    <button class="delete-item-btn" data-path="{{ new_path }}">&times;</button>
-                                </li>
-                                {% if content is mapping %}
-                                    <li>{{ render_file_tree(content, new_path) }}</li>
-                                {% endif %}
-                            {% endfor %}
-                        </ul>
-                        {% endmacro %}
-                        {{ render_file_tree(bot.files_tree) }}
-                    </div>
-                </aside>
-                <main class="editor-main-panel">
-                    <div class="editor-area">
-                        <button id="save-button" style="display:none;" class="button-2">Save</button>
-                        <div id="editor-container"></div>
-                    </div>
-                </main>
+            <!-- View 1: File Browser -->
+            <div id="file-browser-view">
+                <div class="file-browser-content">
+                    <!-- File Tree will be rendered here -->
+                    {% macro render_file_tree(tree, path='') %}
+                    <ul class="file-tree">
+                        {% for name, content in tree.items() %}
+                            {% set new_path = path + '/' + name if path else name %}
+                            <li data-path="{{ new_path }}" class="{% if content is mapping %}folder-item{% else %}file-item{% endif %}">
+                                <span>{% if content is mapping %}&#128193;{% else %}&#128196;{% endif %} {{ name }}</span>
+                                <button class="delete-item-btn" data-path="{{ new_path }}">&times;</button>
+                            </li>
+                            {% if content is mapping %}
+                                <li>{{ render_file_tree(content, new_path) }}</li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                    {% endmacro %}
+                    {{ render_file_tree(bot.files_tree) }}
+                </div>
+            </div>
+
+            <!-- View 2: File Editor -->
+            <div id="file-editor-view" style="display: none;">
+                <div class="editor-toolbar">
+                    <button id="back-to-files-btn" class="button-2">&larr; Back to Files</button>
+                    <button id="save-button" style="display:none;" class="button-2">Save</button>
+                </div>
+                <div id="editor-container" class="editor-area"></div>
             </div>
         </div>
 
@@ -106,10 +117,17 @@
         let selectedFolderPath = '';
         const saveButton = document.getElementById('save-button');
         const editor = CodeMirror(document.getElementById('editor-container'), { lineNumbers: true, theme: 'dracula', mode: 'python' });
+        const fileBrowserView = document.getElementById('file-browser-view');
+        const fileEditorView = document.getElementById('file-editor-view');
 
         document.querySelectorAll('.file-item').forEach(item => {
             item.addEventListener('click', async (e) => {
                 if (e.target.classList.contains('delete-item-btn')) return;
+
+                // Show editor, hide browser
+                fileBrowserView.style.display = 'none';
+                fileEditorView.style.display = 'flex';
+
                 const path = item.dataset.path;
                 currentFilePath = path;
                 const response = await fetch(`/api/bot/${botId}/file?path=${path}`);
@@ -117,8 +135,14 @@
                 if (response.ok) {
                     editor.setValue(data.content);
                     saveButton.style.display = 'block';
+                    editor.refresh(); // Important for CodeMirror when shown
                 } else { alert('Error: ' + data.error); }
             });
+        });
+
+        document.getElementById('back-to-files-btn').addEventListener('click', () => {
+            fileEditorView.style.display = 'none';
+            fileBrowserView.style.display = 'block';
         });
 
         saveButton.addEventListener('click', async () => {
@@ -176,12 +200,12 @@
             }
         }
 
-        function openMainTab(evt, tabName) {
-            document.querySelectorAll('.main-tab-content').forEach(tc => tc.style.display = 'none');
-            document.querySelectorAll('.main-tab-link').forEach(tl => tl.classList.remove('active'));
-            document.getElementById(tabName).style.display = 'flex';
-            evt.currentTarget.classList.add('active');
-        }
+        document.querySelectorAll('input[name="main-tab"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                document.querySelectorAll('.main-tab-content').forEach(tc => tc.classList.remove('active'));
+                document.getElementById(this.value).classList.add('active');
+            });
+        });
 
         const consoleEl = document.querySelector('.console.full-screen pre');
         const socket = io.connect('/editor');
