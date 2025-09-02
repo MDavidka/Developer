@@ -331,5 +331,19 @@ def uninstall_package(bot_id):
     return jsonify({"success": True})
 
 
+@app.route("/api/bot/<bot_id>/startup", methods=["POST"])
+@login_required
+def update_startup_command(bot_id):
+    command = request.json.get("startup_command")
+    if command is None:
+        return jsonify({"error": "Startup command is required"}), 400
+
+    db.bots.update_one(
+        {"_id": ObjectId(bot_id), "owner_id": current_user.id},
+        {"$set": {"startup_command": command}}
+    )
+    return jsonify({"success": True})
+
+
 if __name__ == "__main__":
     socketio.run(app, host='0.0.0.0', port=30158, debug=True)

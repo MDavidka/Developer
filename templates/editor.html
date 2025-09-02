@@ -13,42 +13,76 @@
 </head>
 <body class="app-container">
     <header class="app-header">
-        <div>
-            <button id="mobile-menu-btn" class="mobile-menu-button">&#9776;</button>
-            <h1>Editing: {{ bot.name }}</h1>
-        </div>
+        <h1>Editing: {{ bot.name }}</h1>
         <a href="{{ url_for('dashboard') }}" class="button-2">Back to Dashboard</a>
     </header>
 
-    <div class="editor-container">
-        <aside id="left-panel" class="editor-left-panel frosted-glass">
-            <div class="editor-tabs">
-                <button class="tab-link active" onclick="openTab(event, 'files')">Files</button>
-                <button class="tab-link" onclick="openTab(event, 'packages')">Packages</button>
+    <div class="main-editor-tabs">
+        <button class="main-tab-link active" onclick="openMainTab(event, 'console-tab')">Console</button>
+        <button class="main-tab-link" onclick="openMainTab(event, 'files-tab')">Files</button>
+        <button class="main-tab-link" onclick="openMainTab(event, 'settings-tab')">Settings</button>
+    </div>
+
+    <main class="editor-main-content">
+        <!-- Console Tab -->
+        <div id="console-tab" class="main-tab-content">
+            <div class="console-actions">
+                <button class="start-bot-btn button-2" data-bot-id="{{ bot._id }}">Start</button>
+                <button class="stop-bot-btn button-2" data-bot-id="{{ bot._id }}">Stop</button>
             </div>
-            <div class="file-browser-content">
-                <div id="files" class="tab-content">
-                    <div class="file-actions">
-                        <button id="create-file-btn" class="button-2" title="New File">+</button>
-                        <button id="create-folder-btn" class="button-2" title="New Folder">&#128194;</button>
+            <div class="console full-screen">
+                <pre>-- Console output --</pre>
+            </div>
+            <div class="console-footer">
+                <span>RAM: -- MB</span>
+                <span>Uptime: --</span>
+            </div>
+        </div>
+
+        <!-- Files Tab -->
+        <div id="files-tab" class="main-tab-content" style="display: none;">
+            <div class="editor-container">
+                <aside id="left-panel" class="editor-left-panel">
+                    <div class="file-browser-content">
+                        <!-- File Tree will be rendered here -->
+                        {% macro render_file_tree(tree, path='') %}
+                        <ul class="file-tree">
+                            {% for name, content in tree.items() %}
+                                {% set new_path = path + '/' + name if path else name %}
+                                <li data-path="{{ new_path }}" class="{% if content is mapping %}folder-item{% else %}file-item{% endif %}">
+                                    <span>{% if content is mapping %}&#128193;{% else %}&#128196;{% endif %} {{ name }}</span>
+                                    <button class="delete-item-btn" data-path="{{ new_path }}">&times;</button>
+                                </li>
+                                {% if content is mapping %}
+                                    <li>{{ render_file_tree(content, new_path) }}</li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                        {% endmacro %}
+                        {{ render_file_tree(bot.files_tree) }}
                     </div>
-                    {% macro render_file_tree(tree, path='') %}
-                    <ul class="file-tree">
-                        {% for name, content in tree.items() %}
-                            {% set new_path = path + '/' + name if path else name %}
-                            <li data-path="{{ new_path }}" class="{% if content is mapping %}folder-item{% else %}file-item{% endif %}">
-                                <span>{% if content is mapping %}&#128193;{% else %}&#128196;{% endif %} {{ name }}</span>
-                                <button class="delete-item-btn" data-path="{{ new_path }}">&times;</button>
-                            </li>
-                            {% if content is mapping %}
-                                <li>{{ render_file_tree(content, new_path) }}</li>
-                            {% endif %}
-                        {% endfor %}
-                    </ul>
-                    {% endmacro %}
-                    {{ render_file_tree(bot.files_tree) }}
+                </aside>
+                <main class="editor-main-panel">
+                    <div class="editor-area">
+                        <button id="save-button" style="display:none;" class="button-2">Save</button>
+                        <div id="editor-container"></div>
+                    </div>
+                </main>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings-tab" class="main-tab-content" style="display: none;">
+            <div class="settings-container">
+                <div class="setting-card frosted-glass">
+                    <h3>Startup Command</h3>
+                    <form id="startup-command-form">
+                        <input type="text" name="startup_command" value="{{ bot.startup_command }}">
+                        <button type="submit" class="button-2">Save</button>
+                    </form>
                 </div>
-                <div id="packages" class="tab-content" style="display: none;">
+                <div class="setting-card frosted-glass">
+                    <h3>Package Management</h3>
                     <div class="package-manager">
                         <input type="text" id="package-name" placeholder="Package name">
                         <button id="install-package-btn" class="button-2">Install</button>
@@ -63,22 +97,13 @@
                     </ul>
                 </div>
             </div>
-        </aside>
-
-        <main class="editor-main-panel">
-            <div class="editor-area">
-                <button id="save-button" style="display:none;" class="button-2">Save</button>
-                <div id="editor-container"></div>
-            </div>
-            <div class="console">
-                <pre>-- Console output --</pre>
-            </div>
-        </main>
-    </div>
+        </div>
+    </main>
 
     <script>
         const botId = "{{ bot._id }}";
         let currentFilePath = null;
+        let selectedFolderPath = '';
         const saveButton = document.getElementById('save-button');
         const editor = CodeMirror(document.getElementById('editor-container'), { lineNumbers: true, theme: 'dracula', mode: 'python' });
 
@@ -108,6 +133,16 @@
             else { alert('Error saving file.'); }
         });
 
+        document.querySelectorAll('.folder-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                // Deselect others
+                document.querySelectorAll('.folder-item.selected').forEach(f => f.classList.remove('selected'));
+                // Select current
+                item.classList.add('selected');
+                selectedFolderPath = item.dataset.path;
+            });
+        });
+
         document.getElementById('create-file-btn').addEventListener('click', () => handleCreate('file'));
         document.getElementById('create-folder-btn').addEventListener('click', () => handleCreate('folder'));
 
@@ -130,7 +165,7 @@
         async function handleCreate(type) {
             const name = prompt(`Enter the name for the new ${type}:`);
             if (name) {
-                const path = name;
+                const path = selectedFolderPath ? `${selectedFolderPath}/${name}` : name;
                 const response = await fetch(`/api/bot/${botId}/files/create`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -141,14 +176,14 @@
             }
         }
 
-        function openTab(evt, tabName) {
-            document.querySelectorAll('.tab-content').forEach(tc => tc.style.display = 'none');
-            document.querySelectorAll('.tab-link').forEach(tl => tl.classList.remove('active'));
-            document.getElementById(tabName).style.display = 'block';
+        function openMainTab(evt, tabName) {
+            document.querySelectorAll('.main-tab-content').forEach(tc => tc.style.display = 'none');
+            document.querySelectorAll('.main-tab-link').forEach(tl => tl.classList.remove('active'));
+            document.getElementById(tabName).style.display = 'flex';
             evt.currentTarget.classList.add('active');
         }
 
-        const consoleEl = document.querySelector('.console pre');
+        const consoleEl = document.querySelector('.console.full-screen pre');
         const socket = io.connect('/editor');
         socket.on('connect', () => socket.emit('join', { bot_id: botId }));
         socket.on('log', (msg) => {
@@ -188,6 +223,22 @@
         // Mobile menu toggle
         document.getElementById('mobile-menu-btn').addEventListener('click', () => {
             document.getElementById('left-panel').classList.toggle('show');
+        });
+
+        // Startup command form
+        document.getElementById('startup-command-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const command = e.target.elements.startup_command.value;
+            const response = await fetch(`/api/bot/${botId}/startup`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ startup_command: command })
+            });
+            if (response.ok) {
+                alert('Startup command saved!');
+            } else {
+                alert('Error saving startup command.');
+            }
         });
     </script>
 </body>
