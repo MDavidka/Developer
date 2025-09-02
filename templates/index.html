@@ -11,15 +11,15 @@
     {% if current_user.is_authenticated %}
         <div>
             <h1>Welcome, {{ current_user.username }}</h1>
-            <div class="actions">
-                <a href="{{ url_for('dashboard') }}" class="button">Go to Dashboard</a>
-                <a href="{{ url_for('logout') }}" class="button button-secondary">Logout</a>
+            <div class="actions" style="margin-top: 1rem; display: flex; gap: 1rem;">
+                <a href="{{ url_for('dashboard') }}" class="button-2">Go to Dashboard</a>
+                <a href="{{ url_for('logout') }}" class="button-2">Logout</a>
             </div>
         </div>
     {% else %}
         <h1 id="sycord-title" class="sycord-title-center">Sycord</h1>
         <div id="login-container" class="login-container">
-             <a href="{{ url_for('login') }}" class="button">Login with Discord</a>
+             <a href="{{ url_for('login') }}" class="button-2">Login with Discord</a>
         </div>
     {% endif %}
 

@@ -26,6 +26,11 @@ body {
     min-height: 100vh;
 }
 
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
 /* --- Layouts --- */
 .app-container, .login-page-container {
     display: flex;
@@ -66,7 +71,7 @@ footer {
 }
 
 /* --- Components --- */
-.button-2 {
+.button-2, a.button-2 {
   background-color: rgba(51, 51, 51, 0.05);
   border-radius: 8px;
   border-width: 0;
@@ -89,14 +94,14 @@ footer {
   touch-action: manipulation;
   text-decoration: none;
 }
-.button-2:hover, .button-2:focus {
+.button-2:hover, .button-2:focus, a.button-2:hover, a.button-2:focus {
     background-color: rgba(255, 255, 255, 0.2);
 }
 
 .frosted-glass {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(45, 45, 45, 0.5);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
@@ -250,6 +255,15 @@ footer {
     justify-content: space-between;
     align-items: center;
     flex-shrink: 0;
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+    .dashboard-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
 }
 
 @keyframes pulse {

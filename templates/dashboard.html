@@ -6,9 +6,9 @@
     <title>Dashboard - Sycord for Developers</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body>
+<body class="app-container">
     <div id="create-bot-modal" class="modal-overlay" style="display:none;">
-        <div class="modal-content">
+        <div class="modal-content frosted-glass">
             <h3>Create a New Bot</h3>
             <form action="{{ url_for('create_bot') }}" method="post">
                 <div class="form-group">
@@ -27,45 +27,43 @@
         </div>
     </div>
 
-    <div class="app-container">
-        <header class="app-header">
-            <h1>Sycord Dashboard</h1>
-            <a href="{{ url_for('logout') }}" title="Logout">
-                <img src="{{ user.avatar_url or url_for('static', filename='img/default_avatar.png') }}" alt="User Avatar" class="avatar">
-            </a>
-        </header>
+    <header class="app-header">
+        <h1>Sycord Dashboard</h1>
+        <a href="{{ url_for('logout') }}" title="Logout">
+            <img src="{{ user.avatar_url or url_for('static', filename='img/default_avatar.png') }}" alt="User Avatar" class="avatar">
+        </a>
+    </header>
 
-        <main class="app-main">
-            <div class="dashboard-toolbar">
-                <h2>Your Bots</h2>
-                <button id="create-bot-btn" class="button-2">Create New Bot</button>
-            </div>
+    <main class="app-main">
+        <div class="dashboard-toolbar">
+            <h2>Your Bots</h2>
+            <button id="create-bot-btn" class="button-2">Create New Bot</button>
+        </div>
 
-            <div class="bot-grid">
-                {% if bots %}
-                    {% for bot in bots %}
-                        <div class="card bot-card frosted-glass">
-                            <h3>{{ bot.name }}</h3>
-                            <p class="status">
-                                <span class="dot {{ 'online' if bot.status == 'online' else 'offline' }}"></span>
-                                <span>{{ bot.status }}</span>
-                            </p>
-                            <div class="actions">
-                                <a href="{{ url_for('editor', bot_id=bot._id) }}" class="button-2">Edit</a>
-                                <button class="start-bot-btn button-2" data-bot-id="{{ bot._id }}">Start</button>
-                                <button class="stop-bot-btn button-2" data-bot-id="{{ bot._id }}">Stop</button>
-                            </div>
+        <div class="bot-grid">
+            {% if bots %}
+                {% for bot in bots %}
+                    <div class="bot-card frosted-glass">
+                        <h3>{{ bot.name }}</h3>
+                        <p class="status">
+                            <span class="dot {{ 'online' if bot.status == 'online' else 'offline' }}"></span>
+                            <span>{{ bot.status }}</span>
+                        </p>
+                        <div class="actions">
+                            <a href="{{ url_for('editor', bot_id=bot._id) }}" class="button-2">Edit</a>
+                            <button class="start-bot-btn button-2" data-bot-id="{{ bot._id }}">Start</button>
+                            <button class="stop-bot-btn button-2" data-bot-id="{{ bot._id }}">Stop</button>
                         </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="card empty-state frosted-glass">
-                        <p>You don't have any bots yet.</p>
-                        <button id="create-bot-btn-empty" class="button-2">Create One</button>
                     </div>
-                {% endif %}
-            </div>
-        </main>
-    </div>
+                {% endfor %}
+            {% else %}
+                <div class="bot-card empty-state frosted-glass">
+                    <p>You don't have any bots yet.</p>
+                    <button id="create-bot-btn-empty" class="button-2">Create One</button>
+                </div>
+            {% endif %}
+        </div>
+    </main>
 
     <footer>
         <p>Sycord for Developers.</p>

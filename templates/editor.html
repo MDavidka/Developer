@@ -19,7 +19,7 @@
 
     <div class="radio-inputs">
         <label class="radio">
-            <input type="radio" name="main-tab" value="console-tab" checked="">
+            <input type="radio" name="main-tab" value="console-tab" checked>
             <span class="name">Console</span>
         </label>
         <label class="radio">
@@ -49,30 +49,28 @@
         </div>
 
         <!-- Files Tab -->
-        <div id="files-tab" class="main-tab-content" style="display: none;">
-            <!-- View 1: File Browser -->
-            <div id="file-browser-view">
-                <div class="file-browser-content">
-                    <!-- File Tree will be rendered here -->
-                    {% macro render_file_tree(tree, path='') %}
-                    <ul class="file-tree">
-                        {% for name, content in tree.items() %}
-                            {% set new_path = path + '/' + name if path else name %}
-                            <li data-path="{{ new_path }}" class="{% if content is mapping %}folder-item{% else %}file-item{% endif %}">
-                                <span>{% if content is mapping %}&#128193;{% else %}&#128196;{% endif %} {{ name }}</span>
-                                <button class="delete-item-btn" data-path="{{ new_path }}">&times;</button>
-                            </li>
-                            {% if content is mapping %}
-                                <li>{{ render_file_tree(content, new_path) }}</li>
-                            {% endif %}
-                        {% endfor %}
-                    </ul>
-                    {% endmacro %}
-                    {{ render_file_tree(bot.files_tree) }}
+        <div id="files-tab" class="main-tab-content">
+            <div id="file-browser-view" class="file-browser-content">
+                <div class="file-actions">
+                    <button id="create-file-btn" class="button-2" title="New File">+</button>
+                    <button id="create-folder-btn" class="button-2" title="New Folder">&#128194;</button>
                 </div>
+                {% macro render_file_tree(tree, path='') %}
+                <ul class="file-tree">
+                    {% for name, content in tree.items() %}
+                        {% set new_path = path + '/' + name if path else name %}
+                        <li data-path="{{ new_path }}" class="{% if content is mapping %}folder-item{% else %}file-item{% endif %}">
+                            <span>{% if content is mapping %}&#128193;{% else %}&#128196;{% endif %} {{ name }}</span>
+                            <button class="delete-item-btn" data-path="{{ new_path }}">&times;</button>
+                        </li>
+                        {% if content is mapping %}
+                            <li>{{ render_file_tree(content, new_path) }}</li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+                {% endmacro %}
+                {{ render_file_tree(bot.files_tree) }}
             </div>
-
-            <!-- View 2: File Editor -->
             <div id="file-editor-view" style="display: none;">
                 <div class="editor-toolbar">
                     <button id="back-to-files-btn" class="button-2">&larr; Back to Files</button>
@@ -83,7 +81,7 @@
         </div>
 
         <!-- Settings Tab -->
-        <div id="settings-tab" class="main-tab-content" style="display: none;">
+        <div id="settings-tab" class="main-tab-content">
             <div class="settings-container">
                 <div class="setting-card frosted-glass">
                     <h3>Startup Command</h3>
@@ -120,14 +118,20 @@
         const fileBrowserView = document.getElementById('file-browser-view');
         const fileEditorView = document.getElementById('file-editor-view');
 
+        // Main Tab Switcher
+        document.querySelectorAll('input[name="main-tab"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                document.querySelectorAll('.main-tab-content').forEach(tc => tc.classList.remove('active'));
+                document.getElementById(this.value).classList.add('active');
+            });
+        });
+
+        // Files Tab Logic
         document.querySelectorAll('.file-item').forEach(item => {
             item.addEventListener('click', async (e) => {
                 if (e.target.classList.contains('delete-item-btn')) return;
-
-                // Show editor, hide browser
                 fileBrowserView.style.display = 'none';
                 fileEditorView.style.display = 'flex';
-
                 const path = item.dataset.path;
                 currentFilePath = path;
                 const response = await fetch(`/api/bot/${botId}/file?path=${path}`);
@@ -135,7 +139,7 @@
                 if (response.ok) {
                     editor.setValue(data.content);
                     saveButton.style.display = 'block';
-                    editor.refresh(); // Important for CodeMirror when shown
+                    editor.refresh();
                 } else { alert('Error: ' + data.error); }
             });
         });
@@ -159,9 +163,7 @@
 
         document.querySelectorAll('.folder-item').forEach(item => {
             item.addEventListener('click', (e) => {
-                // Deselect others
                 document.querySelectorAll('.folder-item.selected').forEach(f => f.classList.remove('selected'));
-                // Select current
                 item.classList.add('selected');
                 selectedFolderPath = item.dataset.path;
             });
@@ -200,13 +202,7 @@
             }
         }
 
-        document.querySelectorAll('input[name="main-tab"]').forEach(radio => {
-            radio.addEventListener('change', function() {
-                document.querySelectorAll('.main-tab-content').forEach(tc => tc.classList.remove('active'));
-                document.getElementById(this.value).classList.add('active');
-            });
-        });
-
+        // Console Tab Logic
         const consoleEl = document.querySelector('.console.full-screen pre');
         const socket = io.connect('/editor');
         socket.on('connect', () => socket.emit('join', { bot_id: botId }));
@@ -220,36 +216,20 @@
             consoleEl.scrollTop = consoleEl.scrollHeight;
         });
 
-        document.getElementById('install-package-btn').addEventListener('click', async () => {
-            const packageName = document.getElementById('package-name').value;
-            if (packageName) {
-                await fetch(`/api/bot/${botId}/packages/install`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ package_name: packageName })
-                });
-                location.reload();
-            }
+        document.querySelectorAll('.start-bot-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const botId = btn.dataset.botId;
+                await fetch(`/api/bot/${botId}/start`, { method: 'POST' });
+            });
         });
-
-        document.querySelectorAll('.uninstall-package-btn').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                const packageName = e.target.dataset.package;
-                await fetch(`/api/bot/${botId}/packages/uninstall`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ package_name: packageName })
-                });
-                location.reload();
+        document.querySelectorAll('.stop-bot-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const botId = btn.dataset.botId;
+                await fetch(`/api/bot/${botId}/stop`, { method: 'POST' });
             });
         });
 
-        // Mobile menu toggle
-        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
-            document.getElementById('left-panel').classList.toggle('show');
-        });
-
-        // Startup command form
+        // Settings Tab Logic
         document.getElementById('startup-command-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const command = e.target.elements.startup_command.value;
@@ -263,6 +243,28 @@
             } else {
                 alert('Error saving startup command.');
             }
+        });
+        document.getElementById('install-package-btn').addEventListener('click', async () => {
+            const packageName = document.getElementById('package-name').value;
+            if (packageName) {
+                await fetch(`/api/bot/${botId}/packages/install`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ package_name: packageName })
+                });
+                location.reload();
+            }
+        });
+        document.querySelectorAll('.uninstall-package-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const packageName = e.target.dataset.package;
+                await fetch(`/api/bot/${botId}/packages/uninstall`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ package_name: packageName })
+                });
+                location.reload();
+            });
         });
     </script>
 </body>
