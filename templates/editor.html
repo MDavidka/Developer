@@ -17,11 +17,11 @@
             <button id="mobile-menu-btn" class="mobile-menu-button">&#9776;</button>
             <h1>Editing: {{ bot.name }}</h1>
         </div>
-        <a href="{{ url_for('dashboard') }}" class="button button-secondary">Back to Dashboard</a>
+        <a href="{{ url_for('dashboard') }}" class="button-2">Back to Dashboard</a>
     </header>
 
     <div class="editor-container">
-        <aside id="left-panel" class="editor-left-panel">
+        <aside id="left-panel" class="editor-left-panel frosted-glass">
             <div class="editor-tabs">
                 <button class="tab-link active" onclick="openTab(event, 'files')">Files</button>
                 <button class="tab-link" onclick="openTab(event, 'packages')">Packages</button>
@@ -29,8 +29,8 @@
             <div class="file-browser-content">
                 <div id="files" class="tab-content">
                     <div class="file-actions">
-                        <button id="create-file-btn" title="New File">+</button>
-                        <button id="create-folder-btn" title="New Folder">&#128194;</button>
+                        <button id="create-file-btn" class="button-2" title="New File">+</button>
+                        <button id="create-folder-btn" class="button-2" title="New Folder">&#128194;</button>
                     </div>
                     {% macro render_file_tree(tree, path='') %}
                     <ul class="file-tree">
@@ -51,7 +51,7 @@
                 <div id="packages" class="tab-content" style="display: none;">
                     <div class="package-manager">
                         <input type="text" id="package-name" placeholder="Package name">
-                        <button id="install-package-btn" class="button">Install</button>
+                        <button id="install-package-btn" class="button-2">Install</button>
                     </div>
                     <ul class="package-list">
                         {% for package in bot.packages %}
@@ -67,7 +67,7 @@
 
         <main class="editor-main-panel">
             <div class="editor-area">
-                <button id="save-button" style="display:none;" class="button">Save</button>
+                <button id="save-button" style="display:none;" class="button-2">Save</button>
                 <div id="editor-container"></div>
             </div>
             <div class="console">

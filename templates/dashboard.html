@@ -20,8 +20,8 @@
                     <input type="text" id="startup_command" name="startup_command" required>
                 </div>
                 <div class="form-actions">
-                    <button type="button" id="cancel-create-bot" class="button button-secondary">Cancel</button>
-                    <button type="submit" class="button">Create</button>
+                    <button type="button" id="cancel-create-bot" class="button-2">Cancel</button>
+                    <button type="submit" class="button-2">Create</button>
                 </div>
             </form>
         </div>
@@ -30,38 +30,37 @@
     <div class="app-container">
         <header class="app-header">
             <h1>Sycord Dashboard</h1>
-            <div>
-                <span>Welcome, {{ user.username }}!</span>
-                <a href="{{ url_for('logout') }}">Logout</a>
-            </div>
+            <a href="{{ url_for('logout') }}" title="Logout">
+                <img src="{{ user.avatar_url or url_for('static', filename='img/default_avatar.png') }}" alt="User Avatar" class="avatar">
+            </a>
         </header>
 
         <main class="app-main">
             <div class="dashboard-toolbar">
                 <h2>Your Bots</h2>
-                <button id="create-bot-btn" class="button">Create New Bot</button>
+                <button id="create-bot-btn" class="button-2">Create New Bot</button>
             </div>
 
             <div class="bot-grid">
                 {% if bots %}
                     {% for bot in bots %}
-                        <div class="card bot-card">
+                        <div class="card bot-card frosted-glass">
                             <h3>{{ bot.name }}</h3>
                             <p class="status">
                                 <span class="dot {{ 'online' if bot.status == 'online' else 'offline' }}"></span>
                                 <span>{{ bot.status }}</span>
                             </p>
                             <div class="actions">
-                                <a href="{{ url_for('editor', bot_id=bot._id) }}" class="button button-secondary">Edit</a>
-                                <button class="start-bot-btn button button-secondary" data-bot-id="{{ bot._id }}">Start</button>
-                                <button class="stop-bot-btn button button-secondary" data-bot-id="{{ bot._id }}">Stop</button>
+                                <a href="{{ url_for('editor', bot_id=bot._id) }}" class="button-2">Edit</a>
+                                <button class="start-bot-btn button-2" data-bot-id="{{ bot._id }}">Start</button>
+                                <button class="stop-bot-btn button-2" data-bot-id="{{ bot._id }}">Stop</button>
                             </div>
                         </div>
                     {% endfor %}
                 {% else %}
-                    <div class="card empty-state">
+                    <div class="card empty-state frosted-glass">
                         <p>You don't have any bots yet.</p>
-                        <button id="create-bot-btn-empty" class="button">Create One</button>
+                        <button id="create-bot-btn-empty" class="button-2">Create One</button>
                     </div>
                 {% endif %}
             </div>

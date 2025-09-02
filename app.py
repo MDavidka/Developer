@@ -35,27 +35,34 @@ login_manager.init_app(app)
 login_manager.login_view = "login"
 
 class User(UserMixin):
-    def __init__(self, id, username, email):
+    def __init__(self, id, username, email, avatar_url):
         self.id = id
         self.username = username
         self.email = email
+        self.avatar_url = avatar_url
 
     @staticmethod
     def get(user_id):
         user_data = db.users.find_one({"_id": user_id})
         if user_data:
-            return User(id=user_data["_id"], username=user_data["username"], email=user_data["email"])
+            return User(
+                id=user_data["_id"],
+                username=user_data["username"],
+                email=user_data["email"],
+                avatar_url=user_data.get("avatar_url")
+            )
         return None
 
     @staticmethod
-    def create(id, username, email):
+    def create(id, username, email, avatar_url):
         user_data = {
             "_id": id,
             "username": username,
             "email": email,
+            "avatar_url": avatar_url,
             "bots": []
         }
-        db.users.insert_one(user_data)
+        db.users.update_one({"_id": id}, {"$set": user_data}, upsert=True)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -98,12 +105,16 @@ def callback():
     user_data = user_response.json()
 
     user_id = user_data["id"]
+    avatar_hash = user_data.get("avatar")
+    avatar_url = f"https://cdn.discordapp.com/avatars/{user_id}/{avatar_hash}.png" if avatar_hash else None
+
+    User.create(
+        id=user_id,
+        username=user_data["username"],
+        email=user_data["email"],
+        avatar_url=avatar_url
+    )
     user = User.get(user_id)
-
-    if user is None:
-        User.create(id=user_id, username=user_data["username"], email=user_data["email"])
-        user = User.get(user_id)
-
     login_user(user)
 
     return redirect(url_for("dashboard"))
