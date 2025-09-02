@@ -13,12 +13,15 @@
 </head>
 <body class="app-container">
     <header class="app-header">
-        <h1>Editing: {{ bot.name }}</h1>
+        <div class="header-left">
+            <button id="mobile-menu-btn" class="mobile-menu-button">&#9776;</button>
+            <h1>Editing: {{ bot.name }}</h1>
+        </div>
         <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
     </header>
 
     <div class="editor-container">
-        <aside class="editor-left-panel">
+        <aside id="left-panel" class="editor-left-panel">
             <div class="editor-tabs">
                 <button class="tab-link active" onclick="openTab(event, 'files')">Files</button>
                 <button class="tab-link" onclick="openTab(event, 'packages')">Packages</button>
@@ -184,6 +187,11 @@
                 });
                 location.reload();
             });
+        });
+
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            document.getElementById('left-panel').classList.toggle('show');
         });
     </script>
 </body>
