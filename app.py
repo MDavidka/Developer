@@ -43,7 +43,7 @@ class User(UserMixin):
 
     @staticmethod
     def get(user_id):
-        user_data = db.users.find_one({"_id": user_id})
+        user_data = db.users.find_one({"_id": ObjectId(user_id)})
         if user_data:
             return User(
                 id=user_data["_id"],
@@ -54,19 +54,26 @@ class User(UserMixin):
         return None
 
     @staticmethod
-    def create(id, username, email, avatar_url):
+    def create_or_update(discord_id, username, email, avatar_url):
         user_data = {
+            "discord_id": discord_id,
             "username": username,
-            "email": email,
             "avatar_url": avatar_url,
         }
         db.users.update_one(
-            {"_id": id},
+            {"email": email},
             {
                 "$set": user_data,
-                "$setOnInsert": {"bots": []}
+                "$setOnInsert": {"bots": [], "email": email}
             },
             upsert=True
+        )
+        user_doc = db.users.find_one({"email": email})
+        return User(
+            id=user_doc["_id"],
+            username=user_doc["username"],
+            email=user_doc["email"],
+            avatar_url=user_doc.get("avatar_url")
         )
 
 @login_manager.user_loader
@@ -109,17 +116,19 @@ def callback():
     user_response = requests.get(f"{DISCORD_API_BASE_URL}/users/@me", headers=headers)
     user_data = user_response.json()
 
-    user_id = user_data["id"]
+    discord_id = user_data["id"]
+    email = user_data["email"]
+    username = user_data["username"]
     avatar_hash = user_data.get("avatar")
-    avatar_url = f"https://cdn.discordapp.com/avatars/{user_id}/{avatar_hash}.png" if avatar_hash else None
+    avatar_url = f"https://cdn.discordapp.com/avatars/{discord_id}/{avatar_hash}.png" if avatar_hash else None
 
-    User.create(
-        id=user_id,
-        username=user_data["username"],
-        email=user_data["email"],
+    user = User.create_or_update(
+        discord_id=discord_id,
+        username=username,
+        email=email,
         avatar_url=avatar_url
     )
-    user = User.get(user_id)
+
     login_user(user)
 
     return redirect(url_for("dashboard"))
