@@ -40,9 +40,9 @@
 
     <main class="editor-main-content">
         <!-- Files/Editor Tab -->
-        <div id="files-tab" class="main-tab-content active">
+        <div id="files-tab" class="main-tab-content active" style="flex-direction: row;">
             <!-- File Browser -->
-            <div id="file-browser-view">
+            <div id="file-browser-view" style="width: 30%; min-width: 200px; resize: horizontal; overflow: auto;">
                 <div class="file-manager-container">
                     <div class="file-actions">
                         <button id="new-file-btn" class="button-2">New File</button>
@@ -53,10 +53,10 @@
                     </ul>
                 </div>
             </div>
+            <div class="resizer" id="resizer"></div>
             <!-- File Editor -->
-            <div class="file-editor-view" style="display: none;">
+            <div class="file-editor-view" style="flex-grow: 1; display: flex;">
                 <div class="editor-toolbar">
-                    <button id="back-to-browser-btn" class="button-2">&larr; Back</button>
                     <span id="editing-filename"></span>
                     <button id="save-file-btn" class="button-2">Save</button>
                 </div>
@@ -109,7 +109,8 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const botId = "{{ bot._id }}";
+            const serverIndex = {{ request.view_args.server_index }};
+            const botId = "{{ bot._id }}"; // This is the constructed workspace ID
 
             // Main tab switching
             const mainTabs = document.querySelectorAll('input[name="main-tab"]');
@@ -121,13 +122,28 @@
                 });
             });
 
-            // File Manager
+            // File Manager & Resizer
             const fileBrowserView = document.getElementById('file-browser-view');
             const fileEditorView = document.getElementById('file-editor-view');
+            const resizer = document.getElementById('resizer');
             const fileTree = document.getElementById('file-tree');
-            const backToBrowserBtn = document.getElementById('back-to-browser-btn');
 
             let currentOpenFile = null;
+
+            resizer.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+                window.addEventListener('mousemove', resize);
+                window.addEventListener('mouseup', stopResize);
+            });
+
+            function resize(e) {
+                const newWidth = e.clientX - fileBrowserView.getBoundingClientRect().left;
+                fileBrowserView.style.width = newWidth + 'px';
+            }
+
+            function stopResize() {
+                window.removeEventListener('mousemove', resize);
+            }
             const editor = CodeMirror(document.getElementById('editor-container'), {
                 mode: 'python',
                 theme: 'material-darker',
@@ -155,7 +171,7 @@
             }
 
             async function openFile(path) {
-                const response = await fetch(`/api/bot/${botId}/file?path=${path}`);
+                const response = await fetch(`/api/server/${serverIndex}/file?path=${path}`);
                 const data = await response.json();
                 if (data.content !== undefined) {
                     currentOpenFile = path;
@@ -174,7 +190,7 @@
 
             document.getElementById('save-file-btn').addEventListener('click', async () => {
                 if (!currentOpenFile) return;
-                await fetch(`/api/bot/${botId}/file?path=${currentOpenFile}`, {
+                await fetch(`/api/server/${serverIndex}/file?path=${currentOpenFile}`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ content: editor.getValue() })
@@ -185,7 +201,7 @@
             document.getElementById('new-file-btn').addEventListener('click', async () => {
                 const path = prompt("Enter new file path (e.g., main.py or folder/main.py):");
                 if (path) {
-                    await fetch(`/api/bot/${botId}/files/create`, {
+                    await fetch(`/api/server/${serverIndex}/files/create`, {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({ path: path, type: 'file' })
@@ -197,7 +213,7 @@
             document.getElementById('new-folder-btn').addEventListener('click', async () => {
                 const path = prompt("Enter new folder path:");
                 if (path) {
-                     await fetch(`/api/bot/${botId}/files/create`, {
+                     await fetch(`/api/server/${serverIndex}/files/create`, {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({ path: path, type: 'folder' })
@@ -224,27 +240,19 @@
                 consoleEl.scrollTop = consoleEl.scrollHeight;
             });
 
-            async function updateBotStatus() {
-                // You might want a dedicated API endpoint for just the status
-                // For now, we'll just update the text
-                const response = await fetch(`/api/bot/${botId}/status`); // This endpoint doesn't exist yet
-                // const data = await response.json();
-                // botStatusEl.textContent = data.status;
-            }
-
             document.getElementById('start-bot-btn-console').addEventListener('click', async () => {
-                await fetch(`/api/bot/${botId}/start`, { method: 'POST' });
+                await fetch(`/api/server/${serverIndex}/start`, { method: 'POST' });
                 botStatusEl.textContent = 'online';
             });
             document.getElementById('stop-bot-btn-console').addEventListener('click', async () => {
-                await fetch(`/api/bot/${botId}/stop`, { method: 'POST' });
+                await fetch(`/api/server/${serverIndex}/stop`, { method: 'POST' });
                 botStatusEl.textContent = 'offline';
             });
 
             // Settings
             document.getElementById('save-startup-command').addEventListener('click', async () => {
                 const command = document.getElementById('startup-command-input').value;
-                await fetch(`/api/bot/${botId}/startup`, {
+                await fetch(`/api/server/${serverIndex}/startup`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ startup_command: command })
@@ -254,7 +262,7 @@
             document.getElementById('install-package-btn').addEventListener('click', async () => {
                 const packageName = document.getElementById('package-name-input').value;
                 if (!packageName) return;
-                await fetch(`/api/bot/${botId}/packages/install`, {
+                await fetch(`/api/server/${serverIndex}/packages/install`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ package_name: packageName })
@@ -265,7 +273,7 @@
             document.querySelectorAll('.uninstall-package-btn').forEach(btn => {
                 btn.addEventListener('click', async () => {
                     const packageName = btn.dataset.package;
-                    await fetch(`/api/bot/${botId}/packages/uninstall`, {
+                    await fetch(`/api/server/${serverIndex}/packages/uninstall`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ package_name: packageName })

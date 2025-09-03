@@ -148,37 +148,56 @@ def logout():
 @login_required
 def dashboard():
     user_data = db.users.find_one({"_id": current_user.id})
-    bots = user_data.get("bots", [])
-    return render_template("dashboard.html", user=current_user, bots=bots)
+    servers = user_data.get("servers", [])
 
-@app.route("/create_bot", methods=["POST"])
-@login_required
-def create_bot():
-    bot_name = request.form.get("bot_name")
-    startup_command = request.form.get("startup_command")
-    bot_id = ObjectId()
+    for i, server in enumerate(servers):
+        bot_id = f"{current_user.id}_{server.get('server_name', i)}"
+        bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
 
-    new_bot = {
-        "_id": bot_id,
-        "name": bot_name,
-        "status": "offline",
-        "last_start_time": None,
-        "uptime": 0,
-        "startup_command": startup_command,
-        "files": [],
-        "packages": []
-    }
+        if not os.path.exists(bot_dir):
+            os.makedirs(bot_dir)
 
-    db.users.update_one(
-        {"_id": current_user.id},
-        {"$push": {"bots": new_bot}}
-    )
+            # Auto-generate main.py
+            main_py_content = f"""
+import os
+import discord
 
-    # Create a directory for the bot
-    bot_dir = os.path.join(BOT_WORKSPACES_PATH, str(bot_id))
-    os.makedirs(bot_dir, exist_ok=True)
+client = discord.Client()
 
-    return redirect(url_for("dashboard"))
+@client.event
+async def on_ready():
+    print(f'We have logged in as {{client.user}}')
+
+@client.event
+async def on_message(message):
+    if message.author == client.user:
+        return
+
+    if message.content.startswith('$hello'):
+        await message.channel.send('Hello!')
+
+client.run(os.getenv('BOT_TOKEN'))
+"""
+            with open(os.path.join(bot_dir, "main.py"), "w") as f:
+                f.write(main_py_content)
+
+            # Set default startup command in the database
+            db.users.update_one(
+                {"_id": current_user.id},
+                {"$set": {f"servers.{i}.startup_command": "python main.py"}}
+            )
+            # Add files array to the server object
+            db.users.update_one(
+                {"_id": current_user.id},
+                {"$set": {f"servers.{i}.files": [{"path": "main.py", "type": "file", "content": main_py_content}]}}
+            )
+
+
+    # Re-fetch user_data to get the updated server list
+    user_data = db.users.find_one({"_id": current_user.id})
+    servers = user_data.get("servers", [])
+
+    return render_template("dashboard.html", user=current_user, servers=servers)
 
 from flask import jsonify
 
@@ -197,23 +216,46 @@ def build_file_tree(file_list):
 
     return tree
 
-@app.route("/editor/<bot_id>")
+@app.route("/editor/<int:server_index>")
 @login_required
-def editor(bot_id):
+def editor(server_index):
     user_data = db.users.find_one({"_id": current_user.id})
-    bot = next((b for b in user_data.get("bots", []) if str(b["_id"]) == bot_id), None)
-    if not bot:
-        return "Unauthorized", 403
+    servers = user_data.get("servers", [])
+    if server_index >= len(servers):
+        return "Not Found", 404
 
-    file_tree = build_file_tree(bot.get('files', []))
-    bot['files_tree'] = file_tree
+    # NOTE: Using array index as an identifier is fragile.
+    # It would be better to have a unique ID for each server/bot.
+    bot_data = servers[server_index]
 
-    return render_template("editor.html", bot=bot, user=current_user)
+    # We need a unique and persistent ID for the workspace.
+    # Using a combination of user ID and server name for now.
+    # A dedicated botId in the server object would be best.
+    bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
 
-@app.route("/api/bot/<bot_id>/file", methods=["GET", "POST"])
+    # The concept of 'files' needs to be re-evaluated.
+    # For now, we'll assume it's still part of the server object.
+    file_tree = build_file_tree(bot_data.get('files', []))
+    bot_data['files_tree'] = file_tree
+    bot_data['_id'] = bot_id # Pass a usable ID to the template for API calls
+
+    return render_template("editor.html", bot=bot_data, user=current_user)
+
+# Note: The 'bot_id' in these routes is a constructed ID for the workspace.
+# It is not a real database ID. This is a temporary solution.
+
+@app.route("/api/server/<int:server_index>/file", methods=["GET", "POST"])
 @login_required
-def file_content(bot_id):
+def file_content(server_index):
+    user_data = db.users.find_one({"_id": current_user.id})
+    servers = user_data.get("servers", [])
+    if server_index >= len(servers):
+        return jsonify({"error": "Server not found"}), 404
+
+    bot_data = servers[server_index]
+    bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
     bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
+
     path = request.args.get("path")
     if not path:
         return jsonify({"error": "File path is required"}), 400
@@ -232,89 +274,78 @@ def file_content(bot_id):
         content = request.json.get("content")
         with open(full_path, "w") as f:
             f.write(content)
-
-        # Also update in the database for consistency if needed, though not strictly necessary if filesystem is the source of truth
-        db.users.update_one(
-            {"_id": current_user.id, "bots._id": ObjectId(bot_id), "bots.files.path": path},
-            {"$set": {"bots.$[bot].files.$[file].content": content}},
-            array_filters=[{"bot._id": ObjectId(bot_id)}, {"file.path": path}]
-        )
         return jsonify({"success": True})
 
-@app.route("/api/bot/<bot_id>/files/create", methods=["POST"])
+@app.route("/api/server/<int:server_index>/files/create", methods=["POST"])
 @login_required
-def create_file(bot_id):
+def create_file(server_index):
     path = request.json.get("path")
     type = request.json.get("type")
     if not path or not type:
         return jsonify({"error": "Path and type are required"}), 400
 
-    # Check for duplicates in the database
-    existing = db.users.find_one({"_id": current_user.id, "bots._id": ObjectId(bot_id), "bots.files.path": path})
-    if existing:
-        return jsonify({"error": "File or folder with this path already exists"}), 400
+    user_data = db.users.find_one({"_id": current_user.id})
+    servers = user_data.get("servers", [])
+    if server_index >= len(servers):
+        return jsonify({"error": "Server not found"}), 404
 
-    # Create on filesystem
+    bot_data = servers[server_index]
+    bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
     bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
     full_path = os.path.join(bot_dir, path)
 
+    if os.path.exists(full_path):
+        return jsonify({"error": "File or folder with this path already exists"}), 400
+
     if type == "folder":
         os.makedirs(full_path, exist_ok=True)
-    else: # type == "file"
+    else:
         os.makedirs(os.path.dirname(full_path), exist_ok=True)
         with open(full_path, "w") as f:
             f.write("")
 
-    # Add to database
-    new_file_doc = {"path": path, "type": type}
-    if type == "file":
-        new_file_doc["content"] = ""
-
-    db.users.update_one(
-        {"_id": current_user.id, "bots._id": ObjectId(bot_id)},
-        {"$push": {"bots.$.files": new_file_doc}}
-    )
     return jsonify({"success": True})
 
-@app.route("/api/bot/<bot_id>/files/delete", methods=["POST"])
+@app.route("/api/server/<int:server_index>/files/delete", methods=["POST"])
 @login_required
-def delete_file(bot_id):
+def delete_file(server_index):
     path = request.json.get("path")
     if not path:
         return jsonify({"error": "Path is required"}), 400
 
-    # Delete from filesystem
+    user_data = db.users.find_one({"_id": current_user.id})
+    servers = user_data.get("servers", [])
+    if server_index >= len(servers):
+        return jsonify({"error": "Server not found"}), 404
+
+    bot_data = servers[server_index]
+    bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
     bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
     full_path = os.path.join(bot_dir, path)
+
     if os.path.isdir(full_path):
         import shutil
         shutil.rmtree(full_path)
     elif os.path.isfile(full_path):
         os.remove(full_path)
+    else:
+        return jsonify({"error": "File or folder not found"}), 404
 
-    # Delete from database
-    result = db.users.update_one(
-        {"_id": current_user.id, "bots._id": ObjectId(bot_id)},
-        {"$pull": {"bots.$.files": {"path": {"$regex": f"^{path}"}}}}
-    )
-
-    if result.modified_count > 0:
-        return jsonify({"success": True})
-    return jsonify({"error": "File or folder not found"}), 404
+    return jsonify({"success": True})
 
 def stream_logs(bot_id, process):
     """Stream logs from a subprocess to the client."""
-    for line in iter(process.stdout.readline, ''):
-        socketio.emit('log', {'data': line}, room=bot_id)
-    for line in iter(process.stderr.readline, ''):
-        socketio.emit('log', {'data': f'[ERROR] {line}'}, room=bot_id)
+    def get_timestamp():
+        return datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-    # Process finished
-    socketio.emit('log', {'data': 'Bot process stopped.'}, room=bot_id)
-    db.users.update_one(
-        {"bots._id": ObjectId(bot_id)},
-        {"$set": {"bots.$.status": "offline"}}
-    )
+    socketio.emit('log', {'data': f'[{get_timestamp()}] Bot process started.'}, room=bot_id)
+
+    for line in iter(process.stdout.readline, ''):
+        socketio.emit('log', {'data': f'[{get_timestamp()}] {line}'}, room=bot_id)
+    for line in iter(process.stderr.readline, ''):
+        socketio.emit('log', {'data': f'[{get_timestamp()}] [ERROR] {line}'}, room=bot_id)
+
+    socketio.emit('log', {'data': f'[{get_timestamp()}] Bot process stopped.'}, room=bot_id)
     if bot_id in running_bots:
         del running_bots[bot_id]
 
@@ -328,79 +359,74 @@ def on_join(data):
     join_room(bot_id)
     emit('log', {'data': f'Console opened for bot {bot_id}'}, room=bot_id)
 
-
-@app.route("/api/bot/<bot_id>/start", methods=["POST"])
+@app.route("/api/server/<int:server_index>/start", methods=["POST"])
 @login_required
-def start_bot(bot_id):
+def start_bot(server_index):
+    user_data = db.users.find_one({"_id": current_user.id})
+    servers = user_data.get("servers", [])
+    if server_index >= len(servers):
+        return jsonify({"error": "Server not found"}), 404
+
+    bot_data = servers[server_index]
+    bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
+
     if bot_id in running_bots:
         return jsonify({"error": "Bot is already running"}), 400
 
-    user_data = db.users.find_one({"_id": current_user.id})
-    bot = next((b for b in user_data.get("bots", []) if str(b["_id"]) == bot_id), None)
-    if not bot:
-        return jsonify({"error": "Bot not found"}), 404
-
     bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
-    startup_command = bot.get("startup_command")
-    if not startup_command:
-        return jsonify({"error": "Startup command not set"}), 400
+    startup_command = bot_data.get("startup_command", "python main.py")
+
+    env = os.environ.copy()
+    env["BOT_TOKEN"] = bot_data.get("botToken")
 
     process = subprocess.Popen(
         startup_command.split(),
         cwd=bot_dir,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        text=True
+        text=True,
+        env=env
     )
     running_bots[bot_id] = process
     socketio.start_background_task(stream_logs, bot_id, process)
 
-    db.users.update_one(
-        {"bots._id": ObjectId(bot_id)},
-        {"$set": {"bots.$.status": "online"}}
-    )
-
     return jsonify({"success": True})
 
-
-@app.route("/api/bot/<bot_id>/stop", methods=["POST"])
+@app.route("/api/server/<int:server_index>/stop", methods=["POST"])
 @login_required
-def stop_bot(bot_id):
+def stop_bot(server_index):
+    user_data = db.users.find_one({"_id": current_user.id})
+    servers = user_data.get("servers", [])
+    if server_index >= len(servers):
+        return jsonify({"error": "Server not found"}), 404
+
+    bot_data = servers[server_index]
+    bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
+
     if bot_id not in running_bots:
         return jsonify({"error": "Bot is not running"}), 400
 
     process = running_bots.pop(bot_id)
-    process.terminate() # or process.kill()
-
-    db.users.update_one(
-        {"bots._id": ObjectId(bot_id)},
-        {"$set": {"bots.$.status": "offline"}}
-    )
+    process.terminate()
 
     return jsonify({"success": True})
 
-
-@app.route("/api/bot/<bot_id>/packages/install", methods=["POST"])
+@app.route("/api/server/<int:server_index>/packages/install", methods=["POST"])
 @login_required
-def install_package(bot_id):
+def install_package(server_index):
     package_name = request.json.get("package_name")
     if not package_name:
         return jsonify({"error": "Package name is required"}), 400
 
-    # For simplicity, installing into the main env. A better solution would be bot-specific venvs.
     result = subprocess.run(["pip", "install", package_name], capture_output=True, text=True)
     if result.returncode != 0:
         return jsonify({"error": f"Failed to install package: {result.stderr}"}), 500
 
-    db.users.update_one(
-        {"_id": current_user.id, "bots._id": ObjectId(bot_id)},
-        {"$push": {"bots.$.packages": package_name}}
-    )
     return jsonify({"success": True, "message": result.stdout})
 
-@app.route("/api/bot/<bot_id>/packages/uninstall", methods=["POST"])
+@app.route("/api/server/<int:server_index>/packages/uninstall", methods=["POST"])
 @login_required
-def uninstall_package(bot_id):
+def uninstall_package(server_index):
     package_name = request.json.get("package_name")
     if not package_name:
         return jsonify({"error": "Package name is required"}), 400
@@ -409,23 +435,18 @@ def uninstall_package(bot_id):
     if result.returncode != 0:
         return jsonify({"error": f"Failed to uninstall package: {result.stderr}"}), 500
 
-    db.users.update_one(
-        {"_id": current_user.id, "bots._id": ObjectId(bot_id)},
-        {"$pull": {"bots.$.packages": package_name}}
-    )
     return jsonify({"success": True, "message": result.stdout})
 
-
-@app.route("/api/bot/<bot_id>/startup", methods=["POST"])
+@app.route("/api/server/<int:server_index>/startup", methods=["POST"])
 @login_required
-def update_startup_command(bot_id):
+def update_startup_command(server_index):
     command = request.json.get("startup_command")
     if command is None:
         return jsonify({"error": "Startup command is required"}), 400
 
     db.users.update_one(
-        {"_id": current_user.id, "bots._id": ObjectId(bot_id)},
-        {"$set": {"bots.$.startup_command": command}}
+        {"_id": current_user.id},
+        {"$set": {f"servers.{server_index}.startup_command": command}}
     )
     return jsonify({"success": True})
 

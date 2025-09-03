@@ -50,6 +50,36 @@ a {
 .app-header h1 {
     font-size: 1.2rem;
 }
+
+.app-header .logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.app-header .logo-dev {
+    background: -webkit-linear-gradient(45deg, #3498db, #8e44ad);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.bot-card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.bot-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.server-name {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
 .app-header .avatar {
     width: 40px;
     height: 40px;
@@ -320,6 +350,12 @@ footer {
     flex: 1;
     flex-direction: column;
     gap: 1rem;
+}
+
+.resizer {
+    width: 5px;
+    background: var(--border-color);
+    cursor: col-resize;
 }
 
 .editor-toolbar {
