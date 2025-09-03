@@ -55,8 +55,9 @@
             </div>
             <div class="resizer" id="resizer"></div>
             <!-- File Editor -->
-            <div class="file-editor-view" style="flex-grow: 1; display: flex;">
+            <div id="file-editor-view-container" class="file-editor-view" style="flex-grow: 1; display: none;">
                 <div class="editor-toolbar">
+                    <button id="back-to-files-btn" class="button-2">&larr; Back to Files</button>
                     <span id="editing-filename"></span>
                     <button id="save-file-btn" class="button-2">Save</button>
                 </div>
@@ -124,9 +125,10 @@
 
             // File Manager & Resizer
             const fileBrowserView = document.getElementById('file-browser-view');
-            const fileEditorView = document.getElementById('file-editor-view');
+            const fileEditorContainer = document.getElementById('file-editor-view-container');
             const resizer = document.getElementById('resizer');
             const fileTree = document.getElementById('file-tree');
+            const backToFilesBtn = document.getElementById('back-to-files-btn');
 
             let currentOpenFile = null;
 
@@ -177,15 +179,18 @@
                     currentOpenFile = path;
                     editor.setValue(data.content);
                     document.getElementById('editing-filename').textContent = path;
-                    fileBrowserView.style.display = 'none';
-                    fileEditorView.style.display = 'flex';
+
+                    if (window.innerWidth <= 768) {
+                        fileBrowserView.style.display = 'none';
+                    }
+                    fileEditorContainer.style.display = 'flex';
                 }
             }
 
-            backToBrowserBtn.addEventListener('click', () => {
+            backToFilesBtn.addEventListener('click', () => {
                 currentOpenFile = null;
+                fileEditorContainer.style.display = 'none';
                 fileBrowserView.style.display = 'block';
-                fileEditorView.style.display = 'none';
             });
 
             document.getElementById('save-file-btn').addEventListener('click', async () => {

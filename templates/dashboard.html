@@ -119,9 +119,11 @@
                 {% for server in servers %}
                     <div class="bot-card frosted-glass">
                         <div class="bot-card-header">
-                            <img src="{{ server.botProfilePictureUrl or url_for('static', filename='img/default_avatar.png') }}" alt="Bot Avatar" class="bot-avatar">
                             <div class="bot-info">
-                                <h3>{{ server.customBotName }}</h3>
+                                <h3 class="bot-name-container">
+                                    {{ server.customBotName }}
+                                    <span class="bot-icon-dot"></span>
+                                </h3>
                                 <p class="server-name">{{ server.server_name }}</p>
                             </div>
                         </div>

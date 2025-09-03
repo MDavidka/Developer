@@ -69,10 +69,18 @@ a {
     margin-bottom: 1rem;
 }
 
-.bot-avatar {
-    width: 50px;
-    height: 50px;
+.bot-name-container {
+    display: flex;
+    align-items: center;
+}
+
+.bot-icon-dot {
+    width: 10px;
+    height: 10px;
+    background-color: #34d399; /* Example color */
     border-radius: 50%;
+    margin-left: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 .server-name {
