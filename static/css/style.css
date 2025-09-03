@@ -57,31 +57,23 @@ a {
 }
 
 .app-header .logo-dev {
-    background: -webkit-linear-gradient(45deg, #3498db, #8e44ad);
+    background: -webkit-linear-gradient(45deg, #00008b, #000000);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
 .bot-card-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
     gap: 1rem;
     margin-bottom: 1rem;
 }
 
-.bot-name-container {
-    display: flex;
-    align-items: center;
-}
-
-.bot-icon-dot {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    background-color: #34d399; /* Example color */
-    border-radius: 50%;
-    margin-left: 0.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.5);
+.bot-avatar-large-square {
+    width: 80px; /* 300% bigger is too big, let's try a fixed size */
+    height: 80px;
+    border-radius: 8px; /* Square with rounded corners */
 }
 
 .server-name {
@@ -453,7 +445,6 @@ footer {
 @media (max-width: 768px) {
     .app-header {
         padding: 1rem;
-        flex-direction: column;
         gap: 1rem;
     }
 

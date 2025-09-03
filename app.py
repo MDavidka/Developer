@@ -157,10 +157,17 @@ def dashboard():
         if not os.path.exists(bot_dir):
             os.makedirs(bot_dir)
 
+            # Create .env file
+            with open(os.path.join(bot_dir, ".env"), "w") as f:
+                f.write(f"BOT_TOKEN={server.get('botToken', '')}")
+
             # Auto-generate main.py
             main_py_content = f"""
+from dotenv import load_dotenv
 import os
 import discord
+
+load_dotenv()
 
 client = discord.Client()
 
@@ -189,7 +196,7 @@ client.run(os.getenv('BOT_TOKEN'))
             # Add files array to the server object
             db.users.update_one(
                 {"_id": current_user.id},
-                {"$set": {f"servers.{i}.files": [{"path": "main.py", "type": "file", "content": main_py_content}]}}
+                {"$set": {f"servers.{i}.files": [{"path": "main.py", "type": "file", "content": main_py_content}, {"path": ".env", "type": "file", "content": f"BOT_TOKEN={server.get('botToken', '')}"}]}}
             )
 
 
@@ -376,16 +383,12 @@ def start_bot(server_index):
     bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
     startup_command = bot_data.get("startup_command", "python main.py")
 
-    env = os.environ.copy()
-    env["BOT_TOKEN"] = bot_data.get("botToken")
-
     process = subprocess.Popen(
         startup_command.split(),
         cwd=bot_dir,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        text=True,
-        env=env
+        text=True
     )
     running_bots[bot_id] = process
     socketio.start_background_task(stream_logs, bot_id, process)
