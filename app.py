@@ -402,15 +402,19 @@ def start_bot(server_index):
     socketio.emit('log', {'data': '- Necessary files exist.'}, room=bot_id)
 
     socketio.emit('log', {'data': '- Connecting to machine...'}, room=bot_id)
-    process = subprocess.Popen(
-        command_parts,
-        cwd=bot_dir,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
-    )
-    running_bots[bot_id] = process
-    socketio.start_background_task(stream_logs, bot_id, process)
+    try:
+        process = subprocess.Popen(
+            command_parts,
+            cwd=bot_dir,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        running_bots[bot_id] = process
+        socketio.start_background_task(stream_logs, bot_id, process)
+    except Exception as e:
+        socketio.emit('log', {'data': f'[ERROR] Failed to start bot process: {e}'}, room=bot_id)
+        return jsonify({"error": "Failed to start bot process"}), 500
 
     return jsonify({"success": True})
 
