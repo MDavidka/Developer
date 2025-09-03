@@ -170,7 +170,13 @@ import discord
 
 load_dotenv()
 
-client = discord.Client()
+token = os.getenv('BOT_TOKEN')
+if not token:
+    raise ValueError("BOT_TOKEN not found in .env file")
+
+intents = discord.Intents.default()
+intents.message_content = True
+client = discord.Client(intents=intents)
 
 @client.event
 async def on_ready():
@@ -184,7 +190,7 @@ async def on_message(message):
     if message.content.startswith('$hello'):
         await message.channel.send('Hello!')
 
-client.run(os.getenv('BOT_TOKEN'))
+client.run(token)
 """
             with open(os.path.join(bot_dir, "main.py"), "w") as f:
                 f.write(main_py_content)
@@ -192,7 +198,7 @@ client.run(os.getenv('BOT_TOKEN'))
             # Set default startup command in the database
             db.users.update_one(
                 {"_id": current_user.id},
-                {"$set": {f"servers.{i}.startup_command": "python main.py"}}
+                {"$set": {f"servers.{i}.startup_command": "python -u main.py"}}
             )
             # Add files array to the server object
             db.users.update_one(
