@@ -129,8 +129,7 @@ def logout():
 @login_required
 def dashboard():
     user_data = db.users.find_one({"_id": current_user.id})
-    bot_ids = user_data.get("bots", [])
-    bots = list(db.bots.find({"_id": {"$in": bot_ids}}))
+    bots = user_data.get("bots", [])
     return render_template("dashboard.html", user=current_user, bots=bots)
 
 @app.route("/create_bot", methods=["POST"])
@@ -142,19 +141,17 @@ def create_bot():
     new_bot = {
         "_id": ObjectId(),
         "name": bot_name,
-        "owner_id": current_user.id,
         "status": "offline",
         "last_start_time": None,
         "uptime": 0,
         "startup_command": startup_command,
-        "files": [], # Using a list of file documents
+        "files": [],
         "packages": []
     }
-    bot_id = db.bots.insert_one(new_bot).inserted_id
 
     db.users.update_one(
         {"_id": current_user.id},
-        {"$push": {"bots": bot_id}}
+        {"$push": {"bots": new_bot}}
     )
 
     return redirect(url_for("dashboard"))
@@ -179,19 +176,21 @@ def build_file_tree(file_list):
 @app.route("/editor/<bot_id>")
 @login_required
 def editor(bot_id):
-    bot = db.bots.find_one({"_id": ObjectId(bot_id), "owner_id": current_user.id})
+    user_data = db.users.find_one({"_id": current_user.id})
+    bot = next((b for b in user_data.get("bots", []) if str(b["_id"]) == bot_id), None)
     if not bot:
         return "Unauthorized", 403
 
     file_tree = build_file_tree(bot.get('files', []))
-    bot['files_tree'] = file_tree # Add the generated tree to the bot object
+    bot['files_tree'] = file_tree
 
-    return render_template("editor.html", bot=bot)
+    return render_template("editor.html", bot=bot, user=current_user)
 
 @app.route("/api/bot/<bot_id>/file", methods=["GET", "POST"])
 @login_required
 def file_content(bot_id):
-    bot = db.bots.find_one({"_id": ObjectId(bot_id), "owner_id": current_user.id})
+    user_data = db.users.find_one({"_id": current_user.id})
+    bot = next((b for b in user_data.get("bots", []) if str(b["_id"]) == bot_id), None)
     if not bot:
         return jsonify({"error": "Unauthorized"}), 403
 
@@ -207,9 +206,10 @@ def file_content(bot_id):
 
     if request.method == "POST":
         content = request.json.get("content")
-        db.bots.update_one(
-            {"_id": ObjectId(bot_id), "files.path": path},
-            {"$set": {"files.$.content": content}}
+        db.users.update_one(
+            {"_id": current_user.id, "bots._id": ObjectId(bot_id)},
+            {"$set": {"bots.$[bot].files.$[file].content": content}},
+            array_filters=[{"bot._id": ObjectId(bot_id)}, {"file.path": path}]
         )
         return jsonify({"success": True})
 
@@ -222,7 +222,7 @@ def create_file(bot_id):
         return jsonify({"error": "Path and type are required"}), 400
 
     # Check for duplicates
-    existing = db.bots.find_one({"_id": ObjectId(bot_id), "files.path": path})
+    existing = db.users.find_one({"_id": current_user.id, "bots._id": ObjectId(bot_id), "bots.files.path": path})
     if existing:
         return jsonify({"error": "File or folder with this path already exists"}), 400
 
@@ -230,9 +230,9 @@ def create_file(bot_id):
     if type == "file":
         new_file_doc["content"] = ""
 
-    db.bots.update_one(
-        {"_id": ObjectId(bot_id)},
-        {"$push": {"files": new_file_doc}}
+    db.users.update_one(
+        {"_id": current_user.id, "bots._id": ObjectId(bot_id)},
+        {"$push": {"bots.$.files": new_file_doc}}
     )
     return jsonify({"success": True})
 
@@ -244,9 +244,9 @@ def delete_file(bot_id):
         return jsonify({"error": "Path is required"}), 400
 
     # If it's a folder, we need to delete all files inside it too
-    result = db.bots.update_one(
-        {"_id": ObjectId(bot_id)},
-        {"$pull": {"files": {"path": {"$regex": f"^{path}"}}}}
+    result = db.users.update_one(
+        {"_id": current_user.id, "bots._id": ObjectId(bot_id)},
+        {"$pull": {"bots.$.files": {"path": {"$regex": f"^{path}"}}}}
     )
 
     if result.modified_count > 0:
@@ -285,7 +285,10 @@ def start_bot(bot_id):
 
     socketio.start_background_task(send_dummy_logs, bot_id, stop_event)
 
-    db.bots.update_one({"_id": ObjectId(bot_id)}, {"$set": {"status": "online"}})
+    db.users.update_one(
+        {"bots._id": ObjectId(bot_id)},
+        {"$set": {"bots.$.status": "online"}}
+    )
 
     return jsonify({"success": True})
 
@@ -299,7 +302,10 @@ def stop_bot(bot_id):
     stop_event = running_bots.pop(bot_id)
     stop_event.set()
 
-    db.bots.update_one({"_id": ObjectId(bot_id)}, {"$set": {"status": "offline"}})
+    db.users.update_one(
+        {"bots._id": ObjectId(bot_id)},
+        {"$set": {"bots.$.status": "offline"}}
+    )
 
     return jsonify({"success": True})
 
@@ -311,9 +317,9 @@ def install_package(bot_id):
     if not package_name:
         return jsonify({"error": "Package name is required"}), 400
 
-    db.bots.update_one(
-        {"_id": ObjectId(bot_id), "owner_id": current_user.id},
-        {"$push": {"packages": package_name}}
+    db.users.update_one(
+        {"_id": current_user.id, "bots._id": ObjectId(bot_id)},
+        {"$push": {"bots.$.packages": package_name}}
     )
     return jsonify({"success": True})
 
@@ -324,9 +330,9 @@ def uninstall_package(bot_id):
     if not package_name:
         return jsonify({"error": "Package name is required"}), 400
 
-    db.bots.update_one(
-        {"_id": ObjectId(bot_id), "owner_id": current_user.id},
-        {"$pull": {"packages": package_name}}
+    db.users.update_one(
+        {"_id": current_user.id, "bots._id": ObjectId(bot_id)},
+        {"$pull": {"bots.$.packages": package_name}}
     )
     return jsonify({"success": True})
 
@@ -338,9 +344,9 @@ def update_startup_command(bot_id):
     if command is None:
         return jsonify({"error": "Startup command is required"}), 400
 
-    db.bots.update_one(
-        {"_id": ObjectId(bot_id), "owner_id": current_user.id},
-        {"$set": {"startup_command": command}}
+    db.users.update_one(
+        {"_id": current_user.id, "bots._id": ObjectId(bot_id)},
+        {"$set": {"bots.$.startup_command": command}}
     )
     return jsonify({"success": True})
 
