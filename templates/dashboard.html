@@ -5,23 +5,148 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Sycord for Developers</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* Updated styles for frosted glass inputs and modal */
+        #create-bot-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .modal-content {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 20px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #fff;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #fff;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            backdrop-filter: blur(5px);
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: rgba(76, 175, 80, 0.6);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .helper-text {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.8rem;
+            display: block;
+            margin-top: 0.3rem;
+        }
+        .error-text {
+            color: #ff6b6b;
+            font-size: 0.8rem;
+            display: none;
+            margin-top: 0.3rem;
+        }
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 1.5rem;
+        }
+        .button-2 {
+            padding: 8px 16px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            backdrop-filter: blur(5px);
+        }
+        .button-2[type="submit"] {
+            background-color: rgba(76, 175, 80, 0.7);
+        }
+        .button-2[type="submit"]:hover {
+            background-color: rgba(69, 160, 73, 0.9);
+        }
+        .button-2[type="button"] {
+            background-color: rgba(244, 67, 54, 0.7);
+        }
+        .button-2[type="button"]:hover {
+            background-color: rgba(211, 47, 47, 0.9);
+        }
+        #loading-spinner {
+            display: none;
+            animation: spin 1s linear infinite;
+            color: #fff;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body class="app-container">
-    <div id="create-bot-modal" class="modal-overlay" style="display:none;">
-        <div class="modal-content frosted-glass">
-            <h3>Create a New Bot</h3>
+    <div id="create-bot-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button type="button" class="close-modal" id="close-modal" aria-label="Close">&times;</button>
+            <h3 style="color: #fff; margin-top: 0;">Create a New Bot</h3>
             <form action="{{ url_for('create_bot') }}" method="post">
                 <div class="form-group">
                     <label for="bot_name">Bot Name</label>
-                    <input type="text" id="bot_name" name="bot_name" required>
+                    <input type="text" id="bot_name" name="bot_name" placeholder="e.g., MyAwesomeBot" pattern="[A-Za-z0-9]+" minlength="3" required>
+                    <small class="helper-text">Choose a unique name for your bot (letters and numbers only).</small>
+                    <small class="error-text" id="bot_name_error">Only letters and numbers are allowed (min 3 characters).</small>
                 </div>
                 <div class="form-group">
                     <label for="startup_command">Startup Command</label>
-                    <input type="text" id="startup_command" name="startup_command" required>
+                    <input type="text" id="startup_command" name="startup_command" placeholder="e.g., !start" required>
+                    <small class="helper-text">The command users will type to start your bot.</small>
                 </div>
                 <div class="form-actions">
                     <button type="button" id="cancel-create-bot" class="button-2">Cancel</button>
-                    <button type="submit" class="button-2">Create</button>
+                    <button type="submit" class="button-2" id="create-bot-submit">
+                        <span id="submit-text">Create</span>
+                        <span id="loading-spinner">🌀</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -81,8 +206,26 @@
         if (emptyCreateBtn) {
             emptyCreateBtn.addEventListener('click', showCreateModal);
         }
+        document.getElementById('close-modal').addEventListener('click', hideCreateModal);
         document.getElementById('cancel-create-bot').addEventListener('click', hideCreateModal);
 
+        // Input validation
+        document.getElementById('bot_name').addEventListener('input', function() {
+            const errorElement = document.getElementById('bot_name_error');
+            if (!this.checkValidity()) {
+                errorElement.style.display = 'block';
+            } else {
+                errorElement.style.display = 'none';
+            }
+        });
+
+        // Form submission
+        document.querySelector('form').addEventListener('submit', function() {
+            document.getElementById('submit-text').style.display = 'none';
+            document.getElementById('loading-spinner').style.display = 'inline-block';
+        });
+
+        // Bot start/stop logic
         document.querySelectorAll('.start-bot-btn').forEach(btn => {
             btn.addEventListener('click', async () => {
                 const botId = btn.dataset.botId;
