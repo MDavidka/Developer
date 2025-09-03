@@ -9,6 +9,7 @@ import datetime
 from flask_socketio import SocketIO, emit, join_room
 import time
 import threading
+import subprocess
 
 load_dotenv()
 
@@ -16,7 +17,11 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 socketio = SocketIO(app)
 
-running_bots = {} # {bot_id: threading.Event object}
+BOT_WORKSPACES_PATH = "bot_workspaces"
+if not os.path.exists(BOT_WORKSPACES_PATH):
+    os.makedirs(BOT_WORKSPACES_PATH)
+
+running_bots = {} # {bot_id: subprocess.Popen object}
 
 # Discord OAuth2 settings
 DISCORD_CLIENT_ID = os.getenv("DISCORD_CLIENT_ID")
@@ -151,9 +156,10 @@ def dashboard():
 def create_bot():
     bot_name = request.form.get("bot_name")
     startup_command = request.form.get("startup_command")
+    bot_id = ObjectId()
 
     new_bot = {
-        "_id": ObjectId(),
+        "_id": bot_id,
         "name": bot_name,
         "status": "offline",
         "last_start_time": None,
@@ -167,6 +173,10 @@ def create_bot():
         {"_id": current_user.id},
         {"$push": {"bots": new_bot}}
     )
+
+    # Create a directory for the bot
+    bot_dir = os.path.join(BOT_WORKSPACES_PATH, str(bot_id))
+    os.makedirs(bot_dir, exist_ok=True)
 
     return redirect(url_for("dashboard"))
 
@@ -203,25 +213,29 @@ def editor(bot_id):
 @app.route("/api/bot/<bot_id>/file", methods=["GET", "POST"])
 @login_required
 def file_content(bot_id):
-    user_data = db.users.find_one({"_id": current_user.id})
-    bot = next((b for b in user_data.get("bots", []) if str(b["_id"]) == bot_id), None)
-    if not bot:
-        return jsonify({"error": "Unauthorized"}), 403
-
+    bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
     path = request.args.get("path")
     if not path:
         return jsonify({"error": "File path is required"}), 400
 
+    full_path = os.path.join(bot_dir, path)
+
     if request.method == "GET":
-        file_doc = next((f for f in bot.get("files", []) if f["path"] == path), None)
-        if file_doc and file_doc["type"] == "file":
-            return jsonify({"content": file_doc.get("content", "")})
-        return jsonify({"error": "File not found"}), 404
+        try:
+            with open(full_path, "r") as f:
+                content = f.read()
+            return jsonify({"content": content})
+        except FileNotFoundError:
+            return jsonify({"error": "File not found"}), 404
 
     if request.method == "POST":
         content = request.json.get("content")
+        with open(full_path, "w") as f:
+            f.write(content)
+
+        # Also update in the database for consistency if needed, though not strictly necessary if filesystem is the source of truth
         db.users.update_one(
-            {"_id": current_user.id, "bots._id": ObjectId(bot_id)},
+            {"_id": current_user.id, "bots._id": ObjectId(bot_id), "bots.files.path": path},
             {"$set": {"bots.$[bot].files.$[file].content": content}},
             array_filters=[{"bot._id": ObjectId(bot_id)}, {"file.path": path}]
         )
@@ -235,11 +249,23 @@ def create_file(bot_id):
     if not path or not type:
         return jsonify({"error": "Path and type are required"}), 400
 
-    # Check for duplicates
+    # Check for duplicates in the database
     existing = db.users.find_one({"_id": current_user.id, "bots._id": ObjectId(bot_id), "bots.files.path": path})
     if existing:
         return jsonify({"error": "File or folder with this path already exists"}), 400
 
+    # Create on filesystem
+    bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
+    full_path = os.path.join(bot_dir, path)
+
+    if type == "folder":
+        os.makedirs(full_path, exist_ok=True)
+    else: # type == "file"
+        os.makedirs(os.path.dirname(full_path), exist_ok=True)
+        with open(full_path, "w") as f:
+            f.write("")
+
+    # Add to database
     new_file_doc = {"path": path, "type": type}
     if type == "file":
         new_file_doc["content"] = ""
@@ -257,7 +283,16 @@ def delete_file(bot_id):
     if not path:
         return jsonify({"error": "Path is required"}), 400
 
-    # If it's a folder, we need to delete all files inside it too
+    # Delete from filesystem
+    bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
+    full_path = os.path.join(bot_dir, path)
+    if os.path.isdir(full_path):
+        import shutil
+        shutil.rmtree(full_path)
+    elif os.path.isfile(full_path):
+        os.remove(full_path)
+
+    # Delete from database
     result = db.users.update_one(
         {"_id": current_user.id, "bots._id": ObjectId(bot_id)},
         {"$pull": {"bots.$.files": {"path": {"$regex": f"^{path}"}}}}
@@ -267,15 +302,21 @@ def delete_file(bot_id):
         return jsonify({"success": True})
     return jsonify({"error": "File or folder not found"}), 404
 
-def send_dummy_logs(bot_id, stop_event):
-    """A background task that sends dummy log messages until stopped."""
-    i = 0
-    while not stop_event.is_set():
-        socketio.emit('log', {'data': f'Log message {i} for bot {bot_id}'}, room=bot_id)
-        i += 1
-        time.sleep(2)
-    socketio.emit('log', {'data': 'Bot process stopped.'}, room=bot_id)
+def stream_logs(bot_id, process):
+    """Stream logs from a subprocess to the client."""
+    for line in iter(process.stdout.readline, ''):
+        socketio.emit('log', {'data': line}, room=bot_id)
+    for line in iter(process.stderr.readline, ''):
+        socketio.emit('log', {'data': f'[ERROR] {line}'}, room=bot_id)
 
+    # Process finished
+    socketio.emit('log', {'data': 'Bot process stopped.'}, room=bot_id)
+    db.users.update_one(
+        {"bots._id": ObjectId(bot_id)},
+        {"$set": {"bots.$.status": "offline"}}
+    )
+    if bot_id in running_bots:
+        del running_bots[bot_id]
 
 @socketio.on('connect', namespace='/editor')
 def editor_connect():
@@ -294,10 +335,25 @@ def start_bot(bot_id):
     if bot_id in running_bots:
         return jsonify({"error": "Bot is already running"}), 400
 
-    stop_event = threading.Event()
-    running_bots[bot_id] = stop_event
+    user_data = db.users.find_one({"_id": current_user.id})
+    bot = next((b for b in user_data.get("bots", []) if str(b["_id"]) == bot_id), None)
+    if not bot:
+        return jsonify({"error": "Bot not found"}), 404
 
-    socketio.start_background_task(send_dummy_logs, bot_id, stop_event)
+    bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
+    startup_command = bot.get("startup_command")
+    if not startup_command:
+        return jsonify({"error": "Startup command not set"}), 400
+
+    process = subprocess.Popen(
+        startup_command.split(),
+        cwd=bot_dir,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True
+    )
+    running_bots[bot_id] = process
+    socketio.start_background_task(stream_logs, bot_id, process)
 
     db.users.update_one(
         {"bots._id": ObjectId(bot_id)},
@@ -313,8 +369,8 @@ def stop_bot(bot_id):
     if bot_id not in running_bots:
         return jsonify({"error": "Bot is not running"}), 400
 
-    stop_event = running_bots.pop(bot_id)
-    stop_event.set()
+    process = running_bots.pop(bot_id)
+    process.terminate() # or process.kill()
 
     db.users.update_one(
         {"bots._id": ObjectId(bot_id)},
@@ -331,11 +387,16 @@ def install_package(bot_id):
     if not package_name:
         return jsonify({"error": "Package name is required"}), 400
 
+    # For simplicity, installing into the main env. A better solution would be bot-specific venvs.
+    result = subprocess.run(["pip", "install", package_name], capture_output=True, text=True)
+    if result.returncode != 0:
+        return jsonify({"error": f"Failed to install package: {result.stderr}"}), 500
+
     db.users.update_one(
         {"_id": current_user.id, "bots._id": ObjectId(bot_id)},
         {"$push": {"bots.$.packages": package_name}}
     )
-    return jsonify({"success": True})
+    return jsonify({"success": True, "message": result.stdout})
 
 @app.route("/api/bot/<bot_id>/packages/uninstall", methods=["POST"])
 @login_required
@@ -344,11 +405,15 @@ def uninstall_package(bot_id):
     if not package_name:
         return jsonify({"error": "Package name is required"}), 400
 
+    result = subprocess.run(["pip", "uninstall", "-y", package_name], capture_output=True, text=True)
+    if result.returncode != 0:
+        return jsonify({"error": f"Failed to uninstall package: {result.stderr}"}), 500
+
     db.users.update_one(
         {"_id": current_user.id, "bots._id": ObjectId(bot_id)},
         {"$pull": {"bots.$.packages": package_name}}
     )
-    return jsonify({"success": True})
+    return jsonify({"success": True, "message": result.stdout})
 
 
 @app.route("/api/bot/<bot_id>/startup", methods=["POST"])

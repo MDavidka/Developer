@@ -13,12 +13,15 @@
 </head>
 <body class="app-container">
     <header class="app-header">
-        <a href="{{ url_for('dashboard') }}" class="button-2">Back to Dashboard</a>
         <h1>Editing: {{ bot.name }}</h1>
         <a href="{{ url_for('logout') }}" title="Logout">
             <img src="{{ user.avatar_url or url_for('static', filename='img/default_avatar.png') }}" alt="User Avatar" class="avatar">
         </a>
     </header>
+
+    <div class="editor-controls">
+        <a href="{{ url_for('dashboard') }}" class="button-2">Back to Dashboard</a>
+    </div>
 
     <div class="radio-inputs">
         <label class="radio">

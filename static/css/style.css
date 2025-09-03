@@ -42,9 +42,13 @@ a {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 1.5rem;
+    padding: 0.8rem 1.2rem;
     border-bottom: 1px solid var(--border-color);
     flex-shrink: 0;
+}
+
+.app-header h1 {
+    font-size: 1.2rem;
 }
 .app-header .avatar {
     width: 40px;
@@ -175,6 +179,34 @@ footer {
     gap: 0.5rem;
 }
 
+.bot-card .button-2 {
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    backdrop-filter: blur(5px);
+}
+
+.bot-card .button-2.start-bot-btn {
+    background-color: rgba(76, 175, 80, 0.7);
+}
+
+.bot-card .button-2.start-bot-btn:hover {
+    background-color: rgba(69, 160, 73, 0.9);
+}
+
+.bot-card .button-2.stop-bot-btn {
+    background-color: rgba(244, 67, 54, 0.7);
+}
+
+.bot-card .button-2.stop-bot-btn:hover {
+    background-color: rgba(211, 47, 47, 0.9);
+}
+
 /* --- Editor-Specific Styles --- */
 .editor-main-content {
     flex: 1;
@@ -195,6 +227,12 @@ footer {
 }
 
 /* Radio Inputs */
+.editor-controls {
+    display: flex;
+    justify-content: center;
+    margin: 1rem 0;
+}
+
 .radio-inputs {
     position: relative;
     display: flex;
