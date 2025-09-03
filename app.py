@@ -1,4 +1,5 @@
 import os
+print("Starting app.py")
 import requests
 from flask import Flask, render_template, redirect, url_for, request
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
@@ -56,13 +57,18 @@ class User(UserMixin):
     @staticmethod
     def create(id, username, email, avatar_url):
         user_data = {
-            "_id": id,
             "username": username,
             "email": email,
             "avatar_url": avatar_url,
-            "bots": []
         }
-        db.users.update_one({"_id": id}, {"$set": user_data}, upsert=True)
+        db.users.update_one(
+            {"_id": id},
+            {
+                "$set": user_data,
+                "$setOnInsert": {"bots": []}
+            },
+            upsert=True
+        )
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -352,4 +358,4 @@ def update_startup_command(bot_id):
 
 
 if __name__ == "__main__":
-    socketio.run(app, host='0.0.0.0', port=30158, debug=True)
+    socketio.run(app, host='0.0.0.0', port=30158, debug=True, allow_unsafe_werkzeug=True)
