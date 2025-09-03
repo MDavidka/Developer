@@ -6,3 +6,4 @@ Flask-Login
 Flask-SocketIO
 mongomock
 pytest
+python-dotenv

@@ -10,6 +10,7 @@ from flask_socketio import SocketIO, emit, join_room
 import time
 import threading
 import subprocess
+import shlex
 
 load_dotenv()
 
@@ -383,8 +384,26 @@ def start_bot(server_index):
     bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
     startup_command = bot_data.get("startup_command", "python main.py")
 
+    # Pre-flight checks and debugging
+    socketio.emit('log', {'data': 'Initiating startup sequence...'}, room=bot_id)
+
+    # Check 1: Workspace directory
+    if not os.path.isdir(bot_dir):
+        socketio.emit('log', {'data': f'[ERROR] Workspace directory not found: {bot_dir}'}, room=bot_id)
+        return jsonify({"error": "Workspace not found"}), 404
+    socketio.emit('log', {'data': '- Workspace directory found.'}, room=bot_id)
+
+    # Check 2: Startup file
+    command_parts = shlex.split(startup_command)
+    startup_file = command_parts[1] if len(command_parts) > 1 else "main.py"
+    if not os.path.isfile(os.path.join(bot_dir, startup_file)):
+        socketio.emit('log', {'data': f'[ERROR] Startup file not found: {startup_file}'}, room=bot_id)
+        return jsonify({"error": "Startup file not found"}), 404
+    socketio.emit('log', {'data': '- Necessary files exist.'}, room=bot_id)
+
+    socketio.emit('log', {'data': '- Connecting to machine...'}, room=bot_id)
     process = subprocess.Popen(
-        startup_command.split(),
+        command_parts,
         cwd=bot_dir,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
