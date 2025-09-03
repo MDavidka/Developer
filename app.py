@@ -27,7 +27,7 @@ DISCORD_AUTHORIZATION_URL = f"https://discord.com/api/oauth2/authorize?client_id
 
 # MongoDB setup
 mongo_client = MongoClient(os.getenv("MONGO_URI"))
-db = mongo_client.sycord
+db = mongo_client['dash-bot']
 
 # Flask-Login setup
 login_manager = LoginManager()
