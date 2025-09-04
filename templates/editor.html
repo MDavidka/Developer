@@ -234,13 +234,23 @@
             // Console
             const consoleEl = document.getElementById('console');
             const botStatusEl = document.getElementById('bot-status-console');
+            console.log("Connecting to Socket.IO server...");
             const socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + '/editor');
 
             socket.on('connect', () => {
+                console.log("Socket.IO connected.");
+                consoleEl.innerHTML += '<div>[DEBUG] Socket.IO connection established.</div>';
+                console.log(`Joining room: ${botId}`);
                 socket.emit('join', { bot_id: botId });
             });
 
+            socket.on('disconnect', () => {
+                console.log("Socket.IO disconnected.");
+                consoleEl.innerHTML += '<div>[DEBUG] Socket.IO connection lost.</div>';
+            });
+
             socket.on('log', (msg) => {
+                console.log("Received log message:", msg);
                 consoleEl.innerHTML += `<div>${msg.data}</div>`;
                 consoleEl.scrollTop = consoleEl.scrollHeight;
             });

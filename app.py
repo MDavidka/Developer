@@ -349,6 +349,7 @@ def delete_file(server_index):
 
 def stream_logs(bot_id, process):
     """Stream logs from a subprocess to the client."""
+    socketio.emit('log', {'data': '[DEBUG] Log streaming thread started.'}, room=bot_id)
     def get_timestamp():
         return datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
@@ -376,19 +377,29 @@ def on_join(data):
 @app.route("/api/server/<int:server_index>/start", methods=["POST"])
 @login_required
 def start_bot(server_index):
+    # This is a temporary, loud debug message.
+    socketio.emit('log', {'data': '[DEBUG] start_bot function entered.'})
+
     user_data = db.users.find_one({"_id": current_user.id})
+    socketio.emit('log', {'data': f'[DEBUG] Found user data for {current_user.id}.'})
+
     servers = user_data.get("servers", [])
     if server_index >= len(servers):
+        socketio.emit('log', {'data': f'[ERROR] Server index {server_index} out of bounds.'})
         return jsonify({"error": "Server not found"}), 404
 
     bot_data = servers[server_index]
     bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
+    socketio.emit('log', {'data': f'[DEBUG] Constructed bot_id: {bot_id}.'})
 
     if bot_id in running_bots:
+        socketio.emit('log', {'data': f'[ERROR] Bot {bot_id} is already in running_bots.'})
         return jsonify({"error": "Bot is already running"}), 400
 
     bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
     startup_command = bot_data.get("startup_command", "python main.py")
+    socketio.emit('log', {'data': f'[DEBUG] Bot directory: {bot_dir}'})
+    socketio.emit('log', {'data': f'[DEBUG] Startup command: {startup_command}'})
 
     # Pre-flight checks and debugging
     socketio.emit('log', {'data': 'Initiating startup sequence...'}, room=bot_id)
@@ -417,11 +428,13 @@ def start_bot(server_index):
             text=True
         )
         running_bots[bot_id] = process
+        socketio.emit('log', {'data': '[DEBUG] Subprocess created. Starting log streaming thread.'}, room=bot_id)
         socketio.start_background_task(stream_logs, bot_id, process)
     except Exception as e:
         socketio.emit('log', {'data': f'[ERROR] Failed to start bot process: {e}'}, room=bot_id)
         return jsonify({"error": "Failed to start bot process"}), 500
 
+    socketio.emit('log', {'data': '[DEBUG] start_bot function finished successfully.'}, room=bot_id)
     return jsonify({"success": True})
 
 @app.route("/api/server/<int:server_index>/stop", methods=["POST"])
