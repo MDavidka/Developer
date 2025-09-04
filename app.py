@@ -14,12 +14,18 @@ import shlex
 import signal
 import sys
 import json
+import select
+import logging
 
 load_dotenv()
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 socketio = SocketIO(app, cors_allowed_origins="*")
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 BOT_WORKSPACES_PATH = "bot_workspaces"
 if not os.path.exists(BOT_WORKSPACES_PATH):
@@ -193,38 +199,211 @@ def dashboard():
             with open(os.path.join(bot_dir, ".env"), "w") as f:
                 f.write(f"BOT_TOKEN={server.get('botToken', '')}")
 
-            # Auto-generate main.py
-            main_py_content = f"""
+            # Auto-generate ENHANCED main.py with better error handling
+            main_py_content = f"""import os
+import sys
+import traceback
 from dotenv import load_dotenv
-import os
 import discord
+from discord.ext import commands
+import asyncio
+import logging
 
+# Setup logging for better debugging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+logger = logging.getLogger(__name__)
+
+print("🚀 Starting Discord Bot...")
+print(f"Python version: {{sys.version}}")
+
+# Load environment variables
 load_dotenv()
+print("✅ Environment loaded")
 
+# Validate token
 token = os.getenv('BOT_TOKEN')
 if not token:
-    raise ValueError("BOT_TOKEN not found in .env file")
+    print("❌ ERROR: BOT_TOKEN not found in .env file")
+    print("Please check your .env file contains: BOT_TOKEN=your_bot_token_here")
+    sys.exit(1)
 
+if len(token.strip()) < 50:  # Discord tokens are typically 59+ characters
+    print("❌ ERROR: BOT_TOKEN appears to be invalid (too short)")
+    print(f"Token length: {{len(token.strip())}} characters")
+    sys.exit(1)
+
+print(f"✅ Token loaded: {{token[:10]}}...{{token[-4:]}}")
+
+# Test network connectivity
+try:
+    import requests
+    print("🌐 Testing Discord API connectivity...")
+    response = requests.get("https://discord.com/api/v10/gateway", timeout=10)
+    if response.status_code == 200:
+        print("✅ Discord API is reachable")
+    else:
+        print(f"⚠️ Discord API returned status: {{response.status_code}}")
+except Exception as e:
+    print(f"❌ Network connectivity test failed: {{e}}")
+
+# Setup Discord intents
 intents = discord.Intents.default()
 intents.message_content = True
-client = discord.Client(intents=intents)
+intents.guilds = True
 
-@client.event
+print("✅ Discord intents configured")
+
+# Create bot instance
+try:
+    bot = commands.Bot(
+        command_prefix='$', 
+        intents=intents,
+        help_command=None  # Disable default help command
+    )
+    print("✅ Bot instance created successfully")
+except Exception as e:
+    print(f"❌ Failed to create bot instance: {{e}}")
+    traceback.print_exc()
+    sys.exit(1)
+
+@bot.event
 async def on_ready():
-    print(f'We have logged in as {{client.user}}')
+    print("=" * 50)
+    print("🎉 DISCORD BOT IS NOW ONLINE!")
+    print(f"Bot Name: {{bot.user.name}}")
+    print(f"Bot ID: {{bot.user.id}}")
+    print(f"Discord.py Version: {{discord.__version__}}")
+    print(f"Connected to {{len(bot.guilds)}} server(s)")
+    print("=" * 50)
+    
+    # List all servers the bot is in
+    if bot.guilds:
+        print("📋 Connected servers:")
+        for guild in bot.guilds:
+            print(f"  - {{guild.name}} ({{guild.id}}) - {{guild.member_count}} members")
+    else:
+        print("⚠️ Bot is not connected to any servers!")
+        print("Please invite your bot to a server using the Discord Developer Portal")
+    
+    print("✅ Bot is ready to receive commands!")
 
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
+@bot.event
+async def on_connect():
+    print("🔗 Bot connected to Discord WebSocket")
 
-    if message.content.startswith('$hello'):
-        await message.channel.send('Hello!')
+@bot.event
+async def on_disconnect():
+    print("🔌 Bot disconnected from Discord WebSocket")
 
-client.run(token)
+@bot.event
+async def on_resumed():
+    print("🔄 Bot connection resumed")
+
+@bot.event
+async def on_error(event, *args, **kwargs):
+    print(f"❌ Error in event '{{event}}':")
+    traceback.print_exc()
+
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandNotFound):
+        return  # Ignore command not found errors
+    print(f"❌ Command error in {{ctx.command}}: {{error}}")
+    await ctx.send(f"❌ Error: {{error}}")
+
+# Bot Commands
+@bot.command(name='hello', help='Say hello to the bot')
+async def hello_command(ctx):
+    await ctx.send(f'Hello {{ctx.author.mention}}! 👋 I am online and working!')
+    print(f"✅ Hello command executed by {{ctx.author}} in {{ctx.guild.name if ctx.guild else 'DM'}}")
+
+@bot.command(name='ping', help='Check bot latency')
+async def ping_command(ctx):
+    latency = round(bot.latency * 1000)
+    await ctx.send(f'🏓 Pong! Latency: {{latency}}ms')
+    print(f"✅ Ping command executed: {{latency}}ms latency")
+
+@bot.command(name='test', help='Run a comprehensive bot test')
+async def test_command(ctx):
+    embed = discord.Embed(
+        title="🤖 Bot Status Test", 
+        description="All systems operational!",
+        color=0x00ff00,
+        timestamp=discord.utils.utcnow()
+    )
+    embed.add_field(name="✅ Connection", value="Stable", inline=True)
+    embed.add_field(name="✅ Commands", value="Working", inline=True)
+    embed.add_field(name="✅ Latency", value=f"{{round(bot.latency * 1000)}}ms", inline=True)
+    embed.set_footer(text=f"Requested by {{ctx.author.name}}")
+    
+    await ctx.send(embed=embed)
+    print(f"✅ Test command executed by {{ctx.author}} in {{ctx.guild.name if ctx.guild else 'DM'}}")
+
+@bot.command(name='info', help='Get bot information')
+async def info_command(ctx):
+    embed = discord.Embed(
+        title="🤖 Bot Information",
+        color=0x3498db,
+        timestamp=discord.utils.utcnow()
+    )
+    embed.add_field(name="Bot Name", value=bot.user.name, inline=True)
+    embed.add_field(name="Bot ID", value=bot.user.id, inline=True)
+    embed.add_field(name="Servers", value=len(bot.guilds), inline=True)
+    embed.add_field(name="Python Version", value=f"{{sys.version_info.major}}.{{sys.version_info.minor}}.{{sys.version_info.micro}}", inline=True)
+    embed.add_field(name="Discord.py Version", value=discord.__version__, inline=True)
+    embed.add_field(name="Latency", value=f"{{round(bot.latency * 1000)}}ms", inline=True)
+    
+    await ctx.send(embed=embed)
+
+# Error handling for the bot startup
+async def main():
+    try:
+        print("🔄 Attempting to start bot...")
+        await bot.start(token)
+    except discord.LoginFailure:
+        print("❌ LOGIN FAILED: Invalid bot token!")
+        print("Please check your bot token in the Discord Developer Portal")
+        sys.exit(1)
+    except discord.HTTPException as e:
+        print(f"❌ HTTP Error occurred: {{e}}")
+        print("This might be a temporary Discord API issue")
+        sys.exit(1)
+    except discord.ConnectionClosed as e:
+        print(f"❌ Connection closed: {{e}}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"❌ Unexpected error during startup: {{e}}")
+        traceback.print_exc()
+        sys.exit(1)
+
+# Run the bot
+if __name__ == "__main__":
+    try:
+        # Use asyncio.run for proper async handling
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("🛑 Bot stopped by user")
+    except Exception as e:
+        print(f"❌ Fatal error: {{e}}")
+        traceback.print_exc()
+        sys.exit(1)
 """
             with open(os.path.join(bot_dir, "main.py"), "w") as f:
                 f.write(main_py_content)
+
+            # Create requirements.txt
+            requirements_content = """discord.py>=2.3.0
+python-dotenv>=1.0.0
+aiohttp>=3.8.0
+"""
+            with open(os.path.join(bot_dir, "requirements.txt"), "w") as f:
+                f.write(requirements_content)
 
             # Set default startup command in the database
             db.users.update_one(
@@ -234,7 +413,11 @@ client.run(token)
             # Add files array to the server object
             db.users.update_one(
                 {"_id": current_user.id},
-                {"$set": {f"servers.{i}.files": [{"path": "main.py", "type": "file", "content": main_py_content}, {"path": ".env", "type": "file", "content": f"BOT_TOKEN={server.get('botToken', '')}"}]}}
+                {"$set": {f"servers.{i}.files": [
+                    {"path": "main.py", "type": "file", "content": main_py_content}, 
+                    {"path": ".env", "type": "file", "content": f"BOT_TOKEN={server.get('botToken', '')}"},
+                    {"path": "requirements.txt", "type": "file", "content": requirements_content}
+                ]}}
             )
 
         # Update server status based on running processes
@@ -305,6 +488,90 @@ def editor(server_index):
     bot_data['_id'] = bot_id
 
     return render_template("editor.html", bot=bot_data, user=current_user)
+
+# Debug endpoint
+@app.route("/api/server/<int:server_index>/debug", methods=["GET"])
+@login_required  
+def debug_bot(server_index):
+    user_data = db.users.find_one({"_id": current_user.id})
+    servers = user_data.get("servers", [])
+    
+    if server_index >= len(servers):
+        return jsonify({"error": "Server not found"}), 404
+
+    bot_data = servers[server_index]
+    bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
+    bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
+    
+    # Check .env file
+    env_file = os.path.join(bot_dir, ".env")
+    debug_info = {"bot_dir": bot_dir, "bot_id": bot_id}
+    
+    if os.path.exists(env_file):
+        try:
+            with open(env_file, 'r') as f:
+                env_content = f.read()
+            
+            has_token = "BOT_TOKEN=" in env_content
+            if has_token:
+                token_line = [line for line in env_content.split('\n') if line.startswith('BOT_TOKEN=')]
+                if token_line:
+                    token = token_line[0].split('=', 1)[1].strip()
+                    debug_info.update({
+                        "env_exists": True,
+                        "has_token": True,
+                        "token_length": len(token),
+                        "token_preview": f"{token[:10]}...{token[-4:]}" if len(token) > 14 else "too_short",
+                        "token_valid_length": len(token) >= 50
+                    })
+                else:
+                    debug_info.update({
+                        "env_exists": True,
+                        "has_token": False,
+                        "error": "BOT_TOKEN line not found"
+                    })
+            else:
+                debug_info.update({
+                    "env_exists": True,
+                    "has_token": False,
+                    "error": "BOT_TOKEN not in file"
+                })
+        except Exception as e:
+            debug_info.update({
+                "env_exists": True,
+                "error": f"Failed to read .env: {str(e)}"
+            })
+    else:
+        debug_info.update({"env_exists": False})
+    
+    # Test Discord API connectivity
+    try:
+        import requests
+        response = requests.get("https://discord.com/api/v10/gateway", timeout=10)
+        debug_info["discord_api"] = {
+            "reachable": response.status_code == 200,
+            "status_code": response.status_code
+        }
+    except Exception as e:
+        debug_info["discord_api"] = {
+            "reachable": False,
+            "error": str(e)
+        }
+    
+    return jsonify(debug_info)
+
+@app.route("/api/server/<int:server_index>/test-discord", methods=["POST"])
+@login_required
+def test_discord_connection(server_index):
+    try:
+        # Test Discord API connectivity
+        response = requests.get("https://discord.com/api/v10/gateway", timeout=10)
+        if response.status_code == 200:
+            return jsonify({"discord_api": "reachable", "status": "ok", "gateway": response.json()})
+        else:
+            return jsonify({"discord_api": "unreachable", "status": "error", "code": response.status_code})
+    except Exception as e:
+        return jsonify({"discord_api": "error", "status": "error", "error": str(e)})
 
 @app.route("/api/server/<int:server_index>/file", methods=["GET", "POST"])
 @login_required
@@ -412,38 +679,36 @@ def stream_bot_logs(bot_id, process):
             'data': f'[{datetime.datetime.now().strftime("%H:%M:%S")}] 🚀 Bot process started (PID: {process.pid})'
         }, room=bot_id)
 
-        # Read stdout and stderr simultaneously
-        import select
-        
+        # Read both stdout and stderr in real-time
         while True:
             # Check if process is still running
             if process.poll() is not None:
                 break
-                
-            # Use select to check for available data (Unix-like systems)
-            if hasattr(select, 'select'):
-                ready, _, _ = select.select([process.stdout, process.stderr], [], [], 0.1)
-                
-                for stream in ready:
-                    line = stream.readline()
-                    if line:
-                        timestamp = datetime.datetime.now().strftime("%H:%M:%S")
-                        if stream == process.stderr:
-                            socketio.emit('log', {
-                                'data': f'[{timestamp}] ❌ {line.strip()}'
-                            }, room=bot_id)
-                        else:
-                            socketio.emit('log', {
-                                'data': f'[{timestamp}] ℹ️ {line.strip()}'
-                            }, room=bot_id)
-            else:
-                # Fallback for Windows
-                line = process.stdout.readline()
-                if line:
+            
+            # Read stdout
+            try:
+                stdout_line = process.stdout.readline()
+                if stdout_line:
                     timestamp = datetime.datetime.now().strftime("%H:%M:%S")
                     socketio.emit('log', {
-                        'data': f'[{timestamp}] ℹ️ {line.strip()}'
+                        'data': f'[{timestamp}] {stdout_line.strip()}'
                     }, room=bot_id)
+            except:
+                pass
+            
+            # Read stderr
+            try:
+                stderr_line = process.stderr.readline()
+                if stderr_line:
+                    timestamp = datetime.datetime.now().strftime("%H:%M:%S")
+                    socketio.emit('log', {
+                        'data': f'[{timestamp}] [ERROR] {stderr_line.strip()}'
+                    }, room=bot_id)
+            except:
+                pass
+            
+            # Small delay to prevent high CPU usage
+            time.sleep(0.1)
                     
         # Process finished
         return_code = process.returncode
@@ -467,7 +732,6 @@ def stream_bot_logs(bot_id, process):
         # Clean up
         if bot_id in running_bots:
             running_bots[bot_id]["status"] = "stopped"
-            # Don't delete immediately, let the stop endpoint handle cleanup
 
 @socketio.on('connect', namespace='/editor')
 def editor_connect():
@@ -517,7 +781,7 @@ def start_bot(server_index):
     bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
     startup_command = bot_data.get("startup_command", "python -u main.py")
 
-    # Enhanced startup sequence with better error handling
+    # Enhanced startup sequence with better validation
     socketio.emit('log', {
         'data': f'🔄 Starting bot {bot_id}...'
     }, room=bot_id)
@@ -527,6 +791,44 @@ def start_bot(server_index):
         error_msg = f'❌ Workspace directory not found: {bot_dir}'
         socketio.emit('log', {'data': error_msg}, room=bot_id)
         return jsonify({"error": "Workspace not found"}), 404
+
+    # Check .env file and validate token
+    env_file = os.path.join(bot_dir, ".env")
+    if not os.path.exists(env_file):
+        error_msg = f'❌ .env file not found in {bot_dir}'
+        socketio.emit('log', {'data': error_msg}, room=bot_id)
+        return jsonify({"error": ".env file not found"}), 404
+
+    # Validate token in .env
+    try:
+        with open(env_file, 'r') as f:
+            env_content = f.read()
+        
+        if "BOT_TOKEN=" not in env_content:
+            error_msg = "❌ BOT_TOKEN not found in .env file"
+            socketio.emit('log', {'data': error_msg}, room=bot_id)
+            return jsonify({"error": "BOT_TOKEN not configured"}), 400
+            
+        token_line = [line for line in env_content.split('\n') if line.startswith('BOT_TOKEN=')]
+        if not token_line:
+            error_msg = "❌ BOT_TOKEN line not found in .env file"
+            socketio.emit('log', {'data': error_msg}, room=bot_id)
+            return jsonify({"error": "BOT_TOKEN not configured"}), 400
+            
+        token = token_line[0].split('=', 1)[1].strip()
+        if len(token) < 50:  # Discord tokens are typically 59+ characters
+            error_msg = f"❌ BOT_TOKEN appears to be invalid (length: {len(token)} chars, expected 50+)"
+            socketio.emit('log', {'data': error_msg}, room=bot_id)
+            return jsonify({"error": "Invalid BOT_TOKEN"}), 400
+            
+        socketio.emit('log', {
+            'data': f'✅ Token validation passed: {token[:10]}...{token[-4:]}'
+        }, room=bot_id)
+        
+    except Exception as e:
+        error_msg = f'❌ Error reading .env file: {str(e)}'
+        socketio.emit('log', {'data': error_msg}, room=bot_id)
+        return jsonify({"error": "Error reading .env file"}), 500
 
     # Parse and validate command
     try:
@@ -546,6 +848,20 @@ def start_bot(server_index):
             socketio.emit('log', {'data': error_msg}, room=bot_id)
             return jsonify({"error": "Main file not found"}), 404
 
+    # Test Discord API connectivity
+    socketio.emit('log', {'data': '🌐 Testing Discord API connectivity...'}, room=bot_id)
+    try:
+        response = requests.get("https://discord.com/api/v10/gateway", timeout=10)
+        if response.status_code != 200:
+            error_msg = f'❌ Discord API unreachable (status: {response.status_code})'
+            socketio.emit('log', {'data': error_msg}, room=bot_id)
+            return jsonify({"error": "Discord API unreachable"}), 503
+        socketio.emit('log', {'data': '✅ Discord API is reachable'}, room=bot_id)
+    except Exception as e:
+        error_msg = f'❌ Network connectivity test failed: {str(e)}'
+        socketio.emit('log', {'data': error_msg}, room=bot_id)
+        return jsonify({"error": f"Network error: {str(e)}"}), 503
+
     socketio.emit('log', {
         'data': f'✅ Pre-flight checks passed'
     }, room=bot_id)
@@ -555,6 +871,13 @@ def start_bot(server_index):
     }, room=bot_id)
 
     try:
+        # Create subprocess with proper environment
+        env = dict(os.environ)
+        env.update({
+            "PYTHONUNBUFFERED": "1",
+            "PYTHONIOENCODING": "utf-8"
+        })
+
         # Create subprocess with proper settings for real-time output
         process = subprocess.Popen(
             command_parts,
@@ -564,7 +887,7 @@ def start_bot(server_index):
             text=True,
             bufsize=1,  # Line buffered
             universal_newlines=True,
-            env=dict(os.environ, PYTHONUNBUFFERED="1")  # Force Python to be unbuffered
+            env=env
         )
 
         # Start log streaming thread
@@ -585,7 +908,7 @@ def start_bot(server_index):
         }
 
         socketio.emit('log', {
-            'data': f'✅ Bot started successfully (PID: {process.pid})'
+            'data': f'✅ Bot subprocess started (PID: {process.pid})'
         }, room=bot_id)
 
         return jsonify({
@@ -595,9 +918,9 @@ def start_bot(server_index):
         })
 
     except Exception as e:
-        error_msg = f'💥 Failed to start bot: {str(e)}'
+        error_msg = f'💥 Failed to start bot subprocess: {str(e)}'
         socketio.emit('log', {'data': error_msg}, room=bot_id)
-        return jsonify({"error": f"Failed to start bot: {str(e)}"}), 500
+        return jsonify({"error": f"Failed to start bot subprocess: {str(e)}"}), 500
 
 @app.route("/api/server/<int:server_index>/stop", methods=["POST"])
 @login_required
@@ -700,7 +1023,7 @@ def install_package(server_index):
     bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
 
     try:
-        # Install package in bot's virtual environment if it exists, otherwise globally
+        # Install package in bot's directory context
         result = subprocess.run(
             ["pip", "install", package_name], 
             capture_output=True, 
@@ -763,6 +1086,8 @@ def update_startup_command(server_index):
 
 if __name__ == "__main__":
     try:
+        print("🚀 Starting Flask application...")
+        print(f"BOT_WORKSPACES_PATH: {BOT_WORKSPACES_PATH}")
         socketio.run(app, host='0.0.0.0', port=30158, debug=True, allow_unsafe_werkzeug=True)
     except KeyboardInterrupt:
         print("\nShutting down...")
