@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Code Editor - {{ bot.name }}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/github.min.css">
@@ -24,14 +24,16 @@
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            overflow: hidden;
+            height: 100vh;
         }
 
         /* Header */
         .header {
             background: #fff;
             border-bottom: 1px solid #eaeaea;
-            padding: 0 24px;
-            height: 64px;
+            padding: 0 16px;
+            height: 56px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -43,13 +45,14 @@
         .header-left {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
+            flex: 1;
         }
 
         .logo {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             font-weight: 600;
             font-size: 16px;
             text-decoration: none;
@@ -69,22 +72,20 @@
             font-weight: 700;
         }
 
-        .breadcrumb {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #666;
+        .current-file {
+            flex: 1;
             font-size: 14px;
-        }
-
-        .breadcrumb-separator {
-            color: #ccc;
+            color: #666;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-left: 8px;
         }
 
         .header-right {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
         }
 
         .user-avatar {
@@ -94,81 +95,110 @@
             border: 1px solid #eaeaea;
         }
 
-        /* Main Layout */
+        /* Mobile Navigation */
+        .mobile-nav {
+            background: #fff;
+            border-bottom: 1px solid #eaeaea;
+            display: flex;
+            height: 48px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 80px;
+            padding: 0 16px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 13px;
+            color: #666;
+            border-bottom: 2px solid transparent;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+
+        .nav-item.active {
+            color: #000;
+            border-bottom-color: #000;
+        }
+
+        .nav-item:hover:not(.active) {
+            color: #000;
+            background: #f5f5f5;
+        }
+
+        /* Main Container */
         .main-container {
             display: flex;
-            height: calc(100vh - 64px);
+            flex-direction: column;
+            height: calc(100vh - 104px);
             overflow: hidden;
         }
 
-        /* Sidebar */
-        .sidebar {
-            width: 280px;
-            background: #fff;
-            border-right: 1px solid #eaeaea;
+        /* Views */
+        .view {
+            display: none;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .view.active {
             display: flex;
             flex-direction: column;
-            overflow: hidden;
         }
 
-        .sidebar-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid #eaeaea;
+        /* Files View */
+        .files-view {
+            background: #fff;
+        }
+
+        .files-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            padding: 16px;
+            border-bottom: 1px solid #eaeaea;
         }
 
-        .sidebar-title {
-            font-size: 14px;
+        .files-title {
+            font-size: 16px;
             font-weight: 600;
             color: #000;
         }
 
-        .sidebar-actions {
+        .files-actions {
             display: flex;
-            gap: 4px;
-        }
-
-        .icon-button {
-            width: 24px;
-            height: 24px;
-            border: none;
-            background: none;
-            cursor: pointer;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.15s ease;
-        }
-
-        .icon-button:hover {
-            background: #f5f5f5;
+            gap: 8px;
         }
 
         .file-tree {
             flex: 1;
             overflow-y: auto;
             padding: 8px 0;
+            -webkit-overflow-scrolling: touch;
         }
 
         .file-item {
             display: flex;
             align-items: center;
-            padding: 8px 20px;
+            padding: 12px 16px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 15px;
             border: none;
             background: none;
             width: 100%;
             text-align: left;
             transition: background 0.15s ease;
-            gap: 8px;
+            gap: 12px;
+            min-height: 48px;
         }
 
-        .file-item:hover {
-            background: #f5f5f5;
+        .file-item:active {
+            background: #f0f0f0;
         }
 
         .file-item.active {
@@ -177,9 +207,10 @@
         }
 
         .file-icon {
-            width: 16px;
-            height: 16px;
+            width: 20px;
+            height: 20px;
             flex-shrink: 0;
+            font-size: 16px;
         }
 
         .folder-item {
@@ -194,73 +225,37 @@
             content: "📄";
         }
 
-        /* Content Area */
-        .content-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        /* Tabs */
-        .tabs-container {
+        /* Editor View */
+        .editor-view {
             background: #fff;
-            border-bottom: 1px solid #eaeaea;
-            display: flex;
-            align-items: center;
-            min-height: 48px;
-            overflow-x: auto;
         }
 
-        .tab {
+        .editor-toolbar {
             display: flex;
             align-items: center;
+            justify-content: space-between;
             padding: 12px 16px;
-            border: none;
-            background: none;
-            cursor: pointer;
-            font-size: 14px;
-            color: #666;
-            border-bottom: 2px solid transparent;
-            transition: all 0.15s ease;
-            gap: 8px;
-            white-space: nowrap;
+            border-bottom: 1px solid #eaeaea;
+            background: #fafafa;
         }
 
-        .tab.active {
-            color: #000;
-            border-bottom-color: #000;
-        }
-
-        .tab:hover:not(.active) {
-            color: #000;
-            background: #f5f5f5;
-        }
-
-        .tab-close {
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            border: none;
-            background: none;
-            cursor: pointer;
+        .editor-back {
             display: flex;
             align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: all 0.15s ease;
-            font-size: 12px;
+            gap: 8px;
+            background: none;
+            border: none;
+            font-size: 15px;
+            color: #000;
+            cursor: pointer;
+            padding: 8px 0;
         }
 
-        .tab:hover .tab-close {
-            opacity: 1;
+        .editor-actions {
+            display: flex;
+            gap: 8px;
         }
 
-        .tab-close:hover {
-            background: #eaeaea;
-        }
-
-        /* Editor */
         .editor-container {
             flex: 1;
             overflow: hidden;
@@ -289,23 +284,98 @@
             padding: 0 8px;
         }
 
-        /* Status Bar */
-        .status-bar {
-            height: 32px;
+        .CodeMirror-scroll {
+            padding-bottom: 20px;
+        }
+
+        /* Console View */
+        .console-view {
             background: #fff;
-            border-top: 1px solid #eaeaea;
+        }
+
+        .console-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 16px;
-            font-size: 12px;
-            color: #666;
+            padding: 16px;
+            border-bottom: 1px solid #eaeaea;
         }
 
-        .status-left, .status-right {
+        .console-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .console-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .console-output {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            background: #fafafa;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .console-line {
+            margin-bottom: 4px;
+            word-wrap: break-word;
+        }
+
+        /* Settings View */
+        .settings-view {
+            background: #fff;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .settings-header {
+            padding: 16px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .settings-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .settings-content {
+            padding: 16px;
+        }
+
+        .setting-group {
+            margin-bottom: 24px;
+        }
+
+        .setting-group h3 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #000;
+        }
+
+        .setting-item {
+            margin-bottom: 16px;
+        }
+
+        .package-item {
             display: flex;
             align-items: center;
-            gap: 16px;
+            justify-content: space-between;
+            padding: 12px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .package-name {
+            font-size: 14px;
+            font-weight: 500;
         }
 
         /* Empty State */
@@ -316,7 +386,7 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 40px;
+            padding: 40px 20px;
         }
 
         .empty-state-icon {
@@ -349,7 +419,7 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 8px 16px;
+            padding: 10px 16px;
             border: 1px solid #eaeaea;
             border-radius: 6px;
             background: #fff;
@@ -360,10 +430,12 @@
             text-decoration: none;
             transition: all 0.15s ease;
             gap: 8px;
+            min-height: 44px;
         }
 
-        .btn:hover {
-            border-color: #000;
+        .btn:active {
+            background: #f0f0f0;
+            transform: scale(0.98);
         }
 
         .btn-primary {
@@ -372,131 +444,163 @@
             border-color: #000;
         }
 
-        .btn-primary:hover {
+        .btn-primary:active {
             background: #333;
         }
 
         .btn-sm {
-            padding: 6px 12px;
-            font-size: 12px;
+            padding: 8px 12px;
+            font-size: 13px;
+            min-height: 36px;
         }
 
-        /* Console */
-        .console-container {
-            display: none;
-            flex-direction: column;
-            height: 300px;
-            border-top: 1px solid #eaeaea;
-            background: #fff;
-        }
-
-        .console-container.active {
+        .icon-button {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-radius: 6px;
             display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s ease;
+            font-size: 16px;
         }
 
-        .console-header {
+        .icon-button:active {
+            background: #f0f0f0;
+        }
+
+        /* Input Styles */
+        .input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #eaeaea;
+            border-radius: 6px;
+            font-size: 15px;
+            background: #fff;
+            transition: border-color 0.15s ease;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: #000;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            height: 44px;
+            background: #fff;
+            border-top: 1px solid #eaeaea;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 12px 16px;
-            border-bottom: 1px solid #eaeaea;
-            background: #fafafa;
-        }
-
-        .console-title {
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .console-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .console-output {
-            flex: 1;
-            padding: 16px;
-            overflow-y: auto;
-            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            padding: 0 16px;
             font-size: 12px;
-            line-height: 1.4;
-            background: #fafafa;
+            color: #666;
+            position: sticky;
+            bottom: 0;
         }
 
-        .console-line {
-            margin-bottom: 4px;
-            word-wrap: break-word;
+        .status-left, .status-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            .sidebar {
-                position: fixed;
-                left: -280px;
-                top: 64px;
-                height: calc(100vh - 64px);
-                z-index: 50;
-                transition: left 0.3s ease;
-            }
-
-            .sidebar.open {
-                left: 0;
-            }
-
-            .mobile-overlay {
-                position: fixed;
-                top: 64px;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(0, 0, 0, 0.5);
-                z-index: 40;
-                display: none;
-            }
-
-            .mobile-overlay.active {
-                display: block;
-            }
-
-            .header-left {
-                gap: 8px;
-            }
-
-            .breadcrumb {
-                display: none;
-            }
-
-            .console-container {
-                height: 250px;
-            }
-
-            .tabs-container {
-                padding-left: 40px;
-            }
-
-            .mobile-menu-btn {
-                position: absolute;
-                left: 12px;
-                width: 32px;
-                height: 32px;
-                border: none;
-                background: none;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border-radius: 4px;
-            }
-
-            .mobile-menu-btn:hover {
-                background: #f5f5f5;
-            }
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            right: 16px;
+            bottom: 80px;
+            width: 56px;
+            height: 56px;
+            background: #000;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            z-index: 50;
+            transition: all 0.2s ease;
         }
+
+        .fab:active {
+            transform: scale(0.9);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .fab.hidden {
+            transform: scale(0);
+            opacity: 0;
+        }
+
+        /* Pull to Refresh */
+        .pull-refresh {
+            position: absolute;
+            top: -60px;
+            left: 0;
+            right: 0;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            border-bottom: 1px solid #eaeaea;
+            transition: transform 0.2s ease;
+            z-index: 10;
+        }
+
+        .pull-refresh.visible {
+            transform: translateY(60px);
+        }
+
+        .pull-refresh-text {
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* Animations */
+        @keyframes slideInRight {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        @keyframes slideOutRight {
+            from { transform: translateX(0); }
+            to { transform: translateX(100%); }
+        }
+
+        .slide-in-right {
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        .slide-out-right {
+            animation: slideOutRight 0.3s ease-out;
+        }
+
+        /* Custom Icons */
+        .icon-folder::before { content: "📁"; }
+        .icon-file::before { content: "📄"; }
+        .icon-plus::before { content: "+"; }
+        .icon-back::before { content: "←"; }
+        .icon-save::before { content: "💾"; }
+        .icon-play::before { content: "▶"; }
+        .icon-stop::before { content: "⏹"; }
+        .icon-settings::before { content: "⚙"; }
+        .icon-terminal::before { content: "⌨"; }
+        .icon-refresh::before { content: "⟳"; }
+        .icon-close::before { content: "×"; }
 
         /* Scrollbars */
         ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+            width: 4px;
+            height: 4px;
         }
 
         ::-webkit-scrollbar-track {
@@ -505,137 +609,184 @@
 
         ::-webkit-scrollbar-thumb {
             background: #ccc;
-            border-radius: 4px;
+            border-radius: 2px;
         }
 
-        ::-webkit-scrollbar-thumb:hover {
-            background: #999;
+        /* Safe Area for iPhone */
+        @supports (padding: max(0px)) {
+            .header {
+                padding-left: max(16px, env(safe-area-inset-left));
+                padding-right: max(16px, env(safe-area-inset-right));
+            }
+            
+            .status-bar {
+                padding-bottom: env(safe-area-inset-bottom);
+                padding-left: max(16px, env(safe-area-inset-left));
+                padding-right: max(16px, env(safe-area-inset-right));
+            }
+            
+            .fab {
+                right: max(16px, env(safe-area-inset-right));
+                bottom: max(80px, calc(80px + env(safe-area-inset-bottom)));
+            }
         }
 
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            body { background: #000; color: #fff; }
+            .header, .mobile-nav, .files-view, .editor-view, .console-view, .settings-view { background: #111; }
+            .editor-toolbar, .console-output { background: #000; }
+            .file-item.active { background: #fff; color: #000; }
+            .package-item, .empty-state-icon { background: #222; }
+            .input { background: #111; color: #fff; }
+            .btn { background: #111; color: #fff; border-color: #333; }
+            .btn-primary { background: #fff; color: #000; }
         }
 
-        .fade-in {
-            animation: fadeIn 0.2s ease-in-out;
+        /* Landscape optimization */
+        @media (orientation: landscape) and (max-height: 500px) {
+            .header { height: 48px; }
+            .mobile-nav { height: 40px; }
+            .main-container { height: calc(100vh - 88px); }
+            .status-bar { height: 36px; }
         }
-
-        /* Custom Icons */
-        .icon-folder::before { content: "📁"; }
-        .icon-file::before { content: "📄"; }
-        .icon-plus::before { content: "+"; }
-        .icon-menu::before { content: "☰"; }
-        .icon-close::before { content: "×"; }
-        .icon-play::before { content: "▶"; }
-        .icon-stop::before { content: "⏹"; }
-        .icon-terminal::before { content: "⌨"; }
     </style>
 </head>
 <body>
     <!-- Header -->
     <header class="header">
         <div class="header-left">
-            <button class="mobile-menu-btn icon-button" id="mobile-menu-btn">
-                <span class="icon-menu"></span>
-            </button>
             <a href="#" class="logo">
                 <div class="logo-icon">E</div>
                 Editor
             </a>
-            <nav class="breadcrumb">
-                <span>{{ bot.name }}</span>
-                <span class="breadcrumb-separator">/</span>
-                <span id="current-file">Select a file</span>
-            </nav>
+            <div class="current-file" id="current-file">Select a file</div>
         </div>
         <div class="header-right">
-            <button class="btn btn-sm" id="console-toggle">
-                <span class="icon-terminal"></span>
-                Console
-            </button>
             <img src="{{ user.avatar_url or '/static/img/default_avatar.png' }}" alt="User" class="user-avatar">
         </div>
     </header>
 
-    <!-- Mobile Overlay -->
-    <div class="mobile-overlay" id="mobile-overlay"></div>
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav">
+        <button class="nav-item active" data-view="files">Files</button>
+        <button class="nav-item" data-view="editor">Editor</button>
+        <button class="nav-item" data-view="console">Console</button>
+        <button class="nav-item" data-view="settings">Settings</button>
+    </nav>
 
     <!-- Main Container -->
     <div class="main-container">
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <span class="sidebar-title">Files</span>
-                <div class="sidebar-actions">
+        <!-- Files View -->
+        <div class="view files-view active" id="files-view">
+            <div class="files-header">
+                <span class="files-title">Project Files</span>
+                <div class="files-actions">
                     <button class="icon-button" id="new-file-btn" title="New File">
                         <span class="icon-plus"></span>
-                    </button>
-                    <button class="icon-button" id="new-folder-btn" title="New Folder">
-                        <span class="icon-folder"></span>
                     </button>
                 </div>
             </div>
             <div class="file-tree" id="file-tree">
                 <!-- Files will be populated here -->
             </div>
-        </aside>
+        </div>
 
-        <!-- Content Area -->
-        <main class="content-area">
-            <!-- Tabs -->
-            <div class="tabs-container" id="tabs-container">
-                <!-- Tabs will be populated here -->
+        <!-- Editor View -->
+        <div class="view editor-view" id="editor-view">
+            <div class="editor-toolbar">
+                <button class="editor-back" id="editor-back">
+                    <span class="icon-back"></span>
+                    Back
+                </button>
+                <div class="editor-actions">
+                    <button class="btn btn-sm btn-primary" id="save-btn" disabled>
+                        <span class="icon-save"></span>
+                        Save
+                    </button>
+                </div>
             </div>
-
-            <!-- Editor -->
             <div class="editor-container" id="editor-container">
                 <div class="empty-state" id="empty-state">
                     <div class="empty-state-icon">
                         <span class="icon-file"></span>
                     </div>
                     <h3>No file selected</h3>
-                    <p>Select a file from the sidebar to start editing</p>
+                    <p>Select a file to start editing</p>
                 </div>
             </div>
+        </div>
 
-            <!-- Status Bar -->
-            <div class="status-bar">
-                <div class="status-left">
-                    <span id="cursor-position">Ln 1, Col 1</span>
-                    <span id="file-encoding">UTF-8</span>
-                </div>
-                <div class="status-right">
-                    <span id="bot-status">Status: {{ bot.status }}</span>
-                    <button class="btn btn-sm btn-primary" id="save-btn" disabled>Save</button>
+        <!-- Console View -->
+        <div class="view console-view" id="console-view">
+            <div class="console-header">
+                <span class="console-title">Console</span>
+                <div class="console-actions">
+                    <button class="btn btn-sm" id="start-bot-btn">
+                        <span class="icon-play"></span>
+                        Start
+                    </button>
+                    <button class="btn btn-sm" id="stop-bot-btn">
+                        <span class="icon-stop"></span>
+                        Stop
+                    </button>
                 </div>
             </div>
+            <div class="console-output" id="console-output">
+                <div class="console-line">Welcome to the console...</div>
+            </div>
+        </div>
 
-            <!-- Console -->
-            <div class="console-container" id="console-container">
-                <div class="console-header">
-                    <span class="console-title">Console</span>
-                    <div class="console-actions">
-                        <button class="btn btn-sm" id="start-bot-btn">
-                            <span class="icon-play"></span>
-                            Start
-                        </button>
-                        <button class="btn btn-sm" id="stop-bot-btn">
-                            <span class="icon-stop"></span>
-                            Stop
-                        </button>
-                        <button class="icon-button" id="console-close">
-                            <span class="icon-close"></span>
-                        </button>
+        <!-- Settings View -->
+        <div class="view settings-view" id="settings-view">
+            <div class="settings-header">
+                <span class="settings-title">Settings</span>
+            </div>
+            <div class="settings-content">
+                <div class="setting-group">
+                    <h3>Startup Command</h3>
+                    <div class="setting-item">
+                        <input type="text" class="input" id="startup-command-input" 
+                               value="{{ bot.startup_command }}" placeholder="python main.py">
+                    </div>
+                    <button class="btn" id="save-startup-command">Save Command</button>
+                </div>
+
+                <div class="setting-group">
+                    <h3>Package Management</h3>
+                    <div class="setting-item">
+                        <input type="text" class="input" id="package-name-input" 
+                               placeholder="e.g., requests">
+                    </div>
+                    <button class="btn" id="install-package-btn">Install Package</button>
+                    
+                    <div id="package-list">
+                        {% for pkg in bot.packages %}
+                        <div class="package-item">
+                            <span class="package-name">{{ pkg }}</span>
+                            <button class="btn btn-sm" data-package="{{ pkg }}">Remove</button>
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
-                <div class="console-output" id="console-output">
-                    <div class="console-line">Welcome to the console...</div>
-                </div>
             </div>
-        </main>
+        </div>
     </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+        <div class="status-left">
+            <span id="cursor-position">Ln 1, Col 1</span>
+        </div>
+        <div class="status-right">
+            <span id="bot-status">{{ bot.status }}</span>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <button class="fab hidden" id="fab">
+        <span class="icon-plus"></span>
+    </button>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -643,86 +794,49 @@
             const botId = "{{ bot._id }}";
             
             // Elements
-            const sidebar = document.getElementById('sidebar');
-            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-            const mobileOverlay = document.getElementById('mobile-overlay');
+            const navItems = document.querySelectorAll('.nav-item');
+            const views = document.querySelectorAll('.view');
             const fileTree = document.getElementById('file-tree');
-            const tabsContainer = document.getElementById('tabs-container');
             const editorContainer = document.getElementById('editor-container');
             const emptyState = document.getElementById('empty-state');
-            const consoleContainer = document.getElementById('console-container');
-            const consoleToggle = document.getElementById('console-toggle');
-            const consoleClose = document.getElementById('console-close');
-            const consoleOutput = document.getElementById('console-output');
             const currentFileSpan = document.getElementById('current-file');
             const saveBtn = document.getElementById('save-btn');
             const cursorPosition = document.getElementById('cursor-position');
             const botStatus = document.getElementById('bot-status');
+            const consoleOutput = document.getElementById('console-output');
+            const fab = document.getElementById('fab');
 
-            let openTabs = new Map();
-            let activeTab = null;
             let editor = null;
+            let currentFile = null;
+            let fileContent = '';
+            let isModified = false;
 
-            // Mobile menu
-            mobileMenuBtn.addEventListener('click', () => {
-                sidebar.classList.toggle('open');
-                mobileOverlay.classList.toggle('active');
+            // Navigation
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const viewName = item.dataset.view;
+                    switchView(viewName);
+                });
             });
 
-            mobileOverlay.addEventListener('click', () => {
-                sidebar.classList.remove('open');
-                mobileOverlay.classList.remove('active');
-            });
-
-            // Console toggle
-            consoleToggle.addEventListener('click', () => {
-                consoleContainer.classList.toggle('active');
-            });
-
-            consoleClose.addEventListener('click', () => {
-                consoleContainer.classList.remove('active');
-            });
-
-            // Initialize CodeMirror
-            function initEditor() {
-                if (editor) return;
+            function switchView(viewName) {
+                navItems.forEach(item => {
+                    item.classList.toggle('active', item.dataset.view === viewName);
+                });
                 
-                const wrapper = document.createElement('div');
-                wrapper.className = 'editor-wrapper';
-                editorContainer.appendChild(wrapper);
-                
-                editor = CodeMirror(wrapper, {
-                    mode: 'python',
-                    theme: 'github',
-                    lineNumbers: true,
-                    autofocus: true,
-                    lineWrapping: true,
-                    indentUnit: 4,
-                    smartIndent: true,
-                    matchBrackets: true,
-                    autoCloseBrackets: true,
-                    foldGutter: true,
-                    gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+                views.forEach(view => {
+                    view.classList.toggle('active', view.id === `${viewName}-view`);
                 });
 
-                editor.on('cursorActivity', () => {
-                    const cursor = editor.getCursor();
-                    cursorPosition.textContent = `Ln ${cursor.line + 1}, Col ${cursor.ch + 1}`;
-                });
-
-                editor.on('change', () => {
-                    if (activeTab) {
-                        const tab = openTabs.get(activeTab);
-                        if (tab && !tab.modified) {
-                            tab.modified = true;
-                            updateTabTitle(activeTab);
-                        }
-                        saveBtn.disabled = false;
-                    }
-                });
+                // Show/hide FAB based on view
+                if (viewName === 'files') {
+                    fab.classList.remove('hidden');
+                } else {
+                    fab.classList.add('hidden');
+                }
             }
 
-            // File tree rendering
+            // File tree
             function renderFileTree(tree, container = fileTree, pathPrefix = '') {
                 Object.entries(tree).forEach(([name, content]) => {
                     const fullPath = pathPrefix ? `${pathPrefix}/${name}` : name;
@@ -740,7 +854,6 @@
                         item.classList.add('folder-item');
                         item.appendChild(icon);
                         item.appendChild(label);
-                        // Handle folder expansion here if needed
                     } else {
                         item.appendChild(icon);
                         item.appendChild(label);
@@ -754,205 +867,67 @@
             // File operations
             async function openFile(path) {
                 try {
-                    if (!openTabs.has(path)) {
-                        const response = await fetch(`/api/server/${serverIndex}/file?path=${path}`);
-                        const data = await response.json();
+                    const response = await fetch(`/api/server/${serverIndex}/file?path=${path}`);
+                    const data = await response.json();
+                    
+                    if (data.content !== undefined) {
+                        currentFile = path;
+                        fileContent = data.content;
+                        isModified = false;
                         
-                        if (data.content !== undefined) {
-                            openTabs.set(path, {
-                                content: data.content,
-                                modified: false,
-                                path: path
-                            });
-                            createTab(path);
+                        // Update UI
+                        document.querySelectorAll('.file-item').forEach(item => {
+                            item.classList.toggle('active', item.dataset.path === path);
+                        });
+                        
+                        currentFileSpan.textContent = path.split('/').pop();
+                        
+                        // Initialize or update editor
+                        if (!editor) {
+                            initEditor();
                         }
+                        
+                        editor.setValue(fileContent);
+                        editor.refresh();
+                        
+                        // Switch to editor view
+                        switchView('editor');
+                        saveBtn.disabled = true;
                     }
-                    switchToTab(path);
                 } catch (error) {
                     console.error('Error opening file:', error);
                 }
             }
 
-            function createTab(path) {
-                const tab = document.createElement('button');
-                tab.className = 'tab';
-                tab.dataset.path = path;
+            function initEditor() {
+                if (editor) return;
                 
-                const fileName = path.split('/').pop();
-                const label = document.createElement('span');
-                label.textContent = fileName;
+                emptyState.style.display = 'none';
                 
-                const closeBtn = document.createElement('button');
-                closeBtn.className = 'tab-close';
-                closeBtn.innerHTML = '<span class="icon-close"></span>';
-                closeBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    closeTab(path);
+                const wrapper = document.createElement('div');
+                wrapper.className = 'editor-wrapper';
+                editorContainer.appendChild(wrapper);
+                
+                editor = CodeMirror(wrapper, {
+                    mode: 'python',
+                    theme: 'github',
+                    lineNumbers: true,
+                    autofocus: true,
+                    lineWrapping: true,
+                    indentUnit: 4,
+                    smartIndent: true,
+                    matchBrackets: true,
+                    autoCloseBrackets: true,
+                    viewportMargin: 10
                 });
 
-                tab.appendChild(label);
-                tab.appendChild(closeBtn);
-                tab.addEventListener('click', () => switchToTab(path));
-
-                tabsContainer.appendChild(tab);
-            }
-
-            function switchToTab(path) {
-                // Update active tab
-                document.querySelectorAll('.tab').forEach(tab => {
-                    tab.classList.toggle('active', tab.dataset.path === path);
+                editor.on('cursorActivity', () => {
+                    const cursor = editor.getCursor();
+                    cursorPosition.textContent = `Ln ${cursor.line + 1}, Col ${cursor.ch + 1}`;
                 });
 
-                document.querySelectorAll('.file-item').forEach(item => {
-                    item.classList.toggle('active', item.dataset.path === path);
-                });
-
-                activeTab = path;
-                const tabData = openTabs.get(path);
-                
-                if (tabData) {
-                    if (!editor) {
-                        emptyState.style.display = 'none';
-                        initEditor();
-                    }
-                    
-                    editor.setValue(tabData.content);
-                    editor.refresh();
-                    currentFileSpan.textContent = path.split('/').pop();
-                    saveBtn.disabled = !tabData.modified;
-                }
-
-                // Close mobile sidebar
-                if (window.innerWidth <= 768) {
-                    sidebar.classList.remove('open');
-                    mobileOverlay.classList.remove('active');
-                }
-            }
-
-            function closeTab(path) {
-                const tab = document.querySelector(`[data-path="${path}"]`);
-                if (tab) tab.remove();
-                
-                openTabs.delete(path);
-                
-                if (activeTab === path) {
-                    const remainingTabs = document.querySelectorAll('.tab');
-                    if (remainingTabs.length > 0) {
-                        switchToTab(remainingTabs[0].dataset.path);
-                    } else {
-                        activeTab = null;
-                        currentFileSpan.textContent = 'Select a file';
-                        if (editor) {
-                            editorContainer.removeChild(editorContainer.querySelector('.editor-wrapper'));
-                            editor = null;
-                            emptyState.style.display = 'flex';
-                        }
-                        saveBtn.disabled = true;
-                    }
-                }
-            }
-
-            function updateTabTitle(path) {
-                const tab = document.querySelector(`[data-path="${path}"]`);
-                const tabData = openTabs.get(path);
-                if (tab && tabData) {
-                    const label = tab.querySelector('span');
-                    const fileName = path.split('/').pop();
-                    label.textContent = tabData.modified ? `${fileName} •` : fileName;
-                }
-            }
-
-            // Save file
-            saveBtn.addEventListener('click', async () => {
-                if (!activeTab || !editor) return;
-                
-                try {
-                    await fetch(`/api/server/${serverIndex}/file?path=${activeTab}`, {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ content: editor.getValue() })
-                    });
-                    
-                    const tabData = openTabs.get(activeTab);
-                    if (tabData) {
-                        tabData.modified = false;
-                        tabData.content = editor.getValue();
-                        updateTabTitle(activeTab);
-                        saveBtn.disabled = true;
-                    }
-                } catch (error) {
-                    console.error('Error saving file:', error);
-                }
-            });
-
-            // New file/folder
-            document.getElementById('new-file-btn').addEventListener('click', async () => {
-                const path = prompt("Enter new file path (e.g., main.py or folder/main.py):");
-                if (path) {
-                    await fetch(`/api/server/${serverIndex}/files/create`, {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ path: path, type: 'file' })
-                    });
-                    location.reload();
-                }
-            });
-
-            document.getElementById('new-folder-btn').addEventListener('click', async () => {
-                const path = prompt("Enter new folder path:");
-                if (path) {
-                    await fetch(`/api/server/${serverIndex}/files/create`, {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ path: path, type: 'folder' })
-                    });
-                    location.reload();
-                }
-            });
-
-            // Bot controls
-            document.getElementById('start-bot-btn').addEventListener('click', async () => {
-                await fetch(`/api/server/${serverIndex}/start`, { method: 'POST' });
-                botStatus.textContent = 'Status: online';
-            });
-
-            document.getElementById('stop-bot-btn').addEventListener('click', async () => {
-                await fetch(`/api/server/${serverIndex}/stop`, { method: 'POST' });
-                botStatus.textContent = 'Status: offline';
-            });
-
-            // Socket.IO for console
-            const socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + '/editor');
-
-            socket.on('connect', () => {
-                socket.emit('join', { bot_id: botId });
-            });
-
-            socket.on('log', (msg) => {
-                const line = document.createElement('div');
-                line.className = 'console-line';
-                line.textContent = msg.data;
-                consoleOutput.appendChild(line);
-                consoleOutput.scrollTop = consoleOutput.scrollHeight;
-            });
-
-            // Keyboard shortcuts
-            document.addEventListener('keydown', (e) => {
-                if (e.ctrlKey || e.metaKey) {
-                    if (e.key === 's') {
-                        e.preventDefault();
-                        if (!saveBtn.disabled) saveBtn.click();
-                    }
-                    if (e.key === '`') {
-                        e.preventDefault();
-                        consoleToggle.click();
-                    }
-                }
-            });
-
-            // Initialize
-            renderFileTree({{ bot.files_tree | tojson }});
-        });
-    </script>
-</body>
-</html>
+                editor.on('change', () => {
+                    if (!isModified) {
+                        isModified = true;
+                        saveBtn.disabled = false;
+                        currentFileSpan.
