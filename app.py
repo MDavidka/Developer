@@ -60,7 +60,7 @@ class User(UserMixin):
     @staticmethod
     def get(user_id):
         user_data = db.users.find_one({"_id": ObjectId(user_id)})
-        if user_
+        if user_data:
             return User(
                 id=user_data["_id"],
                 username=user_data["username"],
@@ -673,43 +673,36 @@ def delete_file(server_index):
         return jsonify({"error": f"Error deleting file/folder: {str(e)}"}), 500
 
 def stream_bot_logs(bot_id, process):
-    """Enhanced log streaming with proper process management"""
+    """Enhanced log streaming with proper process management using select"""
     try:
         socketio.emit('log', {
             'data': f'[{datetime.datetime.now().strftime("%H:%M:%S")}] 🚀 Bot process started (PID: {process.pid})'
         }, room=bot_id)
 
-        # Read both stdout and stderr in real-time
-        while True:
-            # Check if process is still running
-            if process.poll() is not None:
-                break
-            
-            # Read stdout
-            try:
-                stdout_line = process.stdout.readline()
-                if stdout_line:
+        # Use select for non-blocking reads on stdout and stderr
+        streams = [process.stdout, process.stderr]
+        while process.poll() is None:
+            readable, _, _ = select.select(streams, [], [], 0.1)
+            for stream in readable:
+                line = stream.readline().strip()
+                if line:
                     timestamp = datetime.datetime.now().strftime("%H:%M:%S")
+                    log_level = '[ERROR]' if stream is process.stderr else ''
                     socketio.emit('log', {
-                        'data': f'[{timestamp}] {stdout_line.strip()}'
+                        'data': f'[{timestamp}] {log_level} {line}'.strip()
                     }, room=bot_id)
-            except:
-                pass
-            
-            # Read stderr
-            try:
-                stderr_line = process.stderr.readline()
-                if stderr_line:
+
+        # After process finishes, read any remaining output
+        for stream in streams:
+            for line in stream.readlines():
+                line = line.strip()
+                if line:
                     timestamp = datetime.datetime.now().strftime("%H:%M:%S")
+                    log_level = '[ERROR]' if stream is process.stderr else ''
                     socketio.emit('log', {
-                        'data': f'[{timestamp}] [ERROR] {stderr_line.strip()}'
+                        'data': f'[{timestamp}] {log_level} {line}'.strip()
                     }, room=bot_id)
-            except:
-                pass
-            
-            # Small delay to prevent high CPU usage
-            time.sleep(0.1)
-                    
+
         # Process finished
         return_code = process.returncode
         timestamp = datetime.datetime.now().strftime("%H:%M:%S")
@@ -730,7 +723,7 @@ def stream_bot_logs(bot_id, process):
         }, room=bot_id)
     finally:
         # Clean up
-        if bot_id in running_bots:
+        if bot_id in running_bots and running_bots[bot_id]["process"].pid == process.pid:
             running_bots[bot_id]["status"] = "stopped"
 
 @socketio.on('connect', namespace='/editor')
@@ -861,6 +854,48 @@ def start_bot(server_index):
         error_msg = f'❌ Network connectivity test failed: {str(e)}'
         socketio.emit('log', {'data': error_msg}, room=bot_id)
         return jsonify({"error": f"Network error: {str(e)}"}), 503
+
+    # Install dependencies from requirements.txt
+    socketio.emit('log', {'data': '📦 Installing dependencies...'}, room=bot_id)
+    requirements_file = os.path.join(bot_dir, "requirements.txt")
+    if os.path.exists(requirements_file):
+        try:
+            # Using sys.executable to ensure we use the same python env
+            install_command = [sys.executable, "-m", "pip", "install", "-r", requirements_file]
+            install_process = subprocess.run(
+                install_command,
+                cwd=bot_dir,
+                capture_output=True,
+                text=True,
+                encoding='utf-8',
+                timeout=300 # 5 minute timeout for installation
+            )
+
+            # Log stdout of pip install
+            if install_process.stdout:
+                for line in install_process.stdout.splitlines():
+                    socketio.emit('log', {'data': f'[pip] {line}'}, room=bot_id)
+
+            if install_process.returncode == 0:
+                socketio.emit('log', {'data': '✅ Dependencies installed successfully.'}, room=bot_id)
+            else:
+                # Log stderr of pip install
+                if install_process.stderr:
+                    for line in install_process.stderr.splitlines():
+                        socketio.emit('log', {'data': f'[pip-error] {line}'}, room=bot_id)
+                error_msg = '❌ Failed to install dependencies. Please check logs.'
+                socketio.emit('log', {'data': error_msg}, room=bot_id)
+                return jsonify({"error": "Failed to install dependencies"}), 500
+        except subprocess.TimeoutExpired:
+            error_msg = '❌ Dependency installation timed out after 5 minutes.'
+            socketio.emit('log', {'data': error_msg}, room=bot_id)
+            return jsonify({"error": "Dependency installation timed out"}), 500
+        except Exception as e:
+            error_msg = f'❌ An unexpected error occurred during dependency installation: {str(e)}'
+            socketio.emit('log', {'data': error_msg}, room=bot_id)
+            return jsonify({"error": "Dependency installation failed"}), 500
+    else:
+        socketio.emit('log', {'data': '⚠️ requirements.txt not found, skipping dependency installation.'}, room=bot_id)
 
     socketio.emit('log', {
         'data': f'✅ Pre-flight checks passed'
