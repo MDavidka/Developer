@@ -136,6 +136,11 @@
             transform: scale(0.95);
         }
 
+        .header-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         .header-btn.active {
             background: #000;
             color: #fff;
@@ -297,6 +302,7 @@
             overflow-y: hidden;
             white-space: nowrap;
             -webkit-overflow-scrolling: touch;
+            display: none;
         }
 
         .mobile-tabs::-webkit-scrollbar {
@@ -529,6 +535,11 @@
             transform: scale(0.95);
         }
 
+        .console-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         .console-close {
             width: 32px;
             height: 32px;
@@ -562,16 +573,86 @@
             word-wrap: break-word;
         }
 
+        /* Desktop Styles */
+        @media (min-width: 768px) {
+            .header {
+                height: 64px;
+                padding: 0 24px;
+            }
+
+            .main-container {
+                margin-top: 64px;
+                flex-direction: row;
+            }
+
+            .sidebar {
+                position: relative;
+                top: 0;
+                width: 280px;
+                height: 100%;
+                transform: translateX(0);
+                transition: none;
+                border-right: 1px solid #eaeaea;
+            }
+
+            .sidebar-overlay {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: none;
+            }
+
+            .mobile-tabs {
+                display: flex;
+            }
+
+            .mobile-console {
+                height: 300px;
+            }
+
+            .header-left {
+                gap: 16px;
+            }
+
+            .current-file {
+                font-size: 16px;
+            }
+
+            .breadcrumb {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                color: #666;
+                font-size: 14px;
+            }
+
+            .breadcrumb-separator {
+                color: #ccc;
+            }
+        }
+
+        /* Large screens */
+        @media (min-width: 1200px) {
+            .sidebar {
+                width: 320px;
+            }
+
+            .mobile-console {
+                height: 350px;
+            }
+        }
+
         /* Touch optimizations */
         .touch-target {
             min-height: 44px;
             min-width: 44px;
         }
 
-        /* Scrollbars for mobile */
+        /* Scrollbars */
         ::-webkit-scrollbar {
-            width: 2px;
-            height: 2px;
+            width: 8px;
+            height: 8px;
         }
 
         ::-webkit-scrollbar-track {
@@ -580,7 +661,19 @@
 
         ::-webkit-scrollbar-thumb {
             background: #ccc;
-            border-radius: 1px;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #999;
+        }
+
+        /* Mobile scrollbars */
+        @media (max-width: 767px) {
+            ::-webkit-scrollbar {
+                width: 2px;
+                height: 2px;
+            }
         }
 
         /* Custom Icons */
@@ -593,6 +686,26 @@
         .icon-play::before { content: "▶"; }
         .icon-stop::before { content: "⏹"; }
         .icon-file::before { content: "📄"; }
+
+        /* Loading states */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #ccc;
+            border-radius: 50%;
+            border-top-color: #000;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
 
         /* Landscape orientation adjustments */
         @media (orientation: landscape) and (max-height: 500px) {
@@ -627,46 +740,6 @@
             }
         }
 
-        /* Large mobile devices */
-        @media (min-width: 414px) {
-            .CodeMirror {
-                font-size: 15px;
-            }
-            
-            .file-item {
-                font-size: 17px;
-            }
-            
-            .mobile-tab {
-                font-size: 15px;
-            }
-        }
-
-        /* Tablet portrait */
-        @media (min-width: 768px) and (orientation: portrait) {
-            .sidebar {
-                width: 320px;
-                transform: translateX(-320px);
-            }
-            
-            .sidebar.open {
-                transform: translateX(0);
-            }
-            
-            .content-area {
-                margin-left: 0;
-            }
-            
-            .mobile-console {
-                height: 40vh;
-            }
-        }
-
-        /* Prevent zoom on input focus */
-        input, textarea, select {
-            font-size: 16px;
-        }
-
         /* iOS safe area support */
         @supports (padding: max(0px)) {
             .app-container {
@@ -691,6 +764,11 @@
                     <div class="logo-icon">E</div>
                     <span class="current-file" id="current-file">Select a file</span>
                 </a>
+                <nav class="breadcrumb">
+                    <span>{{ bot.name }}</span>
+                    <span class="breadcrumb-separator">/</span>
+                    <span id="current-file-breadcrumb">Select a file</span>
+                </nav>
             </div>
             <div class="header-right">
                 <button class="header-btn touch-target" id="save-btn-header" disabled>
@@ -728,7 +806,7 @@
             <!-- Content Area -->
             <main class="content-area">
                 <!-- Mobile Tabs -->
-                <div class="mobile-tabs" id="mobile-tabs" style="display: none;">
+                <div class="mobile-tabs" id="mobile-tabs">
                     <div class="tabs-wrapper" id="tabs-wrapper">
                         <!-- Tabs will be populated here -->
                     </div>
@@ -749,7 +827,7 @@
                 <div class="mobile-status-bar">
                     <div class="status-left">
                         <span id="cursor-position">Ln 1, Col 1</span>
-                        <span id="bot-status">{{ bot.status }}</span>
+                        <span id="bot-status">Status: {{ bot.status }}</span>
                     </div>
                     <button class="save-btn touch-target" id="save-btn" disabled>Save</button>
                 </div>
@@ -775,7 +853,7 @@
                 </div>
             </div>
             <div class="console-output" id="console-output">
-                <div class="console-line">Welcome to the mobile console...</div>
+                <div class="console-line">Welcome to the console...</div>
             </div>
         </div>
     </div>
@@ -799,6 +877,7 @@
             const consoleClose = document.getElementById('console-close');
             const consoleOutput = document.getElementById('console-output');
             const currentFileSpan = document.getElementById('current-file');
+            const currentFileBreadcrumb = document.getElementById('current-file-breadcrumb');
             const saveBtn = document.getElementById('save-btn');
             const saveBtnHeader = document.getElementById('save-btn-header');
             const cursorPosition = document.getElementById('cursor-position');
@@ -809,10 +888,12 @@
             let editor = null;
 
             // Mobile menu toggle
-            mobileMenuBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                toggleSidebar();
-            });
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleSidebar();
+                });
+            }
 
             sidebarOverlay.addEventListener('click', closeSidebar);
 
@@ -854,7 +935,7 @@
                 consoleToggle.classList.remove('active');
             });
 
-            // Initialize CodeMirror for mobile
+            // Initialize CodeMirror
             function initEditor() {
                 if (editor) return;
                 
@@ -879,7 +960,6 @@
                     }
                 });
 
-                // Mobile-specific CodeMirror settings
                 editor.setOption("scrollbarStyle", "null");
                 
                 editor.on('cursorActivity', () => {
@@ -903,12 +983,16 @@
                 // Prevent zoom on focus for iOS
                 editor.on('focus', () => {
                     const viewport = document.querySelector('meta[name=viewport]');
-                    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
+                    if (viewport) {
+                        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
+                    }
                 });
 
                 editor.on('blur', () => {
                     const viewport = document.querySelector('meta[name=viewport]');
-                    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=no');
+                    if (viewport) {
+                        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=no');
+                    }
                 });
             }
 
@@ -944,22 +1028,29 @@
             async function openFile(path) {
                 try {
                     if (!openTabs.has(path)) {
-                        const response = await fetch(`/api/server/${serverIndex}/file?path=${path}`);
+                        const response = await fetch(`/api/server/${serverIndex}/file?path=${path}`, {
+                            headers: {
+                                'Content-Type': 'application/json',
+                            }
+                        });
                         const data = await response.json();
                         
-                        if (data.content !== undefined) {
+                        if (response.ok && data.content !== undefined) {
                             openTabs.set(path, {
                                 content: data.content,
                                 modified: false,
                                 path: path
                             });
                             createMobileTab(path);
+                        } else {
+                            console.error('Error opening file:', data.error);
+                            return;
                         }
                     }
                     switchToTab(path);
                     closeSidebar();
                 } catch (error) {
-                    console.error('Error opening file:', error);
+                    console.error('Network error:', error);
                 }
             }
 
@@ -1013,7 +1104,11 @@
                     
                     editor.setValue(tabData.content);
                     setTimeout(() => editor.refresh(), 100);
-                    currentFileSpan.textContent = path.split('/').pop();
+                    const fileName = path.split('/').pop();
+                    currentFileSpan.textContent = fileName;
+                    if (currentFileBreadcrumb) {
+                        currentFileBreadcrumb.textContent = fileName;
+                    }
                     saveBtn.disabled = !tabData.modified;
                     saveBtnHeader.disabled = !tabData.modified;
                     
@@ -1036,6 +1131,9 @@
                     } else {
                         activeTab = null;
                         currentFileSpan.textContent = 'Select a file';
+                        if (currentFileBreadcrumb) {
+                            currentFileBreadcrumb.textContent = 'Select a file';
+                        }
                         if (editor) {
                             editorContainer.removeChild(editorContainer.querySelector('.editor-wrapper'));
                             editor = null;
@@ -1064,23 +1162,36 @@
                 if (!activeTab || !editor) return;
                 
                 try {
-                    await fetch(`/api/server/${serverIndex}/file?path=${activeTab}`, {
+                    saveBtn.disabled = true;
+                    saveBtnHeader.disabled = true;
+                    
+                    const response = await fetch(`/api/server/${serverIndex}/file?path=${activeTab}`, {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({ content: editor.getValue() })
                     });
                     
-                    const tabData = openTabs.get(activeTab);
-                    if (tabData) {
-                        tabData.modified = false;
-                        tabData.content = editor.getValue();
-                        updateTabTitle(activeTab);
-                        saveBtn.disabled = true;
-                        saveBtnHeader.disabled = true;
-                        saveBtn.classList.remove('primary');
+                    const data = await response.json();
+                    
+                    if (response.ok && data.success) {
+                        const tabData = openTabs.get(activeTab);
+                        if (tabData) {
+                            tabData.modified = false;
+                            tabData.content = editor.getValue();
+                            updateTabTitle(activeTab);
+                            saveBtn.classList.remove('primary');
+                        }
+                    } else {
+                        console.error('Error saving file:', data.error);
+                        // Re-enable buttons on error
+                        saveBtn.disabled = false;
+                        saveBtnHeader.disabled = false;
                     }
                 } catch (error) {
-                    console.error('Error saving file:', error);
+                    console.error('Network error:', error);
+                    // Re-enable buttons on error
+                    saveBtn.disabled = false;
+                    saveBtnHeader.disabled = false;
                 }
             }
 
@@ -1091,43 +1202,147 @@
             document.getElementById('new-file-btn').addEventListener('click', async () => {
                 const path = prompt("Enter new file path (e.g., main.py):");
                 if (path) {
-                    await fetch(`/api/server/${serverIndex}/files/create`, {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ path: path, type: 'file' })
-                    });
-                    location.reload();
+                    try {
+                        const response = await fetch(`/api/server/${serverIndex}/files/create`, {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ path: path, type: 'file' })
+                        });
+                        
+                        if (response.ok) {
+                            location.reload();
+                        } else {
+                            const data = await response.json();
+                            alert(`Error: ${data.error}`);
+                        }
+                    } catch (error) {
+                        console.error('Error creating file:', error);
+                        alert('Network error occurred');
+                    }
                 }
             });
 
             document.getElementById('new-folder-btn').addEventListener('click', async () => {
                 const path = prompt("Enter new folder path:");
                 if (path) {
-                    await fetch(`/api/server/${serverIndex}/files/create`, {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ path: path, type: 'folder' })
-                    });
-                    location.reload();
+                    try {
+                        const response = await fetch(`/api/server/${serverIndex}/files/create`, {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ path: path, type: 'folder' })
+                        });
+                        
+                        if (response.ok) {
+                            location.reload();
+                        } else {
+                            const data = await response.json();
+                            alert(`Error: ${data.error}`);
+                        }
+                    } catch (error) {
+                        console.error('Error creating folder:', error);
+                        alert('Network error occurred');
+                    }
                 }
             });
 
-            // Bot controls
+            // Bot controls - JAVÍTOTT VERZIÓ
             document.getElementById('start-bot-btn').addEventListener('click', async () => {
-                await fetch(`/api/server/${serverIndex}/start`, { method: 'POST' });
-                botStatus.textContent = 'online';
+                try {
+                    const startBtn = document.getElementById('start-bot-btn');
+                    startBtn.disabled = true;
+                    startBtn.innerHTML = '<div class="spinner"></div> Starting...';
+                    
+                    const response = await fetch(`/api/server/${serverIndex}/start`, { 
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok && data.success) {
+                        botStatus.textContent = 'Status: online';
+                        // Add success message to console
+                        addConsoleMessage('✅ Bot started successfully', 'success');
+                    } else {
+                        console.error('Error starting bot:', data.error);
+                        addConsoleMessage(`❌ Failed to start bot: ${data.error}`, 'error');
+                        alert(`Failed to start bot: ${data.error}`);
+                    }
+                } catch (error) {
+                    console.error('Network error:', error);
+                    addConsoleMessage(`💥 Network error: ${error.message}`, 'error');
+                    alert(`Network error: ${error.message}`);
+                } finally {
+                    const startBtn = document.getElementById('start-bot-btn');
+                    startBtn.disabled = false;
+                    startBtn.innerHTML = '<span class="icon-play"></span> Start';
+                }
             });
 
             document.getElementById('stop-bot-btn').addEventListener('click', async () => {
-                await fetch(`/api/server/${serverIndex}/stop`, { method: 'POST' });
-                botStatus.textContent = 'offline';
+                try {
+                    const stopBtn = document.getElementById('stop-bot-btn');
+                    stopBtn.disabled = true;
+                    stopBtn.innerHTML = '<div class="spinner"></div> Stopping...';
+                    
+                    const response = await fetch(`/api/server/${serverIndex}/stop`, { 
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok && data.success) {
+                        botStatus.textContent = 'Status: offline';
+                        addConsoleMessage('⏹ Bot stopped successfully', 'success');
+                    } else {
+                        console.error('Error stopping bot:', data.error);
+                        addConsoleMessage(`❌ Failed to stop bot: ${data.error}`, 'error');
+                        alert(`Failed to stop bot: ${data.error}`);
+                    }
+                } catch (error) {
+                    console.error('Network error:', error);
+                    addConsoleMessage(`💥 Network error: ${error.message}`, 'error');
+                    alert(`Network error: ${error.message}`);
+                } finally {
+                    const stopBtn = document.getElementById('stop-bot-btn');
+                    stopBtn.disabled = false;
+                    stopBtn.innerHTML = '<span class="icon-stop"></span> Stop';
+                }
             });
+
+            // Helper function to add console messages
+            function addConsoleMessage(message, type = 'info') {
+                const line = document.createElement('div');
+                line.className = 'console-line';
+                const timestamp = new Date().toLocaleTimeString();
+                line.textContent = `[${timestamp}] ${message}`;
+                
+                if (type === 'error') {
+                    line.style.color = '#ff4444';
+                } else if (type === 'success') {
+                    line.style.color = '#00aa00';
+                }
+                
+                consoleOutput.appendChild(line);
+                consoleOutput.scrollTop = consoleOutput.scrollHeight;
+            }
 
             // Socket.IO for console
             const socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + '/editor');
 
             socket.on('connect', () => {
+                console.log('Socket.IO connected');
                 socket.emit('join', { bot_id: botId });
+            });
+
+            socket.on('disconnect', () => {
+                console.log('Socket.IO disconnected');
+                addConsoleMessage('🔌 Connection lost', 'error');
             });
 
             socket.on('log', (msg) => {
@@ -1168,14 +1383,41 @@
 
             // Prevent iOS bounce scroll
             document.addEventListener('touchmove', (e) => {
-                if (e.target.closest('.console-output') || e.target.closest('.file-tree') || e.target.closest('.CodeMirror-scroll')) {
+                if (e.target.closest('.console-output') || 
+                    e.target.closest('.file-tree') || 
+                    e.target.closest('.CodeMirror-scroll') ||
+                    e.target.closest('.mobile-tabs')) {
                     return;
                 }
                 e.preventDefault();
             }, { passive: false });
 
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey || e.metaKey) {
+                    if (e.key === 's') {
+                        e.preventDefault();
+                        if (!saveBtn.disabled) saveFile();
+                    }
+                    if (e.key === '`') {
+                        e.preventDefault();
+                        consoleToggle.click();
+                    }
+                }
+            });
+
             // Initialize
             renderFileTree({{ bot.files_tree | tojson }});
+            
+            // Check initial bot status
+            fetch(`/api/server/${serverIndex}/status`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status) {
+                        botStatus.textContent = `Status: ${data.status}`;
+                    }
+                })
+                .catch(console.error);
         });
     </script>
 </body>
