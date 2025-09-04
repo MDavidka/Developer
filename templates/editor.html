@@ -15,6 +15,12 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            height: 100%;
+            overflow: hidden;
         }
 
         body {
@@ -24,8 +30,9 @@
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            height: 100%;
             overflow: hidden;
-            height: 100vh;
+            touch-action: manipulation;
         }
 
         /* Header */
@@ -37,9 +44,11 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            position: sticky;
+            position: fixed;
             top: 0;
-            z-index: 100;
+            left: 0;
+            right: 0;
+            z-index: 1000;
         }
 
         .header-left {
@@ -47,12 +56,32 @@
             align-items: center;
             gap: 12px;
             flex: 1;
+            min-width: 0;
+        }
+
+        .mobile-menu-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 18px;
+            flex-shrink: 0;
+            transition: background 0.15s ease;
+        }
+
+        .mobile-menu-btn:active {
+            background: #f5f5f5;
         }
 
         .logo {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             font-weight: 600;
             font-size: 16px;
             text-decoration: none;
@@ -60,145 +89,172 @@
         }
 
         .logo-icon {
-            width: 24px;
-            height: 24px;
+            width: 28px;
+            height: 28px;
             background: #000;
-            border-radius: 4px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #fff;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 700;
         }
 
         .current-file {
-            flex: 1;
-            font-size: 14px;
             color: #666;
+            font-size: 14px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            margin-left: 8px;
+            min-width: 0;
         }
 
         .header-right {
             display: flex;
             align-items: center;
             gap: 8px;
+            flex-shrink: 0;
         }
 
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
+        .header-btn {
+            width: 40px;
+            height: 40px;
             border: 1px solid #eaeaea;
-        }
-
-        /* Mobile Navigation */
-        .mobile-nav {
             background: #fff;
-            border-bottom: 1px solid #eaeaea;
-            display: flex;
-            height: 48px;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .nav-item {
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-width: 80px;
-            padding: 0 16px;
-            border: none;
-            background: none;
             cursor: pointer;
-            font-size: 13px;
-            color: #666;
-            border-bottom: 2px solid transparent;
+            font-size: 16px;
             transition: all 0.15s ease;
-            white-space: nowrap;
         }
 
-        .nav-item.active {
-            color: #000;
-            border-bottom-color: #000;
-        }
-
-        .nav-item:hover:not(.active) {
-            color: #000;
+        .header-btn:active {
             background: #f5f5f5;
+            transform: scale(0.95);
         }
 
-        /* Main Container */
+        .header-btn.active {
+            background: #000;
+            color: #fff;
+            border-color: #000;
+        }
+
+        /* Main Layout */
+        .app-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
         .main-container {
-            display: flex;
-            flex-direction: column;
-            height: calc(100vh - 104px);
-            overflow: hidden;
-        }
-
-        /* Views */
-        .view {
-            display: none;
             flex: 1;
+            display: flex;
+            margin-top: 56px;
             overflow: hidden;
         }
 
-        .view.active {
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 56px;
+            left: 0;
+            width: 100%;
+            height: calc(100vh - 56px);
+            background: #fff;
+            z-index: 900;
+            transform: translateX(-100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
         }
 
-        /* Files View */
-        .files-view {
-            background: #fff;
+        .sidebar.open {
+            transform: translateX(0);
         }
 
-        .files-header {
+        .sidebar-overlay {
+            position: fixed;
+            top: 56px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 800;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .sidebar-header {
+            padding: 20px 16px 16px;
+            border-bottom: 1px solid #eaeaea;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 16px;
-            border-bottom: 1px solid #eaeaea;
         }
 
-        .files-title {
-            font-size: 16px;
+        .sidebar-title {
+            font-size: 18px;
             font-weight: 600;
             color: #000;
         }
 
-        .files-actions {
+        .sidebar-actions {
             display: flex;
             gap: 8px;
+        }
+
+        .sidebar-btn {
+            width: 36px;
+            height: 36px;
+            border: 1px solid #eaeaea;
+            background: #fff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.15s ease;
+        }
+
+        .sidebar-btn:active {
+            background: #f5f5f5;
+            transform: scale(0.95);
         }
 
         .file-tree {
             flex: 1;
             overflow-y: auto;
             padding: 8px 0;
-            -webkit-overflow-scrolling: touch;
         }
 
         .file-item {
             display: flex;
             align-items: center;
-            padding: 12px 16px;
+            padding: 16px 20px;
             cursor: pointer;
-            font-size: 15px;
+            font-size: 16px;
             border: none;
             background: none;
             width: 100%;
             text-align: left;
-            transition: background 0.15s ease;
             gap: 12px;
-            min-height: 48px;
+            transition: background 0.15s ease;
+            min-height: 52px;
         }
 
         .file-item:active {
-            background: #f0f0f0;
+            background: #f5f5f5;
         }
 
         .file-item.active {
@@ -207,14 +263,13 @@
         }
 
         .file-icon {
-            width: 20px;
-            height: 20px;
+            font-size: 20px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             flex-shrink: 0;
-            font-size: 16px;
-        }
-
-        .folder-item {
-            font-weight: 500;
         }
 
         .folder-item .file-icon::before {
@@ -225,38 +280,81 @@
             content: "📄";
         }
 
-        /* Editor View */
-        .editor-view {
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        /* Mobile Tabs */
+        .mobile-tabs {
             background: #fff;
-        }
-
-        .editor-toolbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
             border-bottom: 1px solid #eaeaea;
-            background: #fafafa;
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
         }
 
-        .editor-back {
+        .mobile-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tabs-wrapper {
+            display: inline-flex;
+            min-width: 100%;
+        }
+
+        .mobile-tab {
+            display: inline-flex;
+            align-items: center;
+            padding: 16px 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+            border-bottom: 2px solid transparent;
+            transition: all 0.15s ease;
+            gap: 8px;
+            white-space: nowrap;
+            min-width: 120px;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .mobile-tab.active {
+            color: #000;
+            border-bottom-color: #000;
+        }
+
+        .mobile-tab:active {
+            background: #f5f5f5;
+        }
+
+        .tab-close {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(0, 0, 0, 0.1);
+            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 8px;
-            background: none;
-            border: none;
-            font-size: 15px;
-            color: #000;
-            cursor: pointer;
-            padding: 8px 0;
+            justify-content: center;
+            font-size: 16px;
+            margin-left: auto;
         }
 
-        .editor-actions {
-            display: flex;
-            gap: 8px;
+        .tab-close:active {
+            background: rgba(0, 0, 0, 0.2);
         }
 
-        .editor-container {
+        /* Mobile Editor */
+        .mobile-editor-container {
             flex: 1;
             overflow: hidden;
             position: relative;
@@ -281,24 +379,124 @@
 
         .CodeMirror-linenumber {
             color: #999;
-            padding: 0 8px;
+            padding: 0 6px;
+            font-size: 12px;
         }
 
-        .CodeMirror-scroll {
-            padding-bottom: 20px;
+        .CodeMirror-cursor {
+            border-left: 2px solid #000 !important;
         }
 
-        /* Console View */
-        .console-view {
+        /* Mobile Status Bar */
+        .mobile-status-bar {
+            height: 48px;
             background: #fff;
+            border-top: 1px solid #eaeaea;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .status-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .save-btn {
+            padding: 8px 16px;
+            border: 1px solid #eaeaea;
+            border-radius: 8px;
+            background: #fff;
+            color: #000;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .save-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .save-btn:not(:disabled):active {
+            background: #f5f5f5;
+            transform: scale(0.95);
+        }
+
+        .save-btn.primary {
+            background: #000;
+            color: #fff;
+            border-color: #000;
+        }
+
+        /* Empty State */
+        .mobile-empty-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .empty-icon {
+            width: 64px;
+            height: 64px;
+            background: #f5f5f5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        .mobile-empty-state h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #000;
+        }
+
+        .mobile-empty-state p {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        /* Mobile Console */
+        .mobile-console {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 50vh;
+            background: #fff;
+            border-top: 1px solid #eaeaea;
+            z-index: 700;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mobile-console.open {
+            transform: translateY(0);
         }
 
         .console-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 16px;
+            padding: 16px 16px 12px;
             border-bottom: 1px solid #eaeaea;
+            background: #fafafa;
         }
 
         .console-title {
@@ -311,12 +509,49 @@
             gap: 8px;
         }
 
+        .console-btn {
+            padding: 8px 12px;
+            border: 1px solid #eaeaea;
+            border-radius: 6px;
+            background: #fff;
+            color: #000;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .console-btn:active {
+            background: #f5f5f5;
+            transform: scale(0.95);
+        }
+
+        .console-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-size: 18px;
+        }
+
+        .console-close:active {
+            background: #f5f5f5;
+        }
+
         .console-output {
             flex: 1;
             padding: 16px;
             overflow-y: auto;
             font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
-            font-size: 13px;
+            font-size: 12px;
             line-height: 1.4;
             background: #fafafa;
             -webkit-overflow-scrolling: touch;
@@ -327,280 +562,16 @@
             word-wrap: break-word;
         }
 
-        /* Settings View */
-        .settings-view {
-            background: #fff;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .settings-header {
-            padding: 16px;
-            border-bottom: 1px solid #eaeaea;
-        }
-
-        .settings-title {
-            font-size: 16px;
-            font-weight: 600;
-        }
-
-        .settings-content {
-            padding: 16px;
-        }
-
-        .setting-group {
-            margin-bottom: 24px;
-        }
-
-        .setting-group h3 {
-            font-size: 15px;
-            font-weight: 600;
-            margin-bottom: 12px;
-            color: #000;
-        }
-
-        .setting-item {
-            margin-bottom: 16px;
-        }
-
-        .package-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px;
-            background: #f5f5f5;
-            border-radius: 8px;
-            margin-bottom: 8px;
-        }
-
-        .package-name {
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        /* Empty State */
-        .empty-state {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 40px 20px;
-        }
-
-        .empty-state-icon {
-            width: 48px;
-            height: 48px;
-            background: #f5f5f5;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 16px;
-            font-size: 20px;
-        }
-
-        .empty-state h3 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #000;
-        }
-
-        .empty-state p {
-            color: #666;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        /* Buttons */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 10px 16px;
-            border: 1px solid #eaeaea;
-            border-radius: 6px;
-            background: #fff;
-            color: #000;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.15s ease;
-            gap: 8px;
+        /* Touch optimizations */
+        .touch-target {
             min-height: 44px;
+            min-width: 44px;
         }
 
-        .btn:active {
-            background: #f0f0f0;
-            transform: scale(0.98);
-        }
-
-        .btn-primary {
-            background: #000;
-            color: #fff;
-            border-color: #000;
-        }
-
-        .btn-primary:active {
-            background: #333;
-        }
-
-        .btn-sm {
-            padding: 8px 12px;
-            font-size: 13px;
-            min-height: 36px;
-        }
-
-        .icon-button {
-            width: 40px;
-            height: 40px;
-            border: none;
-            background: none;
-            cursor: pointer;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.15s ease;
-            font-size: 16px;
-        }
-
-        .icon-button:active {
-            background: #f0f0f0;
-        }
-
-        /* Input Styles */
-        .input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #eaeaea;
-            border-radius: 6px;
-            font-size: 15px;
-            background: #fff;
-            transition: border-color 0.15s ease;
-        }
-
-        .input:focus {
-            outline: none;
-            border-color: #000;
-        }
-
-        /* Status Bar */
-        .status-bar {
-            height: 44px;
-            background: #fff;
-            border-top: 1px solid #eaeaea;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 16px;
-            font-size: 12px;
-            color: #666;
-            position: sticky;
-            bottom: 0;
-        }
-
-        .status-left, .status-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        /* Floating Action Button */
-        .fab {
-            position: fixed;
-            right: 16px;
-            bottom: 80px;
-            width: 56px;
-            height: 56px;
-            background: #000;
-            color: #fff;
-            border: none;
-            border-radius: 50%;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            z-index: 50;
-            transition: all 0.2s ease;
-        }
-
-        .fab:active {
-            transform: scale(0.9);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .fab.hidden {
-            transform: scale(0);
-            opacity: 0;
-        }
-
-        /* Pull to Refresh */
-        .pull-refresh {
-            position: absolute;
-            top: -60px;
-            left: 0;
-            right: 0;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #fff;
-            border-bottom: 1px solid #eaeaea;
-            transition: transform 0.2s ease;
-            z-index: 10;
-        }
-
-        .pull-refresh.visible {
-            transform: translateY(60px);
-        }
-
-        .pull-refresh-text {
-            font-size: 14px;
-            color: #666;
-        }
-
-        /* Animations */
-        @keyframes slideInRight {
-            from { transform: translateX(100%); }
-            to { transform: translateX(0); }
-        }
-
-        @keyframes slideOutRight {
-            from { transform: translateX(0); }
-            to { transform: translateX(100%); }
-        }
-
-        .slide-in-right {
-            animation: slideInRight 0.3s ease-out;
-        }
-
-        .slide-out-right {
-            animation: slideOutRight 0.3s ease-out;
-        }
-
-        /* Custom Icons */
-        .icon-folder::before { content: "📁"; }
-        .icon-file::before { content: "📄"; }
-        .icon-plus::before { content: "+"; }
-        .icon-back::before { content: "←"; }
-        .icon-save::before { content: "💾"; }
-        .icon-play::before { content: "▶"; }
-        .icon-stop::before { content: "⏹"; }
-        .icon-settings::before { content: "⚙"; }
-        .icon-terminal::before { content: "⌨"; }
-        .icon-refresh::before { content: "⟳"; }
-        .icon-close::before { content: "×"; }
-
-        /* Scrollbars */
+        /* Scrollbars for mobile */
         ::-webkit-scrollbar {
-            width: 4px;
-            height: 4px;
+            width: 2px;
+            height: 2px;
         }
 
         ::-webkit-scrollbar-track {
@@ -609,184 +580,205 @@
 
         ::-webkit-scrollbar-thumb {
             background: #ccc;
-            border-radius: 2px;
+            border-radius: 1px;
         }
 
-        /* Safe Area for iPhone */
-        @supports (padding: max(0px)) {
-            .header {
-                padding-left: max(16px, env(safe-area-inset-left));
-                padding-right: max(16px, env(safe-area-inset-right));
-            }
-            
-            .status-bar {
-                padding-bottom: env(safe-area-inset-bottom);
-                padding-left: max(16px, env(safe-area-inset-left));
-                padding-right: max(16px, env(safe-area-inset-right));
-            }
-            
-            .fab {
-                right: max(16px, env(safe-area-inset-right));
-                bottom: max(80px, calc(80px + env(safe-area-inset-bottom)));
-            }
-        }
+        /* Custom Icons */
+        .icon-menu::before { content: "☰"; }
+        .icon-save::before { content: "💾"; }
+        .icon-terminal::before { content: "⌨"; }
+        .icon-plus::before { content: "+"; }
+        .icon-folder::before { content: "📁"; }
+        .icon-close::before { content: "×"; }
+        .icon-play::before { content: "▶"; }
+        .icon-stop::before { content: "⏹"; }
+        .icon-file::before { content: "📄"; }
 
-        /* Dark mode support */
-        @media (prefers-color-scheme: dark) {
-            body { background: #000; color: #fff; }
-            .header, .mobile-nav, .files-view, .editor-view, .console-view, .settings-view { background: #111; }
-            .editor-toolbar, .console-output { background: #000; }
-            .file-item.active { background: #fff; color: #000; }
-            .package-item, .empty-state-icon { background: #222; }
-            .input { background: #111; color: #fff; }
-            .btn { background: #111; color: #fff; border-color: #333; }
-            .btn-primary { background: #fff; color: #000; }
-        }
-
-        /* Landscape optimization */
+        /* Landscape orientation adjustments */
         @media (orientation: landscape) and (max-height: 500px) {
-            .header { height: 48px; }
-            .mobile-nav { height: 40px; }
-            .main-container { height: calc(100vh - 88px); }
-            .status-bar { height: 36px; }
+            .header {
+                height: 48px;
+            }
+            
+            .main-container {
+                margin-top: 48px;
+            }
+            
+            .sidebar {
+                top: 48px;
+                height: calc(100vh - 48px);
+            }
+            
+            .sidebar-overlay {
+                top: 48px;
+            }
+            
+            .mobile-console {
+                height: 60vh;
+            }
+            
+            .file-item {
+                padding: 12px 20px;
+                min-height: 44px;
+            }
+            
+            .mobile-tab {
+                padding: 12px 16px;
+            }
+        }
+
+        /* Large mobile devices */
+        @media (min-width: 414px) {
+            .CodeMirror {
+                font-size: 15px;
+            }
+            
+            .file-item {
+                font-size: 17px;
+            }
+            
+            .mobile-tab {
+                font-size: 15px;
+            }
+        }
+
+        /* Tablet portrait */
+        @media (min-width: 768px) and (orientation: portrait) {
+            .sidebar {
+                width: 320px;
+                transform: translateX(-320px);
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .content-area {
+                margin-left: 0;
+            }
+            
+            .mobile-console {
+                height: 40vh;
+            }
+        }
+
+        /* Prevent zoom on input focus */
+        input, textarea, select {
+            font-size: 16px;
+        }
+
+        /* iOS safe area support */
+        @supports (padding: max(0px)) {
+            .app-container {
+                padding-bottom: max(0px, env(safe-area-inset-bottom));
+            }
+            
+            .mobile-console {
+                padding-bottom: max(0px, env(safe-area-inset-bottom));
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-left">
-            <a href="#" class="logo">
-                <div class="logo-icon">E</div>
-                Editor
-            </a>
-            <div class="current-file" id="current-file">Select a file</div>
-        </div>
-        <div class="header-right">
-            <img src="{{ user.avatar_url or '/static/img/default_avatar.png' }}" alt="User" class="user-avatar">
-        </div>
-    </header>
-
-    <!-- Mobile Navigation -->
-    <nav class="mobile-nav">
-        <button class="nav-item active" data-view="files">Files</button>
-        <button class="nav-item" data-view="editor">Editor</button>
-        <button class="nav-item" data-view="console">Console</button>
-        <button class="nav-item" data-view="settings">Settings</button>
-    </nav>
-
-    <!-- Main Container -->
-    <div class="main-container">
-        <!-- Files View -->
-        <div class="view files-view active" id="files-view">
-            <div class="files-header">
-                <span class="files-title">Project Files</span>
-                <div class="files-actions">
-                    <button class="icon-button" id="new-file-btn" title="New File">
-                        <span class="icon-plus"></span>
-                    </button>
-                </div>
-            </div>
-            <div class="file-tree" id="file-tree">
-                <!-- Files will be populated here -->
-            </div>
-        </div>
-
-        <!-- Editor View -->
-        <div class="view editor-view" id="editor-view">
-            <div class="editor-toolbar">
-                <button class="editor-back" id="editor-back">
-                    <span class="icon-back"></span>
-                    Back
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <button class="mobile-menu-btn touch-target" id="mobile-menu-btn">
+                    <span class="icon-menu"></span>
                 </button>
-                <div class="editor-actions">
-                    <button class="btn btn-sm btn-primary" id="save-btn" disabled>
-                        <span class="icon-save"></span>
-                        Save
-                    </button>
-                </div>
+                <a href="#" class="logo">
+                    <div class="logo-icon">E</div>
+                    <span class="current-file" id="current-file">Select a file</span>
+                </a>
             </div>
-            <div class="editor-container" id="editor-container">
-                <div class="empty-state" id="empty-state">
-                    <div class="empty-state-icon">
-                        <span class="icon-file"></span>
+            <div class="header-right">
+                <button class="header-btn touch-target" id="save-btn-header" disabled>
+                    <span class="icon-save"></span>
+                </button>
+                <button class="header-btn touch-target" id="console-toggle">
+                    <span class="icon-terminal"></span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+        <!-- Main Container -->
+        <div class="main-container">
+            <!-- Sidebar -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <span class="sidebar-title">Files</span>
+                    <div class="sidebar-actions">
+                        <button class="sidebar-btn touch-target" id="new-file-btn" title="New File">
+                            <span class="icon-plus"></span>
+                        </button>
+                        <button class="sidebar-btn touch-target" id="new-folder-btn" title="New Folder">
+                            <span class="icon-folder"></span>
+                        </button>
                     </div>
-                    <h3>No file selected</h3>
-                    <p>Select a file to start editing</p>
                 </div>
-            </div>
+                <div class="file-tree" id="file-tree">
+                    <!-- Files will be populated here -->
+                </div>
+            </aside>
+
+            <!-- Content Area -->
+            <main class="content-area">
+                <!-- Mobile Tabs -->
+                <div class="mobile-tabs" id="mobile-tabs" style="display: none;">
+                    <div class="tabs-wrapper" id="tabs-wrapper">
+                        <!-- Tabs will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Editor -->
+                <div class="mobile-editor-container" id="editor-container">
+                    <div class="mobile-empty-state" id="empty-state">
+                        <div class="empty-icon">
+                            <span class="icon-file"></span>
+                        </div>
+                        <h3>No file selected</h3>
+                        <p>Tap the menu button and select a file to start editing</p>
+                    </div>
+                </div>
+
+                <!-- Mobile Status Bar -->
+                <div class="mobile-status-bar">
+                    <div class="status-left">
+                        <span id="cursor-position">Ln 1, Col 1</span>
+                        <span id="bot-status">{{ bot.status }}</span>
+                    </div>
+                    <button class="save-btn touch-target" id="save-btn" disabled>Save</button>
+                </div>
+            </main>
         </div>
 
-        <!-- Console View -->
-        <div class="view console-view" id="console-view">
+        <!-- Mobile Console -->
+        <div class="mobile-console" id="mobile-console">
             <div class="console-header">
                 <span class="console-title">Console</span>
                 <div class="console-actions">
-                    <button class="btn btn-sm" id="start-bot-btn">
+                    <button class="console-btn touch-target" id="start-bot-btn">
                         <span class="icon-play"></span>
                         Start
                     </button>
-                    <button class="btn btn-sm" id="stop-bot-btn">
+                    <button class="console-btn touch-target" id="stop-bot-btn">
                         <span class="icon-stop"></span>
                         Stop
+                    </button>
+                    <button class="console-close touch-target" id="console-close">
+                        <span class="icon-close"></span>
                     </button>
                 </div>
             </div>
             <div class="console-output" id="console-output">
-                <div class="console-line">Welcome to the console...</div>
-            </div>
-        </div>
-
-        <!-- Settings View -->
-        <div class="view settings-view" id="settings-view">
-            <div class="settings-header">
-                <span class="settings-title">Settings</span>
-            </div>
-            <div class="settings-content">
-                <div class="setting-group">
-                    <h3>Startup Command</h3>
-                    <div class="setting-item">
-                        <input type="text" class="input" id="startup-command-input" 
-                               value="{{ bot.startup_command }}" placeholder="python main.py">
-                    </div>
-                    <button class="btn" id="save-startup-command">Save Command</button>
-                </div>
-
-                <div class="setting-group">
-                    <h3>Package Management</h3>
-                    <div class="setting-item">
-                        <input type="text" class="input" id="package-name-input" 
-                               placeholder="e.g., requests">
-                    </div>
-                    <button class="btn" id="install-package-btn">Install Package</button>
-                    
-                    <div id="package-list">
-                        {% for pkg in bot.packages %}
-                        <div class="package-item">
-                            <span class="package-name">{{ pkg }}</span>
-                            <button class="btn btn-sm" data-package="{{ pkg }}">Remove</button>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
+                <div class="console-line">Welcome to the mobile console...</div>
             </div>
         </div>
     </div>
-
-    <!-- Status Bar -->
-    <div class="status-bar">
-        <div class="status-left">
-            <span id="cursor-position">Ln 1, Col 1</span>
-        </div>
-        <div class="status-right">
-            <span id="bot-status">{{ bot.status }}</span>
-        </div>
-    </div>
-
-    <!-- Floating Action Button -->
-    <button class="fab hidden" id="fab">
-        <span class="icon-plus"></span>
-    </button>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -794,54 +786,138 @@
             const botId = "{{ bot._id }}";
             
             // Elements
-            const navItems = document.querySelectorAll('.nav-item');
-            const views = document.querySelectorAll('.view');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
             const fileTree = document.getElementById('file-tree');
+            const mobileTabs = document.getElementById('mobile-tabs');
+            const tabsWrapper = document.getElementById('tabs-wrapper');
             const editorContainer = document.getElementById('editor-container');
             const emptyState = document.getElementById('empty-state');
+            const mobileConsole = document.getElementById('mobile-console');
+            const consoleToggle = document.getElementById('console-toggle');
+            const consoleClose = document.getElementById('console-close');
+            const consoleOutput = document.getElementById('console-output');
             const currentFileSpan = document.getElementById('current-file');
             const saveBtn = document.getElementById('save-btn');
+            const saveBtnHeader = document.getElementById('save-btn-header');
             const cursorPosition = document.getElementById('cursor-position');
             const botStatus = document.getElementById('bot-status');
-            const consoleOutput = document.getElementById('console-output');
-            const fab = document.getElementById('fab');
 
+            let openTabs = new Map();
+            let activeTab = null;
             let editor = null;
-            let currentFile = null;
-            let fileContent = '';
-            let isModified = false;
 
-            // Navigation
-            navItems.forEach(item => {
-                item.addEventListener('click', () => {
-                    const viewName = item.dataset.view;
-                    switchView(viewName);
-                });
+            // Mobile menu toggle
+            mobileMenuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleSidebar();
             });
 
-            function switchView(viewName) {
-                navItems.forEach(item => {
-                    item.classList.toggle('active', item.dataset.view === viewName);
-                });
-                
-                views.forEach(view => {
-                    view.classList.toggle('active', view.id === `${viewName}-view`);
-                });
+            sidebarOverlay.addEventListener('click', closeSidebar);
 
-                // Show/hide FAB based on view
-                if (viewName === 'files') {
-                    fab.classList.remove('hidden');
+            function toggleSidebar() {
+                const isOpen = sidebar.classList.contains('open');
+                if (isOpen) {
+                    closeSidebar();
                 } else {
-                    fab.classList.add('hidden');
+                    openSidebar();
                 }
             }
 
-            // File tree
+            function openSidebar() {
+                sidebar.classList.add('open');
+                sidebarOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeSidebar() {
+                sidebar.classList.remove('open');
+                sidebarOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            // Console toggle
+            consoleToggle.addEventListener('click', () => {
+                const isOpen = mobileConsole.classList.contains('open');
+                if (isOpen) {
+                    mobileConsole.classList.remove('open');
+                    consoleToggle.classList.remove('active');
+                } else {
+                    mobileConsole.classList.add('open');
+                    consoleToggle.classList.add('active');
+                }
+            });
+
+            consoleClose.addEventListener('click', () => {
+                mobileConsole.classList.remove('open');
+                consoleToggle.classList.remove('active');
+            });
+
+            // Initialize CodeMirror for mobile
+            function initEditor() {
+                if (editor) return;
+                
+                const wrapper = document.createElement('div');
+                wrapper.className = 'editor-wrapper';
+                editorContainer.appendChild(wrapper);
+                
+                editor = CodeMirror(wrapper, {
+                    mode: 'python',
+                    theme: 'github',
+                    lineNumbers: true,
+                    autofocus: false,
+                    lineWrapping: true,
+                    indentUnit: 4,
+                    smartIndent: true,
+                    matchBrackets: true,
+                    autoCloseBrackets: true,
+                    viewportMargin: Infinity,
+                    extraKeys: {
+                        "Ctrl-S": function() { saveFile(); },
+                        "Cmd-S": function() { saveFile(); }
+                    }
+                });
+
+                // Mobile-specific CodeMirror settings
+                editor.setOption("scrollbarStyle", "null");
+                
+                editor.on('cursorActivity', () => {
+                    const cursor = editor.getCursor();
+                    cursorPosition.textContent = `Ln ${cursor.line + 1}, Col ${cursor.ch + 1}`;
+                });
+
+                editor.on('change', () => {
+                    if (activeTab) {
+                        const tab = openTabs.get(activeTab);
+                        if (tab && !tab.modified) {
+                            tab.modified = true;
+                            updateTabTitle(activeTab);
+                        }
+                        saveBtn.disabled = false;
+                        saveBtnHeader.disabled = false;
+                        saveBtn.classList.add('primary');
+                    }
+                });
+
+                // Prevent zoom on focus for iOS
+                editor.on('focus', () => {
+                    const viewport = document.querySelector('meta[name=viewport]');
+                    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
+                });
+
+                editor.on('blur', () => {
+                    const viewport = document.querySelector('meta[name=viewport]');
+                    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=no');
+                });
+            }
+
+            // File tree rendering
             function renderFileTree(tree, container = fileTree, pathPrefix = '') {
                 Object.entries(tree).forEach(([name, content]) => {
                     const fullPath = pathPrefix ? `${pathPrefix}/${name}` : name;
                     const item = document.createElement('button');
-                    item.className = 'file-item';
+                    item.className = 'file-item touch-target';
                     item.dataset.path = fullPath;
 
                     const icon = document.createElement('span');
@@ -867,67 +943,240 @@
             // File operations
             async function openFile(path) {
                 try {
-                    const response = await fetch(`/api/server/${serverIndex}/file?path=${path}`);
-                    const data = await response.json();
-                    
-                    if (data.content !== undefined) {
-                        currentFile = path;
-                        fileContent = data.content;
-                        isModified = false;
+                    if (!openTabs.has(path)) {
+                        const response = await fetch(`/api/server/${serverIndex}/file?path=${path}`);
+                        const data = await response.json();
                         
-                        // Update UI
-                        document.querySelectorAll('.file-item').forEach(item => {
-                            item.classList.toggle('active', item.dataset.path === path);
-                        });
-                        
-                        currentFileSpan.textContent = path.split('/').pop();
-                        
-                        // Initialize or update editor
-                        if (!editor) {
-                            initEditor();
+                        if (data.content !== undefined) {
+                            openTabs.set(path, {
+                                content: data.content,
+                                modified: false,
+                                path: path
+                            });
+                            createMobileTab(path);
                         }
-                        
-                        editor.setValue(fileContent);
-                        editor.refresh();
-                        
-                        // Switch to editor view
-                        switchView('editor');
-                        saveBtn.disabled = true;
                     }
+                    switchToTab(path);
+                    closeSidebar();
                 } catch (error) {
                     console.error('Error opening file:', error);
                 }
             }
 
-            function initEditor() {
-                if (editor) return;
+            function createMobileTab(path) {
+                const tab = document.createElement('button');
+                tab.className = 'mobile-tab touch-target';
+                tab.dataset.path = path;
                 
-                emptyState.style.display = 'none';
+                const fileName = path.split('/').pop();
+                const label = document.createElement('span');
+                label.textContent = fileName;
                 
-                const wrapper = document.createElement('div');
-                wrapper.className = 'editor-wrapper';
-                editorContainer.appendChild(wrapper);
-                
-                editor = CodeMirror(wrapper, {
-                    mode: 'python',
-                    theme: 'github',
-                    lineNumbers: true,
-                    autofocus: true,
-                    lineWrapping: true,
-                    indentUnit: 4,
-                    smartIndent: true,
-                    matchBrackets: true,
-                    autoCloseBrackets: true,
-                    viewportMargin: 10
+                const closeBtn = document.createElement('button');
+                closeBtn.className = 'tab-close touch-target';
+                closeBtn.innerHTML = '<span class="icon-close"></span>';
+                closeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    closeTab(path);
                 });
 
-                editor.on('cursorActivity', () => {
-                    const cursor = editor.getCursor();
-                    cursorPosition.textContent = `Ln ${cursor.line + 1}, Col ${cursor.ch + 1}`;
+                tab.appendChild(label);
+                tab.appendChild(closeBtn);
+                tab.addEventListener('click', () => switchToTab(path));
+
+                tabsWrapper.appendChild(tab);
+                
+                // Show tabs container if hidden
+                if (mobileTabs.style.display === 'none') {
+                    mobileTabs.style.display = 'block';
+                }
+            }
+
+            function switchToTab(path) {
+                // Update active tab
+                document.querySelectorAll('.mobile-tab').forEach(tab => {
+                    tab.classList.toggle('active', tab.dataset.path === path);
                 });
 
-                editor.on('change', () => {
-                    if (!isModified) {
-                        isModified = true;
-                        saveBtn.disabled = false;
-                        currentFileSpan.
+                document.querySelectorAll('.file-item').forEach(item => {
+                    item.classList.toggle('active', item.dataset.path === path);
+                });
+
+                activeTab = path;
+                const tabData = openTabs.get(path);
+                
+                if (tabData) {
+                    if (!editor) {
+                        emptyState.style.display = 'none';
+                        initEditor();
+                    }
+                    
+                    editor.setValue(tabData.content);
+                    setTimeout(() => editor.refresh(), 100);
+                    currentFileSpan.textContent = path.split('/').pop();
+                    saveBtn.disabled = !tabData.modified;
+                    saveBtnHeader.disabled = !tabData.modified;
+                    
+                    if (!tabData.modified) {
+                        saveBtn.classList.remove('primary');
+                    }
+                }
+            }
+
+            function closeTab(path) {
+                const tab = document.querySelector(`.mobile-tab[data-path="${path}"]`);
+                if (tab) tab.remove();
+                
+                openTabs.delete(path);
+                
+                if (activeTab === path) {
+                    const remainingTabs = document.querySelectorAll('.mobile-tab');
+                    if (remainingTabs.length > 0) {
+                        switchToTab(remainingTabs[0].dataset.path);
+                    } else {
+                        activeTab = null;
+                        currentFileSpan.textContent = 'Select a file';
+                        if (editor) {
+                            editorContainer.removeChild(editorContainer.querySelector('.editor-wrapper'));
+                            editor = null;
+                            emptyState.style.display = 'flex';
+                        }
+                        saveBtn.disabled = true;
+                        saveBtnHeader.disabled = true;
+                        saveBtn.classList.remove('primary');
+                        mobileTabs.style.display = 'none';
+                    }
+                }
+            }
+
+            function updateTabTitle(path) {
+                const tab = document.querySelector(`.mobile-tab[data-path="${path}"]`);
+                const tabData = openTabs.get(path);
+                if (tab && tabData) {
+                    const label = tab.querySelector('span');
+                    const fileName = path.split('/').pop();
+                    label.textContent = tabData.modified ? `${fileName} •` : fileName;
+                }
+            }
+
+            // Save file
+            async function saveFile() {
+                if (!activeTab || !editor) return;
+                
+                try {
+                    await fetch(`/api/server/${serverIndex}/file?path=${activeTab}`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ content: editor.getValue() })
+                    });
+                    
+                    const tabData = openTabs.get(activeTab);
+                    if (tabData) {
+                        tabData.modified = false;
+                        tabData.content = editor.getValue();
+                        updateTabTitle(activeTab);
+                        saveBtn.disabled = true;
+                        saveBtnHeader.disabled = true;
+                        saveBtn.classList.remove('primary');
+                    }
+                } catch (error) {
+                    console.error('Error saving file:', error);
+                }
+            }
+
+            saveBtn.addEventListener('click', saveFile);
+            saveBtnHeader.addEventListener('click', saveFile);
+
+            // New file/folder
+            document.getElementById('new-file-btn').addEventListener('click', async () => {
+                const path = prompt("Enter new file path (e.g., main.py):");
+                if (path) {
+                    await fetch(`/api/server/${serverIndex}/files/create`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ path: path, type: 'file' })
+                    });
+                    location.reload();
+                }
+            });
+
+            document.getElementById('new-folder-btn').addEventListener('click', async () => {
+                const path = prompt("Enter new folder path:");
+                if (path) {
+                    await fetch(`/api/server/${serverIndex}/files/create`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ path: path, type: 'folder' })
+                    });
+                    location.reload();
+                }
+            });
+
+            // Bot controls
+            document.getElementById('start-bot-btn').addEventListener('click', async () => {
+                await fetch(`/api/server/${serverIndex}/start`, { method: 'POST' });
+                botStatus.textContent = 'online';
+            });
+
+            document.getElementById('stop-bot-btn').addEventListener('click', async () => {
+                await fetch(`/api/server/${serverIndex}/stop`, { method: 'POST' });
+                botStatus.textContent = 'offline';
+            });
+
+            // Socket.IO for console
+            const socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + '/editor');
+
+            socket.on('connect', () => {
+                socket.emit('join', { bot_id: botId });
+            });
+
+            socket.on('log', (msg) => {
+                const line = document.createElement('div');
+                line.className = 'console-line';
+                line.textContent = msg.data;
+                consoleOutput.appendChild(line);
+                consoleOutput.scrollTop = consoleOutput.scrollHeight;
+            });
+
+            // Touch gestures
+            let touchStartX = 0;
+            let touchStartY = 0;
+
+            document.addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            });
+
+            document.addEventListener('touchmove', (e) => {
+                if (!touchStartX || !touchStartY) return;
+
+                const touchEndX = e.touches[0].clientX;
+                const touchEndY = e.touches[0].clientY;
+                const deltaX = touchStartX - touchEndX;
+                const deltaY = touchStartY - touchEndY;
+
+                // Swipe right to open sidebar (from left edge)
+                if (touchStartX < 20 && deltaX < -100 && Math.abs(deltaY) < 50) {
+                    openSidebar();
+                }
+                
+                // Swipe left to close sidebar
+                if (sidebar.classList.contains('open') && deltaX > 100 && Math.abs(deltaY) < 50) {
+                    closeSidebar();
+                }
+            });
+
+            // Prevent iOS bounce scroll
+            document.addEventListener('touchmove', (e) => {
+                if (e.target.closest('.console-output') || e.target.closest('.file-tree') || e.target.closest('.CodeMirror-scroll')) {
+                    return;
+                }
+                e.preventDefault();
+            }, { passive: false });
+
+            // Initialize
+            renderFileTree({{ bot.files_tree | tojson }});
+        });
+    </script>
+</body>
+</html>
