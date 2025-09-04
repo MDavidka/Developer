@@ -195,209 +195,7 @@ def dashboard():
         if not os.path.exists(bot_dir):
             os.makedirs(bot_dir)
 
-            # Create .env file
-            with open(os.path.join(bot_dir, ".env"), "w") as f:
-                f.write(f"BOT_TOKEN={server.get('botToken', '')}")
-
-            # Auto-generate ENHANCED main.py with better error handling
-            main_py_content = f"""import os
-import sys
-import traceback
-from dotenv import load_dotenv
-import discord
-from discord.ext import commands
-import asyncio
-import logging
-
-# Setup logging for better debugging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(sys.stdout)
-    ]
-)
-logger = logging.getLogger(__name__)
-
-print("🚀 Starting Discord Bot...")
-print(f"Python version: {{sys.version}}")
-
-# Load environment variables
-load_dotenv()
-print("✅ Environment loaded")
-
-# Validate token
-token = os.getenv('BOT_TOKEN')
-if not token:
-    print("❌ ERROR: BOT_TOKEN not found in .env file")
-    print("Please check your .env file contains: BOT_TOKEN=your_bot_token_here")
-    sys.exit(1)
-
-if len(token.strip()) < 50:  # Discord tokens are typically 59+ characters
-    print("❌ ERROR: BOT_TOKEN appears to be invalid (too short)")
-    print(f"Token length: {{len(token.strip())}} characters")
-    sys.exit(1)
-
-print(f"✅ Token loaded: {{token[:10]}}...{{token[-4:]}}")
-
-# Test network connectivity
-try:
-    import requests
-    print("🌐 Testing Discord API connectivity...")
-    response = requests.get("https://discord.com/api/v10/gateway", timeout=10)
-    if response.status_code == 200:
-        print("✅ Discord API is reachable")
-    else:
-        print(f"⚠️ Discord API returned status: {{response.status_code}}")
-except Exception as e:
-    print(f"❌ Network connectivity test failed: {{e}}")
-
-# Setup Discord intents
-intents = discord.Intents.default()
-intents.message_content = True
-intents.guilds = True
-
-print("✅ Discord intents configured")
-
-# Create bot instance
-try:
-    bot = commands.Bot(
-        command_prefix='$', 
-        intents=intents,
-        help_command=None  # Disable default help command
-    )
-    print("✅ Bot instance created successfully")
-except Exception as e:
-    print(f"❌ Failed to create bot instance: {{e}}")
-    traceback.print_exc()
-    sys.exit(1)
-
-@bot.event
-async def on_ready():
-    print("=" * 50)
-    print("🎉 DISCORD BOT IS NOW ONLINE!")
-    print(f"Bot Name: {{bot.user.name}}")
-    print(f"Bot ID: {{bot.user.id}}")
-    print(f"Discord.py Version: {{discord.__version__}}")
-    print(f"Connected to {{len(bot.guilds)}} server(s)")
-    print("=" * 50)
-    
-    # List all servers the bot is in
-    if bot.guilds:
-        print("📋 Connected servers:")
-        for guild in bot.guilds:
-            print(f"  - {{guild.name}} ({{guild.id}}) - {{guild.member_count}} members")
-    else:
-        print("⚠️ Bot is not connected to any servers!")
-        print("Please invite your bot to a server using the Discord Developer Portal")
-    
-    print("✅ Bot is ready to receive commands!")
-
-@bot.event
-async def on_connect():
-    print("🔗 Bot connected to Discord WebSocket")
-
-@bot.event
-async def on_disconnect():
-    print("🔌 Bot disconnected from Discord WebSocket")
-
-@bot.event
-async def on_resumed():
-    print("🔄 Bot connection resumed")
-
-@bot.event
-async def on_error(event, *args, **kwargs):
-    print(f"❌ Error in event '{{event}}':")
-    traceback.print_exc()
-
-@bot.event
-async def on_command_error(ctx, error):
-    if isinstance(error, commands.CommandNotFound):
-        return  # Ignore command not found errors
-    print(f"❌ Command error in {{ctx.command}}: {{error}}")
-    await ctx.send(f"❌ Error: {{error}}")
-
-# Bot Commands
-@bot.command(name='hello', help='Say hello to the bot')
-async def hello_command(ctx):
-    await ctx.send(f'Hello {{ctx.author.mention}}! 👋 I am online and working!')
-    print(f"✅ Hello command executed by {{ctx.author}} in {{ctx.guild.name if ctx.guild else 'DM'}}")
-
-@bot.command(name='ping', help='Check bot latency')
-async def ping_command(ctx):
-    latency = round(bot.latency * 1000)
-    await ctx.send(f'🏓 Pong! Latency: {{latency}}ms')
-    print(f"✅ Ping command executed: {{latency}}ms latency")
-
-@bot.command(name='test', help='Run a comprehensive bot test')
-async def test_command(ctx):
-    embed = discord.Embed(
-        title="🤖 Bot Status Test", 
-        description="All systems operational!",
-        color=0x00ff00,
-        timestamp=discord.utils.utcnow()
-    )
-    embed.add_field(name="✅ Connection", value="Stable", inline=True)
-    embed.add_field(name="✅ Commands", value="Working", inline=True)
-    embed.add_field(name="✅ Latency", value=f"{{round(bot.latency * 1000)}}ms", inline=True)
-    embed.set_footer(text=f"Requested by {{ctx.author.name}}")
-    
-    await ctx.send(embed=embed)
-    print(f"✅ Test command executed by {{ctx.author}} in {{ctx.guild.name if ctx.guild else 'DM'}}")
-
-@bot.command(name='info', help='Get bot information')
-async def info_command(ctx):
-    embed = discord.Embed(
-        title="🤖 Bot Information",
-        color=0x3498db,
-        timestamp=discord.utils.utcnow()
-    )
-    embed.add_field(name="Bot Name", value=bot.user.name, inline=True)
-    embed.add_field(name="Bot ID", value=bot.user.id, inline=True)
-    embed.add_field(name="Servers", value=len(bot.guilds), inline=True)
-    embed.add_field(name="Python Version", value=f"{{sys.version_info.major}}.{{sys.version_info.minor}}.{{sys.version_info.micro}}", inline=True)
-    embed.add_field(name="Discord.py Version", value=discord.__version__, inline=True)
-    embed.add_field(name="Latency", value=f"{{round(bot.latency * 1000)}}ms", inline=True)
-    
-    await ctx.send(embed=embed)
-
-# Error handling for the bot startup
-async def main():
-    try:
-        print("🔄 Attempting to start bot...")
-        await bot.start(token)
-    except discord.LoginFailure:
-        print("❌ LOGIN FAILED: Invalid bot token!")
-        print("Please check your bot token in the Discord Developer Portal")
-        sys.exit(1)
-    except discord.HTTPException as e:
-        print(f"❌ HTTP Error occurred: {{e}}")
-        print("This might be a temporary Discord API issue")
-        sys.exit(1)
-    except discord.ConnectionClosed as e:
-        print(f"❌ Connection closed: {{e}}")
-        sys.exit(1)
-    except Exception as e:
-        print(f"❌ Unexpected error during startup: {{e}}")
-        traceback.print_exc()
-        sys.exit(1)
-
-# Run the bot
-if __name__ == "__main__":
-    try:
-        # Use asyncio.run for proper async handling
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        print("🛑 Bot stopped by user")
-    except Exception as e:
-        print(f"❌ Fatal error: {{e}}")
-        traceback.print_exc()
-        sys.exit(1)
-"""
-            with open(os.path.join(bot_dir, "main.py"), "w") as f:
-                f.write(main_py_content)
-
-            # Create requirements.txt
+            # Create a default requirements.txt
             requirements_content = """discord.py>=2.3.0
 python-dotenv>=1.0.0
 aiohttp>=3.8.0
@@ -405,17 +203,16 @@ aiohttp>=3.8.0
             with open(os.path.join(bot_dir, "requirements.txt"), "w") as f:
                 f.write(requirements_content)
 
-            # Set default startup command in the database
+            # Set the new default startup command. This is for display purposes.
+            new_startup_command = "python -u bot_template.py"
             db.users.update_one(
                 {"_id": current_user.id},
-                {"$set": {f"servers.{i}.startup_command": "python -u main.py"}}
+                {"$set": {f"servers.{i}.startup_command": new_startup_command}}
             )
-            # Add files array to the server object
+            # Update the files array for the editor view
             db.users.update_one(
                 {"_id": current_user.id},
                 {"$set": {f"servers.{i}.files": [
-                    {"path": "main.py", "type": "file", "content": main_py_content}, 
-                    {"path": ".env", "type": "file", "content": f"BOT_TOKEN={server.get('botToken', '')}"},
                     {"path": "requirements.txt", "type": "file", "content": requirements_content}
                 ]}}
             )
@@ -427,12 +224,10 @@ aiohttp>=3.8.0
                 server_status = "online"
             else:
                 server_status = "offline"
-                # Clean up dead process
                 del running_bots[bot_id]
         else:
             server_status = "offline"
         
-        # Update status in database
         db.users.update_one(
             {"_id": current_user.id},
             {"$set": {f"servers.{i}.status": server_status}}
@@ -763,21 +558,14 @@ def start_bot(server_index):
     if bot_id in running_bots:
         process = running_bots[bot_id]["process"]
         if process.poll() is None:  # Still running
-            socketio.emit('log', {
-                'data': f'⚠️ Bot {bot_id} is already running (PID: {process.pid})'
-            }, room=bot_id)
+            socketio.emit('log', {'data': f'⚠️ Bot {bot_id} is already running (PID: {process.pid})'}, room=bot_id)
             return jsonify({"error": "Bot is already running"}), 400
         else:
-            # Process died, clean up
             del running_bots[bot_id]
 
     bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
-    startup_command = bot_data.get("startup_command", "python -u main.py")
 
-    # Enhanced startup sequence with better validation
-    socketio.emit('log', {
-        'data': f'🔄 Starting bot {bot_id}...'
-    }, room=bot_id)
+    socketio.emit('log', {'data': f'🔄 Starting bot {bot_id}...'}, room=bot_id)
 
     # Pre-flight checks
     if not os.path.isdir(bot_dir):
@@ -785,82 +573,25 @@ def start_bot(server_index):
         socketio.emit('log', {'data': error_msg}, room=bot_id)
         return jsonify({"error": "Workspace not found"}), 404
 
-    # Check .env file and validate token
-    env_file = os.path.join(bot_dir, ".env")
-    if not os.path.exists(env_file):
-        error_msg = f'❌ .env file not found in {bot_dir}'
+    # Validate token from database
+    token = bot_data.get("botToken")
+    if not token or len(token.strip()) < 50:
+        error_msg = f"❌ Invalid or missing BOT_TOKEN in the database."
         socketio.emit('log', {'data': error_msg}, room=bot_id)
-        return jsonify({"error": ".env file not found"}), 404
+        return jsonify({"error": "Invalid BOT_TOKEN"}), 400
+    socketio.emit('log', {'data': f'✅ Token validation passed.'}, room=bot_id)
 
-    # Validate token in .env
-    try:
-        with open(env_file, 'r') as f:
-            env_content = f.read()
-        
-        if "BOT_TOKEN=" not in env_content:
-            error_msg = "❌ BOT_TOKEN not found in .env file"
-            socketio.emit('log', {'data': error_msg}, room=bot_id)
-            return jsonify({"error": "BOT_TOKEN not configured"}), 400
-            
-        token_line = [line for line in env_content.split('\n') if line.startswith('BOT_TOKEN=')]
-        if not token_line:
-            error_msg = "❌ BOT_TOKEN line not found in .env file"
-            socketio.emit('log', {'data': error_msg}, room=bot_id)
-            return jsonify({"error": "BOT_TOKEN not configured"}), 400
-            
-        token = token_line[0].split('=', 1)[1].strip()
-        if len(token) < 50:  # Discord tokens are typically 59+ characters
-            error_msg = f"❌ BOT_TOKEN appears to be invalid (length: {len(token)} chars, expected 50+)"
-            socketio.emit('log', {'data': error_msg}, room=bot_id)
-            return jsonify({"error": "Invalid BOT_TOKEN"}), 400
-            
-        socketio.emit('log', {
-            'data': f'✅ Token validation passed: {token[:10]}...{token[-4:]}'
-        }, room=bot_id)
-        
-    except Exception as e:
-        error_msg = f'❌ Error reading .env file: {str(e)}'
+    # Check if bot_template.py exists
+    if not os.path.isfile("bot_template.py"):
+        error_msg = '❌ Bot template file not found: bot_template.py'
         socketio.emit('log', {'data': error_msg}, room=bot_id)
-        return jsonify({"error": "Error reading .env file"}), 500
+        return jsonify({"error": "Bot template not found"}), 500
 
-    # Parse and validate command
-    try:
-        command_parts = shlex.split(startup_command)
-        if not command_parts:
-            raise ValueError("Empty command")
-    except Exception as e:
-        error_msg = f'❌ Invalid startup command: {e}'
-        socketio.emit('log', {'data': error_msg}, room=bot_id)
-        return jsonify({"error": "Invalid startup command"}), 400
-
-    # Check if main file exists
-    if len(command_parts) > 1:
-        main_file = command_parts[1]
-        if not os.path.isfile(os.path.join(bot_dir, main_file)):
-            error_msg = f'❌ Main file not found: {main_file}'
-            socketio.emit('log', {'data': error_msg}, room=bot_id)
-            return jsonify({"error": "Main file not found"}), 404
-
-    # Test Discord API connectivity
-    socketio.emit('log', {'data': '🌐 Testing Discord API connectivity...'}, room=bot_id)
-    try:
-        response = requests.get("https://discord.com/api/v10/gateway", timeout=10)
-        if response.status_code != 200:
-            error_msg = f'❌ Discord API unreachable (status: {response.status_code})'
-            socketio.emit('log', {'data': error_msg}, room=bot_id)
-            return jsonify({"error": "Discord API unreachable"}), 503
-        socketio.emit('log', {'data': '✅ Discord API is reachable'}, room=bot_id)
-    except Exception as e:
-        error_msg = f'❌ Network connectivity test failed: {str(e)}'
-        socketio.emit('log', {'data': error_msg}, room=bot_id)
-        return jsonify({"error": f"Network error: {str(e)}"}), 503
-
-    # Install dependencies from requirements.txt
+    # Install dependencies from requirements.txt in the bot's workspace
     socketio.emit('log', {'data': '📦 Installing dependencies...'}, room=bot_id)
     requirements_file = os.path.join(bot_dir, "requirements.txt")
     if os.path.exists(requirements_file):
         try:
-            # Using sys.executable to ensure we use the same python env
             install_command = [sys.executable, "-m", "pip", "install", "-r", requirements_file]
             install_process = subprocess.run(
                 install_command,
@@ -868,28 +599,20 @@ def start_bot(server_index):
                 capture_output=True,
                 text=True,
                 encoding='utf-8',
-                timeout=300 # 5 minute timeout for installation
+                timeout=300
             )
-
-            # Log stdout of pip install
             if install_process.stdout:
                 for line in install_process.stdout.splitlines():
                     socketio.emit('log', {'data': f'[pip] {line}'}, room=bot_id)
-
             if install_process.returncode == 0:
                 socketio.emit('log', {'data': '✅ Dependencies installed successfully.'}, room=bot_id)
             else:
-                # Log stderr of pip install
                 if install_process.stderr:
                     for line in install_process.stderr.splitlines():
                         socketio.emit('log', {'data': f'[pip-error] {line}'}, room=bot_id)
                 error_msg = '❌ Failed to install dependencies. Please check logs.'
                 socketio.emit('log', {'data': error_msg}, room=bot_id)
                 return jsonify({"error": "Failed to install dependencies"}), 500
-        except subprocess.TimeoutExpired:
-            error_msg = '❌ Dependency installation timed out after 5 minutes.'
-            socketio.emit('log', {'data': error_msg}, room=bot_id)
-            return jsonify({"error": "Dependency installation timed out"}), 500
         except Exception as e:
             error_msg = f'❌ An unexpected error occurred during dependency installation: {str(e)}'
             socketio.emit('log', {'data': error_msg}, room=bot_id)
@@ -897,60 +620,45 @@ def start_bot(server_index):
     else:
         socketio.emit('log', {'data': '⚠️ requirements.txt not found, skipping dependency installation.'}, room=bot_id)
 
-    socketio.emit('log', {
-        'data': f'✅ Pre-flight checks passed'
-    }, room=bot_id)
+    socketio.emit('log', {'data': f'✅ Pre-flight checks passed'}, room=bot_id)
     
-    socketio.emit('log', {
-        'data': f'🚀 Executing: {startup_command}'
-    }, room=bot_id)
+    startup_command = [sys.executable, "-u", "bot_template.py"]
+    socketio.emit('log', {'data': f'🚀 Executing: {" ".join(startup_command)}'}, room=bot_id)
 
     try:
         # Create subprocess with proper environment
         env = dict(os.environ)
         env.update({
             "PYTHONUNBUFFERED": "1",
-            "PYTHONIOENCODING": "utf-8"
+            "PYTHONIOENCODING": "utf-8",
+            "BOT_TOKEN": token,
+            "BOT_ID": bot_id
         })
 
-        # Create subprocess with proper settings for real-time output
         process = subprocess.Popen(
-            command_parts,
-            cwd=bot_dir,
+            startup_command,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            bufsize=1,  # Line buffered
+            bufsize=1,
             universal_newlines=True,
             env=env
         )
 
-        # Start log streaming thread
-        log_thread = threading.Thread(
-            target=stream_bot_logs,
-            args=(bot_id, process),
-            daemon=True
-        )
+        log_thread = threading.Thread(target=stream_bot_logs, args=(bot_id, process), daemon=True)
         log_thread.start()
 
-        # Store bot info
         running_bots[bot_id] = {
             "process": process,
             "thread": log_thread,
             "status": "running",
             "started_at": datetime.datetime.now(),
-            "command": startup_command
+            "command": " ".join(startup_command)
         }
 
-        socketio.emit('log', {
-            'data': f'✅ Bot subprocess started (PID: {process.pid})'
-        }, room=bot_id)
+        socketio.emit('log', {'data': f'✅ Bot subprocess started (PID: {process.pid})'}, room=bot_id)
 
-        return jsonify({
-            "success": True, 
-            "pid": process.pid,
-            "command": startup_command
-        })
+        return jsonify({"success": True, "pid": process.pid, "command": " ".join(startup_command)})
 
     except Exception as e:
         error_msg = f'💥 Failed to start bot subprocess: {str(e)}'
@@ -1099,25 +807,6 @@ def uninstall_package(server_index):
         return jsonify({"error": "Package uninstallation timed out"}), 500
     except Exception as e:
         return jsonify({"error": f"Error uninstalling package: {str(e)}"}), 500
-
-@app.route("/api/server/<int:server_index>/startup", methods=["POST"])
-@login_required
-def update_startup_command(server_index):
-    command = request.json.get("startup_command")
-    if command is None:
-        return jsonify({"error": "Startup command is required"}), 400
-
-    try:
-        # Validate command syntax
-        shlex.split(command)
-    except ValueError as e:
-        return jsonify({"error": f"Invalid command syntax: {str(e)}"}), 400
-
-    db.users.update_one(
-        {"_id": current_user.id},
-        {"$set": {f"servers.{server_index}.startup_command": command}}
-    )
-    return jsonify({"success": True})
 
 if __name__ == "__main__":
     try:
