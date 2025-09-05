@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Code Editor</title>
+    <title>Code Editor - {{ bot.name }}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/github.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
@@ -765,7 +765,7 @@
                     <span class="current-file" id="current-file">Select a file</span>
                 </a>
                 <nav class="breadcrumb">
-                    <span>Bot Editor</span>
+                    <span>{{ bot.name }}</span>
                     <span class="breadcrumb-separator">/</span>
                     <span id="current-file-breadcrumb">Select a file</span>
                 </nav>
@@ -799,19 +799,7 @@
                     </div>
                 </div>
                 <div class="file-tree" id="file-tree">
-                    <!-- Sample files for demonstration -->
-                    <button class="file-item touch-target" data-path="main.py">
-                        <span class="file-icon"></span>
-                        <span>main.py</span>
-                    </button>
-                    <button class="file-item touch-target" data-path="config.json">
-                        <span class="file-icon"></span>
-                        <span>config.json</span>
-                    </button>
-                    <button class="file-item touch-target folder-item" data-path="utils">
-                        <span class="file-icon"></span>
-                        <span>utils</span>
-                    </button>
+                    <!-- Files will be populated here -->
                 </div>
             </aside>
 
@@ -839,7 +827,7 @@
                 <div class="mobile-status-bar">
                     <div class="status-left">
                         <span id="cursor-position">Ln 1, Col 1</span>
-                        <span id="bot-status">Status: Ready</span>
+                        <span id="bot-status">Status: {{ bot.status }}</span>
                     </div>
                     <button class="save-btn touch-target" id="save-btn" disabled>Save</button>
                 </div>
@@ -872,8 +860,8 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const serverIndex = 0; // Default server index
-            const botId = "bot-001"; // Default bot ID
+            const serverIndex = {{ request.view_args.server_index }};
+            const botId = "{{ bot._id }}";
             
             // Elements
             const sidebar = document.getElementById('sidebar');
@@ -1040,24 +1028,24 @@
             async function openFile(path) {
                 try {
                     if (!openTabs.has(path)) {
-                        // Simulate API call - replace with actual endpoint
-                        const sampleContent = `# Sample content for ${path}
-print("Hello, World!")
-
-def main():
-    print("This is a sample Python file")
-    return True
-
-if __name__ == "__main__":
-    main()
-`;
-                        
-                        openTabs.set(path, {
-                            content: sampleContent,
-                            modified: false,
-                            path: path
+                        const response = await fetch(`/api/server/${serverIndex}/file?path=${path}`, {
+                            headers: {
+                                'Content-Type': 'application/json',
+                            }
                         });
-                        createMobileTab(path);
+                        const data = await response.json();
+                        
+                        if (response.ok && data.content !== undefined) {
+                            openTabs.set(path, {
+                                content: data.content,
+                                modified: false,
+                                path: path
+                            });
+                            createMobileTab(path);
+                        } else {
+                            console.error('Error opening file:', data.error);
+                            return;
+                        }
                     }
                     switchToTab(path);
                     closeSidebar();
@@ -1177,16 +1165,27 @@ if __name__ == "__main__":
                     saveBtn.disabled = true;
                     saveBtnHeader.disabled = true;
                     
-                    // Simulate API call - replace with actual endpoint
-                    console.log('Saving file:', activeTab, 'Content:', editor.getValue());
+                    const response = await fetch(`/api/server/${serverIndex}/file?path=${activeTab}`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ content: editor.getValue() })
+                    });
                     
-                    // Simulate successful save
-                    const tabData = openTabs.get(activeTab);
-                    if (tabData) {
-                        tabData.modified = false;
-                        tabData.content = editor.getValue();
-                        updateTabTitle(activeTab);
-                        saveBtn.classList.remove('primary');
+                    const data = await response.json();
+                    
+                    if (response.ok && data.success) {
+                        const tabData = openTabs.get(activeTab);
+                        if (tabData) {
+                            tabData.modified = false;
+                            tabData.content = editor.getValue();
+                            updateTabTitle(activeTab);
+                            saveBtn.classList.remove('primary');
+                        }
+                    } else {
+                        console.error('Error saving file:', data.error);
+                        // Re-enable buttons on error
+                        saveBtn.disabled = false;
+                        saveBtnHeader.disabled = false;
                     }
                 } catch (error) {
                     console.error('Network error:', error);
@@ -1204,9 +1203,18 @@ if __name__ == "__main__":
                 const path = prompt("Enter new file path (e.g., main.py):");
                 if (path) {
                     try {
-                        // Simulate API call - replace with actual endpoint
-                        console.log('Creating new file:', path);
-                        location.reload();
+                        const response = await fetch(`/api/server/${serverIndex}/files/create`, {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ path: path, type: 'file' })
+                        });
+                        
+                        if (response.ok) {
+                            location.reload();
+                        } else {
+                            const data = await response.json();
+                            alert(`Error: ${data.error}`);
+                        }
                     } catch (error) {
                         console.error('Error creating file:', error);
                         alert('Network error occurred');
@@ -1218,49 +1226,19 @@ if __name__ == "__main__":
                 const path = prompt("Enter new folder path:");
                 if (path) {
                     try {
-                        // Simulate API call - replace with actual endpoint
-                        console.log('Creating new folder:', path);
-                        location.reload();
+                        const response = await fetch(`/api/server/${serverIndex}/files/create`, {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ path: path, type: 'folder' })
+                        });
+                        
+                        if (response.ok) {
+                            location.reload();
+                        } else {
+                            const data = await response.json();
+                            alert(`Error: ${data.error}`);
+                        }
                     } catch (error) {
                         console.error('Error creating folder:', error);
                         alert('Network error occurred');
                     }
-                }
-            });
-
-            // Add event listeners to existing file items
-            document.querySelectorAll('.file-item:not(.folder-item)').forEach(item => {
-                item.addEventListener('click', () => {
-                    const path = item.dataset.path;
-                    if (path) {
-                        openFile(path);
-                    }
-                });
-            });
-
-            // Bot control buttons
-            document.getElementById('start-bot-btn').addEventListener('click', () => {
-                console.log('Starting bot...');
-                botStatus.textContent = 'Status: Running';
-                const output = document.getElementById('console-output');
-                const line = document.createElement('div');
-                line.className = 'console-line';
-                line.textContent = 'Bot started...';
-                output.appendChild(line);
-                output.scrollTop = output.scrollHeight;
-            });
-
-            document.getElementById('stop-bot-btn').addEventListener('click', () => {
-                console.log('Stopping bot...');
-                botStatus.textContent = 'Status: Stopped';
-                const output = document.getElementById('console-output');
-                const line = document.createElement('div');
-                line.className = 'console-line';
-                line.textContent = 'Bot stopped...';
-                output.appendChild(line);
-                output.scrollTop = output.scrollHeight;
-            });
-        });
-    </script>
-</body>
-</html>
