@@ -74,7 +74,7 @@
             box-shadow: none !important;
         }
 
-        /* Header - Larger on Mobile */
+        /* Header - Modified Layout */
         .header {
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(25px);
@@ -83,7 +83,7 @@
             padding: 0 20px;
             height: 68px;
             display: flex;
-            align-items: center;
+            align-items: stretch;
             justify-content: space-between;
             position: fixed;
             top: 0;
@@ -98,6 +98,16 @@
             gap: 16px;
             flex: 1;
             min-width: 0;
+            align-self: center;
+        }
+
+        /* Header buttons positioned at the top edge */
+        .header-right {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            flex-shrink: 0;
+            padding-top: 8px;
         }
 
         .mobile-menu-btn {
@@ -140,6 +150,7 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
+        /* Updated file display - shows "Editor / filename" */
         .current-file {
             color: rgba(255, 255, 255, 0.7);
             font-size: 16px;
@@ -150,11 +161,14 @@
             font-weight: 500;
         }
 
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-shrink: 0;
+        .file-path {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .file-separator {
+            color: rgba(255, 255, 255, 0.4);
+            margin: 0 8px;
         }
 
         .header-btn {
@@ -457,7 +471,7 @@
             background: rgba(255, 255, 255, 0.15) !important;
         }
 
-        /* Empty State - Centered and Optimized */
+        /* Empty State - Moved down slightly */
         .mobile-empty-state {
             flex: 1;
             display: flex;
@@ -465,7 +479,7 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 48px 32px;
+            padding: 48px 32px 120px;
             min-height: 0;
         }
 
@@ -773,15 +787,7 @@
             }
 
             .breadcrumb {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                color: rgba(255, 255, 255, 0.6);
-                font-size: 15px;
-            }
-
-            .breadcrumb-separator {
-                color: rgba(255, 255, 255, 0.3);
+                display: none;
             }
 
             .console-actions {
@@ -805,6 +811,10 @@
             .mobile-empty-state p {
                 font-size: 18px;
                 max-width: 440px;
+            }
+
+            .mobile-empty-state {
+                padding: 48px 32px 160px;
             }
         }
 
@@ -1030,13 +1040,12 @@
                 </button>
                 <a href="#" class="logo">
                     <div class="logo-icon">E</div>
-                    <span class="current-file" id="current-file">Select a file</span>
+                    <span class="current-file" id="current-file">
+                        <span class="file-path">Editor</span>
+                        <span class="file-separator">/</span>
+                        <span id="current-file-name">Select a file</span>
+                    </span>
                 </a>
-                <nav class="breadcrumb">
-                    <span>{{ bot.name }}</span>
-                    <span class="breadcrumb-separator">/</span>
-                    <span id="current-file-breadcrumb">Select a file</span>
-                </nav>
             </div>
             <div class="header-right">
                 <button class="header-btn glass-button touch-target" id="save-btn-header" disabled title="Save File">
@@ -1089,8 +1098,8 @@
                         <div class="empty-icon">
                             <i data-lucide="file-text" size="36"></i>
                         </div>
-                        <h3>No file selected</h3>
-                        <p>Select a file from the sidebar to start editing your code</p>
+                        <h3>Select a file to edit</h3>
+                        <p>Choose a file from the sidebar to start editing your code</p>
                     </div>
                 </div>
 
@@ -1182,8 +1191,7 @@
             const consoleToggle = document.getElementById('console-toggle');
             const consoleClose = document.getElementById('console-close');
             const consoleOutput = document.getElementById('console-output');
-            const currentFileSpan = document.getElementById('current-file');
-            const currentFileBreadcrumb = document.getElementById('current-file-breadcrumb');
+            const currentFileName = document.getElementById('current-file-name');
             const saveBtn = document.getElementById('save-btn');
             const saveBtnHeader = document.getElementById('save-btn-header');
             const cursorPosition = document.getElementById('cursor-position');
@@ -1667,10 +1675,8 @@
                     editor.setValue(tabData.content);
                     setTimeout(() => editor.refresh(), 100);
                     const fileName = path.split('/').pop();
-                    currentFileSpan.textContent = fileName;
-                    if (currentFileBreadcrumb) {
-                        currentFileBreadcrumb.textContent = fileName;
-                    }
+                    currentFileName.textContent = fileName;
+                    
                     saveBtn.disabled = !tabData.modified;
                     saveBtnHeader.disabled = !tabData.modified;
                     
@@ -1693,10 +1699,7 @@
                         switchToTab(remainingTabs[0].dataset.path);
                     } else {
                         activeTab = null;
-                        currentFileSpan.textContent = 'Select a file';
-                        if (currentFileBreadcrumb) {
-                            currentFileBreadcrumb.textContent = 'Select a file';
-                        }
+                        currentFileName.textContent = 'Select a file';
                         if (editor) {
                             editorContainer.removeChild(editorContainer.querySelector('.editor-wrapper'));
                             editor = null;
