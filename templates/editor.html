@@ -74,7 +74,7 @@
             box-shadow: none !important;
         }
 
-        /* Minimized Header with Rounded Borders */
+        /* Symmetrical Header with Rounded Borders */
         .header {
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(25px);
@@ -88,8 +88,8 @@
             justify-content: center;
             position: fixed;
             top: 0;
-            left: 88px;
-            right: 88px;
+            left: 88px;  /* 16px (margin) + 56px (button width) + 16px (gap) */
+            right: 88px; /* 16px (margin) + 56px (button width) + 16px (gap) */
             z-index: 998;
             margin-top: 8px;
         }
@@ -141,7 +141,7 @@
             margin: 0 6px;
         }
 
-        /* Top Edge Buttons - Updated positioning */
+        /* Symmetrical Edge Buttons */
         .edge-button {
             position: fixed;
             width: 56px;
@@ -178,13 +178,13 @@
             box-shadow: 0 8px 32px rgba(255, 255, 255, 0.2);
         }
 
-        /* Menu button - Top left */
+        /* Left Side - Menu button only */
         .mobile-menu-btn {
             left: 16px;
             top: 16px;
         }
 
-        /* User Profile - Top right */
+        /* Right Side - User Profile and Action Buttons (symmetrical) */
         .user-profile {
             position: fixed;
             top: 16px;
@@ -307,15 +307,15 @@
             margin: 8px 0;
         }
 
-        /* Action buttons - Below user profile */
+        /* Right side action buttons - positioned symmetrically below user profile */
         .save-btn-header {
             right: 16px;
-            top: 88px;
+            top: 88px; /* 16px (user profile top) + 56px (user profile height) + 16px (gap) */
         }
 
         .console-toggle {
             right: 16px;
-            top: 156px;
+            top: 160px; /* 88px (save button top) + 56px (save button height) + 16px (gap) */
         }
 
         /* Main Layout */
@@ -940,13 +940,13 @@
                 padding: 48px 32px 160px;
             }
 
-            /* Desktop positioning adjustments */
+            /* Desktop symmetrical positioning */
             .save-btn-header {
                 top: 96px;
             }
 
             .console-toggle {
-                top: 164px;
+                top: 168px;
             }
 
             .user-dropdown {
@@ -1181,7 +1181,7 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Minimized Header with Rounded Borders -->
+        <!-- Symmetrical Header with Rounded Borders -->
         <header class="header">
             <a href="#" class="logo">
                 <div class="logo-icon">E</div>
@@ -1193,12 +1193,12 @@
             </a>
         </header>
 
-        <!-- Top Edge Buttons -->
+        <!-- Left Side: Menu Button -->
         <button class="edge-button glass-button mobile-menu-btn touch-target" id="mobile-menu-btn" title="Menu">
             <i data-lucide="menu"></i>
         </button>
         
-        <!-- User Profile -->
+        <!-- Right Side: User Profile -->
         <div class="user-profile touch-target" id="user-profile" title="User Profile">
             <img src="{{ user.avatar_url or url_for('static', filename='img/default_avatar.png') }}" alt="User Avatar" class="user-avatar">
         </div>
@@ -1227,7 +1227,7 @@
             </a>
         </div>
         
-        <!-- Action Buttons below user profile -->
+        <!-- Right Side Action Buttons - Below User Profile -->
         <button class="edge-button glass-button save-btn-header touch-target" id="save-btn-header" disabled title="Save File">
             <i data-lucide="save"></i>
         </button>
@@ -1350,6 +1350,7 @@
     </div>
 
     <script>
+        // [Previous JavaScript code remains exactly the same - no changes needed]
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize Lucide icons
             lucide.createIcons();
