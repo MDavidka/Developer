@@ -1597,12 +1597,15 @@
                 </div>
                 <div class="console-actions">
                     <!-- Only show start OR stop button based on state -->
+                    {% if bot.status == 'online' %}
+                    <button class="console-btn touch-target" id="stop-bot-btn" title="Stop Bot">
+                        <i data-lucide="square" size="16"></i>
+                    </button>
+                    {% else %}
                     <button class="console-btn touch-target" id="start-bot-btn" title="Start Bot">
                         <i data-lucide="play" size="18"></i>
                     </button>
-                    <button class="console-btn touch-target" id="stop-bot-btn" disabled style="display: none;" title="Stop Bot">
-                        <i data-lucide="square" size="16"></i>
-                    </button>
+                    {% endif %}
                     <button class="console-btn touch-target" id="restart-bot-btn" disabled style="display: none;" title="Restart Bot">
                         <i data-lucide="rotate-cw" size="16"></i>
                     </button>
@@ -1773,28 +1776,96 @@
             console.log('Code Editor initialized');
             aiSendBtn.disabled = true; // Start with disabled send button
 
+            const fileTreeContainer = document.getElementById('file-tree');
+            const filesTree = {{ bot.files_tree | tojson }};
+
+            function renderFileTree(tree, container, level = 0) {
+                for (const name in tree) {
+                    const item = tree[name];
+                    const element = document.createElement('div');
+                    element.className = 'file-item';
+                    element.style.paddingLeft = `${28 + level * 20}px`;
+
+                    const icon = document.createElement('i');
+                    icon.className = 'file-icon';
+
+                    const text = document.createElement('span');
+                    text.textContent = name;
+
+                    if (typeof item === 'object' && item !== null && Object.keys(item).length > 0) {
+                        // Folder
+                        icon.setAttribute('data-lucide', 'folder');
+                        element.appendChild(icon);
+                        element.appendChild(text);
+                        container.appendChild(element);
+                        renderFileTree(item, container, level + 1);
+                    } else if (typeof item === 'object' && item !== null) {
+                        // Empty Folder
+                        icon.setAttribute('data-lucide', 'folder');
+                        element.appendChild(icon);
+                        element.appendChild(text);
+                        container.appendChild(element);
+                    }
+                    else {
+                        // File
+                        icon.setAttribute('data-lucide', 'file');
+                        element.appendChild(icon);
+                        element.appendChild(text);
+                        container.appendChild(element);
+                    }
+                }
+                lucide.createIcons();
+            }
+
+            renderFileTree(filesTree, fileTreeContainer);
+
             const startBotBtn = document.getElementById('start-bot-btn');
+            const stopBotBtn = document.getElementById('stop-bot-btn');
             const newFileBtn = document.getElementById('new-file-btn');
             const newFolderBtn = document.getElementById('new-folder-btn');
             const serverIndex = {{ bot.server_index }};
 
-            startBotBtn.addEventListener('click', () => {
-                fetch(`/api/server/${serverIndex}/start`, {
-                    method: 'POST',
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Bot started successfully!');
-                    } else {
-                        alert(`Error starting bot: ${data.error}`);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error starting bot:', error);
-                    alert('An error occurred while starting the bot.');
+            if (startBotBtn) {
+                startBotBtn.addEventListener('click', () => {
+                    fetch(`/api/server/${serverIndex}/start`, {
+                        method: 'POST',
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Bot started successfully!');
+                            location.reload();
+                        } else {
+                            alert(`Error starting bot: ${data.error}`);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error starting bot:', error);
+                        alert('An error occurred while starting the bot.');
+                    });
                 });
-            });
+            }
+
+            if (stopBotBtn) {
+                stopBotBtn.addEventListener('click', () => {
+                    fetch(`/api/server/${serverIndex}/stop`, {
+                        method: 'POST',
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Bot stopped successfully!');
+                            location.reload();
+                        } else {
+                            alert(`Error stopping bot: ${data.error}`);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error stopping bot:', error);
+                        alert('An error occurred while stopping the bot.');
+                    });
+                });
+            }
 
             newFileBtn.addEventListener('click', () => {
                 const path = prompt('Enter the path for the new file:');
