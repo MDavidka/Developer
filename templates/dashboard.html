@@ -133,7 +133,7 @@
             font-weight: 500;
         }
 
-        /* Edge Buttons (Disabled but Styled) */
+        /* Edge Buttons (Only Menu and User Profile) */
         .edge-button {
             position: fixed;
             width: 56px;
@@ -163,7 +163,7 @@
             top: 16px;
         }
 
-        /* Right Side - User Profile */
+        /* Right Side - User Profile (functional) */
         .user-profile {
             position: fixed;
             top: 16px;
@@ -184,6 +184,7 @@
             overflow: hidden;
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02),
                         0 4px 16px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
         }
 
         .user-profile:hover {
@@ -208,15 +209,10 @@
             border-radius: 16px;
         }
 
-        /* Right side disabled buttons */
-        .save-btn-header {
-            right: 16px;
-            top: calc(16px + 56px + 16px);
-        }
-
+        /* Hide right side action buttons - they are not needed on dashboard */
+        .save-btn-header,
         .console-toggle {
-            right: 16px;
-            top: calc(16px + 56px + 16px + 56px + 16px);
+            display: none;
         }
 
         /* Main Layout */
@@ -305,7 +301,7 @@
             border: 2px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Actions */
+        /* Enhanced Card Actions - Matching Editor Style */
         .actions {
             display: flex;
             gap: 12px;
@@ -318,17 +314,21 @@
             padding: 12px 20px;
             border-radius: 16px;
             background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(25px) saturate(1.2);
+            -webkit-backdrop-filter: blur(25px) saturate(1.2);
             color: rgba(255, 255, 255, 0.9);
             font-size: 14px;
             font-weight: 600;
             text-decoration: none;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03),
+                        0 4px 16px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .button-2:hover {
@@ -336,14 +336,21 @@
             border-color: rgba(255, 255, 255, 0.12);
             color: #ffffff;
             transform: translateY(-1px);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04),
-                        0 4px 16px rgba(0, 0, 0, 0.15);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05),
+                        0 8px 24px rgba(0, 0, 0, 0.25);
+            text-decoration: none;
         }
 
         .button-2:active {
             background: rgba(255, 255, 255, 0.08);
             transform: translateY(0);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04),
+                        0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .button-2:focus {
+            outline: none;
+            text-decoration: none;
         }
 
         /* Empty State */
@@ -539,6 +546,11 @@
                 width: 64px;
                 height: 64px;
             }
+
+            .button-2 {
+                padding: 14px 24px;
+                font-size: 15px;
+            }
         }
 
         /* Large screens */
@@ -601,19 +613,10 @@
         <i data-lucide="menu"></i>
     </button>
 
-    <!-- Right Side - User Profile -->
+    <!-- Right Side - User Profile Only -->
     <a href="{{ url_for('logout') }}" class="user-profile" title="Logout">
         <img src="{{ user.avatar_url or url_for('static', filename='img/default_avatar.png') }}" alt="User Avatar" class="user-avatar">
     </a>
-
-    <!-- Right Side Disabled Buttons -->
-    <button class="edge-button save-btn-header" disabled title="Save (Disabled)">
-        <i data-lucide="save"></i>
-    </button>
-
-    <button class="edge-button console-toggle" disabled title="Console (Disabled)">
-        <i data-lucide="terminal"></i>
-    </button>
 
     <main class="app-main">
         <div class="dashboard-toolbar">
