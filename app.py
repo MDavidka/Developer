@@ -1,17 +1,20 @@
 import os
-import shlex
 import requests
-from flask import Flask, render_template, redirect, url_for, request, jsonify
+from flask import Flask, render_template, redirect, url_for, request
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 import datetime
 from flask_socketio import SocketIO, emit, join_room
+import time
 import threading
 import subprocess
+import shlex
 import signal
 import sys
+import json
+import select
 import logging
 
 load_dotenv()
@@ -28,18 +31,15 @@ BOT_WORKSPACES_PATH = "bot_workspaces"
 if not os.path.exists(BOT_WORKSPACES_PATH):
     os.makedirs(BOT_WORKSPACES_PATH)
 
-# Bot process management
-running_bots = {}
+# Enhanced bot process management
+running_bots = {} # {bot_id: {"process": subprocess.Popen, "thread": threading.Thread, "status": "running"}}
 
 # Discord OAuth2 settings
 DISCORD_CLIENT_ID = os.getenv("DISCORD_CLIENT_ID")
 DISCORD_CLIENT_SECRET = os.getenv("DISCORD_CLIENT_SECRET")
 DISCORD_REDIRECT_URI = os.getenv("DISCORD_REDIRECT_URI", "http://localhost:5000/callback")
 DISCORD_API_BASE_URL = "https://discord.com/api"
-DISCORD_AUTHORIZATION_URL = (
-    f"https://discord.com/api/oauth2/authorize?client_id={DISCORD_CLIENT_ID}"
-    f"&redirect_uri={DISCORD_REDIRECT_URI}&response_type=code&scope=identify%20email"
-)
+DISCORD_AUTHORIZATION_URL = f"https://discord.com/api/oauth2/authorize?client_id={DISCORD_CLIENT_ID}&redirect_uri={DISCORD_REDIRECT_URI}&response_type=code&scope=identify%20email"
 
 # MongoDB setup
 mongo_client = MongoClient(os.getenv("MONGO_URI"))
@@ -52,68 +52,74 @@ login_manager.login_view = "login"
 
 class User(UserMixin):
     def __init__(self, id, username, email, avatar_url):
-        # store id as string so Flask-Login can serialize it safely
-        self.id = str(id)
+        self.id = id
         self.username = username
         self.email = email
         self.avatar_url = avatar_url
 
     @staticmethod
     def get(user_id):
-        try:
-            oid = ObjectId(user_id)
-        except Exception:
-            return None
-        user_data = db.users.find_one({"_id": oid})
+        user_data = db.users.find_one({"_id": ObjectId(user_id)})
         if user_data:
             return User(
                 id=user_data["_id"],
-                username=user_data.get("username"),
-                email=user_data.get("email"),
+                username=user_data["username"],
+                email=user_data["email"],
                 avatar_url=user_data.get("avatar_url")
             )
         return None
 
     @staticmethod
     def create_or_update(discord_id, username, email, avatar_url):
-        # Upsert user by email (which you require Discord to provide)
-        user_data = {"discord_id": discord_id, "username": username, "avatar_url": avatar_url}
+        user_data = {
+            "discord_id": discord_id,
+            "username": username,
+            "avatar_url": avatar_url,
+        }
         db.users.update_one(
             {"email": email},
             {
                 "$set": user_data,
-                "$setOnInsert": {"bots": [], "email": email, "servers": []}
+                "$setOnInsert": {"bots": [], "email": email}
             },
             upsert=True
         )
         user_doc = db.users.find_one({"email": email})
-        return User(id=user_doc["_id"], username=user_doc.get("username"), email=user_doc.get("email"), avatar_url=user_doc.get("avatar_url"))
+        return User(
+            id=user_doc["_id"],
+            username=user_doc["username"],
+            email=user_doc["email"],
+            avatar_url=user_doc.get("avatar_url")
+        )
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.get(user_id)
 
 def cleanup_bot_processes():
-    logger.info("Cleaning up bot processes...")
-    for bot_id, bot_info in list(running_bots.items()):
+    """Clean up all running bot processes on shutdown"""
+    print("Cleaning up bot processes...")
+    for bot_id, bot_info in running_bots.items():
         try:
             process = bot_info["process"]
-            if process and process.poll() is None:
-                logger.info(f"Terminating bot {bot_id} (pid {process.pid})...")
+            if process.poll() is None:  # Process is still running
+                print(f"Terminating bot {bot_id}...")
                 process.terminate()
                 try:
                     process.wait(timeout=5)
                 except subprocess.TimeoutExpired:
-                    logger.info(f"Killing bot {bot_id} (pid {process.pid})...")
+                    print(f"Killing bot {bot_id}...")
                     process.kill()
         except Exception as e:
-            logger.exception(f"Error cleaning up bot {bot_id}: {e}")
+            print(f"Error cleaning up bot {bot_id}: {e}")
 
 def signal_handler(sig, frame):
-    logger.info("Received shutdown signal...")
+    """Handle shutdown signals"""
+    print("Received shutdown signal...")
     cleanup_bot_processes()
     sys.exit(0)
 
+# Register signal handlers
 signal.signal(signal.SIGINT, signal_handler)
 signal.signal(signal.SIGTERM, signal_handler)
 
@@ -133,35 +139,41 @@ def callback():
         "client_secret": DISCORD_CLIENT_SECRET,
         "grant_type": "authorization_code",
         "code": code,
-        "redirect_uri": DISCORD_REDIRECT_URI
+        "redirect_uri": DISCORD_REDIRECT_URI,
+        "scope": "identify email"
     }
-    headers = {"Content-Type": "application/x-www-form-urlencoded"}
-    try:
-        response = requests.post(f"{DISCORD_API_BASE_URL}/oauth2/token", data=data, headers=headers)
-        response.raise_for_status()
-        token_data = response.json()
-        access_token = token_data.get("access_token")
-        
-        user_headers = {"Authorization": f"Bearer {access_token}"}
-        user_response = requests.get(f"{DISCORD_API_BASE_URL}/users/@me", headers=user_headers)
-        user_response.raise_for_status()
-        user_data = user_response.json()
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+    response = requests.post(f"{DISCORD_API_BASE_URL}/oauth2/token", data=data, headers=headers)
+    token_data = response.json()
+    access_token = token_data.get("access_token")
 
-    except requests.RequestException as e:
-        logger.error(f"OAuth callback error: {e}")
-        return "An error occurred during authentication.", 400
+    if not access_token:
+        print(f"Error getting access token from Discord: {token_data}")
+        return "Failed to retrieve access token.", 400
 
-    email = user_data.get("email")
-    if not email:
-        return "Discord account must have a verified email.", 400
+    headers = {
+        "Authorization": f"Bearer {access_token}"
+    }
+    user_response = requests.get(f"{DISCORD_API_BASE_URL}/users/@me", headers=headers)
+    user_data = user_response.json()
+
+    discord_id = user_data["id"]
+    email = user_data["email"]
+    username = user_data["username"]
+    avatar_hash = user_data.get("avatar")
+    avatar_url = f"https://cdn.discordapp.com/avatars/{discord_id}/{avatar_hash}.png" if avatar_hash else None
 
     user = User.create_or_update(
-        discord_id=user_data["id"],
-        username=user_data["username"],
+        discord_id=discord_id,
+        username=username,
         email=email,
-        avatar_url=f"https://cdn.discordapp.com/avatars/{user_data['id']}/{user_data.get('avatar')}.png" if user_data.get('avatar') else None
+        avatar_url=avatar_url
     )
+
     login_user(user)
+
     return redirect(url_for("dashboard"))
 
 @app.route("/logout")
@@ -173,10 +185,8 @@ def logout():
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    user_oid = ObjectId(current_user.id)
-    user_data = db.users.find_one({"_id": user_oid})
+    user_data = db.users.find_one({"_id": current_user.id})
     servers = user_data.get("servers", [])
-    needs_reload = False
 
     for i, server in enumerate(servers):
         bot_id = f"{current_user.id}_{server.get('server_name', i)}"
@@ -184,49 +194,52 @@ def dashboard():
 
         if not os.path.exists(bot_dir):
             os.makedirs(bot_dir)
-            needs_reload = True
-            
-            requirements_content = "discord.py>=2.3.0\n"
-            with open(os.path.join(bot_dir, "requirements.txt"), "w", encoding="utf-8") as f:
-                f.write(requirements_content)
-            
-            bot_template_content = '''import os, discord
-TOKEN = os.getenv("BOT_TOKEN")
-intents = discord.Intents.default(); intents.message_content = True
-client = discord.Client(intents=intents)
-@client.event
-async def on_ready(): print(f"Logged in as {client.user}")
-@client.event
-async def on_message(msg):
-    if msg.author == client.user: return
-    if msg.content.startswith('$ping'): await msg.channel.send('pong')
-client.run(TOKEN)
-'''
-            with open(os.path.join(bot_dir, "bot_template.py"), "w", encoding="utf-8") as f:
-                f.write(bot_template_content)
 
-            # store the files and startup command for this server index
+            # Create a default requirements.txt
+            requirements_content = """discord.py>=2.3.0
+python-dotenv>=1.0.0
+aiohttp>=3.8.0
+"""
+            with open(os.path.join(bot_dir, "requirements.txt"), "w") as f:
+                f.write(requirements_content)
+
+            # Set the new default startup command. This is for display purposes.
+            new_startup_command = "python -u bot_template.py"
             db.users.update_one(
-                {"_id": user_oid},
-                {"$set": {
-                    f"servers.{i}.startup_command": "python -u bot_template.py",
-                    f"servers.{i}.files": [
-                        {"path": "requirements.txt", "type": "file", "content": requirements_content},
-                        {"path": "bot_template.py", "type": "file", "content": bot_template_content}
-                    ]
-                }}
+                {"_id": current_user.id},
+                {"$set": {f"servers.{i}.startup_command": new_startup_command}}
+            )
+            # Update the files array for the editor view
+            db.users.update_one(
+                {"_id": current_user.id},
+                {"$set": {f"servers.{i}.files": [
+                    {"path": "requirements.txt", "type": "file", "content": requirements_content}
+                ]}}
             )
 
-        server_status = "online" if bot_id in running_bots and running_bots[bot_id]["process"].poll() is None else "offline"
-        if server.get("status") != server_status:
-            needs_reload = True
-            db.users.update_one({"_id": user_oid}, {"$set": {f"servers.{i}.status": server_status}})
+        # Update server status based on running processes
+        if bot_id in running_bots:
+            process = running_bots[bot_id]["process"]
+            if process.poll() is None:
+                server_status = "online"
+            else:
+                server_status = "offline"
+                del running_bots[bot_id]
+        else:
+            server_status = "offline"
 
-    if needs_reload:
-        user_data = db.users.find_one({"_id": user_oid})
-        servers = user_data.get("servers", [])
+        db.users.update_one(
+            {"_id": current_user.id},
+            {"$set": {f"servers.{i}.status": server_status}}
+        )
+
+    # Re-fetch user_data to get the updated server list
+    user_data = db.users.find_one({"_id": current_user.id})
+    servers = user_data.get("servers", [])
 
     return render_template("dashboard.html", user=current_user, servers=servers)
+
+from flask import jsonify
 
 def build_file_tree(file_list):
     tree = {}
@@ -235,177 +248,571 @@ def build_file_tree(file_list):
         current_level = tree
         for part in path_parts[:-1]:
             current_level = current_level.setdefault(part, {})
-        current_level[path_parts[-1]] = {} if file_doc['type'] == 'folder' else file_doc.get('content', '')
+
+        if file_doc['type'] == 'file':
+            current_level[path_parts[-1]] = file_doc.get('content', '')
+        else:
+            current_level[path_parts[-1]] = {}
+
     return tree
 
 @app.route("/editor/<int:server_index>")
 @login_required
 def editor(server_index):
-    user_oid = ObjectId(current_user.id)
-    user_data = db.users.find_one({"_id": user_oid})
+    user_data = db.users.find_one({"_id": current_user.id})
     servers = user_data.get("servers", [])
-    if server_index >= len(servers): return "Not Found", 404
+    if server_index >= len(servers):
+        return "Not Found", 404
 
     bot_data = servers[server_index]
     bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
+
+    # Check current bot status
+    if bot_id in running_bots:
+        process = running_bots[bot_id]["process"]
+        if process.poll() is None:
+            bot_data['status'] = "online"
+        else:
+            bot_data['status'] = "offline"
+            del running_bots[bot_id]
+    else:
+        bot_data['status'] = "offline"
+
+    file_tree = build_file_tree(bot_data.get('files', []))
+    bot_data['files_tree'] = file_tree
     bot_data['_id'] = bot_id
-    bot_data['status'] = "online" if bot_id in running_bots and running_bots[bot_id]["process"].poll() is None else "offline"
-    bot_data['files_tree'] = build_file_tree(bot_data.get('files', []))
-    
+
     return render_template("editor.html", bot=bot_data, user=current_user)
+
+# Debug endpoint
+@app.route("/api/server/<int:server_index>/debug", methods=["GET"])
+@login_required
+def debug_bot(server_index):
+    user_data = db.users.find_one({"_id": current_user.id})
+    servers = user_data.get("servers", [])
+
+    if server_index >= len(servers):
+        return jsonify({"error": "Server not found"}), 404
+
+    bot_data = servers[server_index]
+    bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
+    bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
+
+    # Check .env file
+    env_file = os.path.join(bot_dir, ".env")
+    debug_info = {"bot_dir": bot_dir, "bot_id": bot_id}
+
+    if os.path.exists(env_file):
+        try:
+            with open(env_file, 'r') as f:
+                env_content = f.read()
+
+            has_token = "BOT_TOKEN=" in env_content
+            if has_token:
+                token_line = [line for line in env_content.split('\n') if line.startswith('BOT_TOKEN=')]
+                if token_line:
+                    token = token_line[0].split('=', 1)[1].strip()
+                    debug_info.update({
+                        "env_exists": True,
+                        "has_token": True,
+                        "token_length": len(token),
+                        "token_preview": f"{token[:10]}...{token[-4:]}" if len(token) > 14 else "too_short",
+                        "token_valid_length": len(token) >= 50
+                    })
+                else:
+                    debug_info.update({
+                        "env_exists": True,
+                        "has_token": False,
+                        "error": "BOT_TOKEN line not found"
+                    })
+            else:
+                debug_info.update({
+                    "env_exists": True,
+                    "has_token": False,
+                    "error": "BOT_TOKEN not in file"
+                })
+        except Exception as e:
+            debug_info.update({
+                "env_exists": True,
+                "error": f"Failed to read .env: {str(e)}"
+            })
+    else:
+        debug_info.update({"env_exists": False})
+
+    # Test Discord API connectivity
+    try:
+        import requests
+        response = requests.get("https://discord.com/api/v10/gateway", timeout=10)
+        debug_info["discord_api"] = {
+            "reachable": response.status_code == 200,
+            "status_code": response.status_code
+        }
+    except Exception as e:
+        debug_info["discord_api"] = {
+            "reachable": False,
+            "error": str(e)
+        }
+
+    return jsonify(debug_info)
+
+@app.route("/api/server/<int:server_index>/test-discord", methods=["POST"])
+@login_required
+def test_discord_connection(server_index):
+    try:
+        # Test Discord API connectivity
+        response = requests.get("https://discord.com/api/v10/gateway", timeout=10)
+        if response.status_code == 200:
+            return jsonify({"discord_api": "reachable", "status": "ok", "gateway": response.json()})
+        else:
+            return jsonify({"discord_api": "unreachable", "status": "error", "code": response.status_code})
+    except Exception as e:
+        return jsonify({"discord_api": "error", "status": "error", "error": str(e)})
 
 @app.route("/api/server/<int:server_index>/file", methods=["GET", "POST"])
 @login_required
 def file_content(server_index):
-    user_oid = ObjectId(current_user.id)
-    user_data = db.users.find_one({"_id": user_oid})
+    user_data = db.users.find_one({"_id": current_user.id})
     servers = user_data.get("servers", [])
-    if server_index >= len(servers): return jsonify({"error": "Server not found"}), 404
+    if server_index >= len(servers):
+        return jsonify({"error": "Server not found"}), 404
 
     bot_data = servers[server_index]
     bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
-    bot_dir = os.path.abspath(os.path.join(BOT_WORKSPACES_PATH, bot_id))
-    path = request.args.get("path")
-    if not path: return jsonify({"error": "File path is required"}), 400
+    bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
 
-    full_path = os.path.normpath(os.path.join(bot_dir, path))
-    if not full_path.startswith(bot_dir):
-        return jsonify({"error": "Invalid path"}), 403
+    path = request.args.get("path")
+    if not path:
+        return jsonify({"error": "File path is required"}), 400
+
+    full_path = os.path.join(bot_dir, path)
 
     if request.method == "GET":
         try:
             with open(full_path, "r", encoding='utf-8') as f:
                 content = f.read()
             return jsonify({"content": content})
+        except FileNotFoundError:
+            return jsonify({"error": "File not found"}), 404
         except Exception as e:
-            logger.exception("Error reading file")
-            return jsonify({"error": str(e)}), 500
+            return jsonify({"error": f"Error reading file: {str(e)}"}), 500
 
-    # POST -> save file
     if request.method == "POST":
         try:
             content = request.json.get("content", "")
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
             with open(full_path, "w", encoding='utf-8') as f:
                 f.write(content)
-            # Also update the content in the database for this server index
-            db.users.update_one(
-                {"_id": user_oid},
-                {"$set": {f"servers.{server_index}.files.$[file].content": content}},
-                array_filters=[{"file.path": path}]
-            )
             return jsonify({"success": True})
         except Exception as e:
-            logger.exception("Error saving file")
-            return jsonify({"error": str(e)}), 500
+            return jsonify({"error": f"Error saving file: {str(e)}"}), 500
+
+@app.route("/api/server/<int:server_index>/files/create", methods=["POST"])
+@login_required
+def create_file(server_index):
+    path = request.json.get("path")
+    file_type = request.json.get("type")
+    if not path or not file_type:
+        return jsonify({"error": "Path and type are required"}), 400
+
+    user_data = db.users.find_one({"_id": current_user.id})
+    servers = user_data.get("servers", [])
+    if server_index >= len(servers):
+        return jsonify({"error": "Server not found"}), 404
+
+    bot_data = servers[server_index]
+    bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
+    bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
+    full_path = os.path.join(bot_dir, path)
+
+    if os.path.exists(full_path):
+        return jsonify({"error": "File or folder with this path already exists"}), 400
+
+    try:
+        if file_type == "folder":
+            os.makedirs(full_path, exist_ok=True)
+        else:
+            os.makedirs(os.path.dirname(full_path), exist_ok=True)
+            with open(full_path, "w", encoding='utf-8') as f:
+                f.write("")
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"error": f"Error creating file/folder: {str(e)}"}), 500
+
+@app.route("/api/server/<int:server_index>/files/delete", methods=["POST"])
+@login_required
+def delete_file(server_index):
+    path = request.json.get("path")
+    if not path:
+        return jsonify({"error": "Path is required"}), 400
+
+    user_data = db.users.find_one({"_id": current_user.id})
+    servers = user_data.get("servers", [])
+    if server_index >= len(servers):
+        return jsonify({"error": "Server not found"}), 404
+
+    bot_data = servers[server_index]
+    bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
+    bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
+    full_path = os.path.join(bot_dir, path)
+
+    try:
+        if os.path.isdir(full_path):
+            import shutil
+            shutil.rmtree(full_path)
+        elif os.path.isfile(full_path):
+            os.remove(full_path)
+        else:
+            return jsonify({"error": "File or folder not found"}), 404
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"error": f"Error deleting file/folder: {str(e)}"}), 500
 
 def stream_bot_logs(bot_id, process):
+    """Enhanced log streaming with proper process management using select"""
     try:
-        socketio.emit('log', {'data': f'[{datetime.datetime.now():%H:%M:%S}] 🚀 Bot process started (PID: {process.pid})'}, room=bot_id)
-        # start threads for stdout/stderr
-        for stream, is_err in [(process.stdout, False), (process.stderr, True)]:
-            threading.Thread(target=forward_stream, args=(bot_id, stream, is_err), daemon=True).start()
-        process.wait()
-    except Exception as e:
-        logger.exception(f"Log streaming error for {bot_id}: {e}")
-    finally:
-        return_code = process.returncode
-        status_msg = '✅ Bot process finished successfully.' if return_code == 0 else f'⚠️ Bot process exited with code {return_code}.'
-        socketio.emit('log', {'data': f'[{datetime.datetime.now():%H:%M:%S}] {status_msg}'}, room=bot_id)
-        if bot_id in running_bots:
-            running_bots.pop(bot_id)
+        socketio.emit('log', {
+            'data': f'[{datetime.datetime.now().strftime("%H:%M:%S")}] 🚀 Bot process started (PID: {process.pid})'
+        }, room=bot_id)
 
-def forward_stream(bot_id, stream, is_stderr):
-    try:
-        # stream is a text-mode file-like (because Popen uses text=True)
-        for line in iter(stream.readline, ''):
-            if not line:
-                break
-            log_level = '[ERROR]' if is_stderr else ''
-            socketio.emit('log', {'data': f'[{datetime.datetime.now():%H:%M:%S}] {log_level} {line.strip()}'.strip()}, room=bot_id)
+        # Use select for non-blocking reads on stdout and stderr
+        streams = [process.stdout, process.stderr]
+        while process.poll() is None:
+            readable, _, _ = select.select(streams, [], [], 0.1)
+            for stream in readable:
+                line = stream.readline().strip()
+                if line:
+                    timestamp = datetime.datetime.now().strftime("%H:%M:%S")
+                    log_level = '[ERROR]' if stream is process.stderr else ''
+                    log_line = f'[{timestamp}] {log_level} {line}'.strip()
+                    socketio.emit('log', {'data': log_line}, room=bot_id)
+                    print(f"[BOT_LOGS/{bot_id}] {log_line}") # Mirror to main console
+
+        # After process finishes, read any remaining output
+        for stream in streams:
+            for line in stream.readlines():
+                line = line.strip()
+                if line:
+                    timestamp = datetime.datetime.now().strftime("%H:%M:%S")
+                    log_level = '[ERROR]' if stream is process.stderr else ''
+                    log_line = f'[{timestamp}] {log_level} {line}'.strip()
+                    socketio.emit('log', {'data': log_line}, room=bot_id)
+                    print(f"[BOT_LOGS/{bot_id}] {log_line}") # Mirror to main console
+
+        # Process finished
+        return_code = process.returncode
+        timestamp = datetime.datetime.now().strftime("%H:%M:%S")
+
+        if return_code == 0:
+            socketio.emit('log', {
+                'data': f'[{timestamp}] ✅ Bot process finished successfully'
+            }, room=bot_id)
+        else:
+            socketio.emit('log', {
+                'data': f'[{timestamp}] ⚠️ Bot process exited with code {return_code}'
+            }, room=bot_id)
+
     except Exception as e:
-        logger.exception(f"Error forwarding stream for {bot_id}: {e}")
+        timestamp = datetime.datetime.now().strftime("%H:%M:%S")
+        socketio.emit('log', {
+            'data': f'[{timestamp}] 💥 Log streaming error: {str(e)}'
+        }, room=bot_id)
+    finally:
+        # Clean up
+        if bot_id in running_bots and running_bots[bot_id]["process"].pid == process.pid:
+            running_bots[bot_id]["status"] = "stopped"
 
 @socketio.on('connect', namespace='/editor')
-def on_connect():
-    emit('log', {'data': '🔌 Console connected.'})
+def editor_connect():
+    emit('log', {'data': '🔌 Connected to console...'})
 
 @socketio.on('join', namespace='/editor')
 def on_join(data):
-    bot_id = data.get('bot_id')
-    if not bot_id: return
+    bot_id = data['bot_id']
     join_room(bot_id)
-    status = "running" if bot_id in running_bots and running_bots[bot_id]['process'].poll() is None else "offline"
-    emit('log', {'data': f'📡 Reconnected. Bot is {status}.'}, room=bot_id)
+
+    # Check if bot is running and send status
+    if bot_id in running_bots:
+        process = running_bots[bot_id]["process"]
+        if process.poll() is None:
+            emit('log', {'data': f'📡 Console connected - Bot {bot_id} is running (PID: {process.pid})'}, room=bot_id)
+        else:
+            emit('log', {'data': f'📡 Console connected - Bot {bot_id} is stopped'}, room=bot_id)
+            # Clean up dead process
+            del running_bots[bot_id]
+    else:
+        emit('log', {'data': f'📡 Console connected - Bot {bot_id} is offline'}, room=bot_id)
 
 @app.route("/api/server/<int:server_index>/start", methods=["POST"])
 @login_required
 def start_bot(server_index):
-    user_oid = ObjectId(current_user.id)
-    user_data = db.users.find_one({"_id": user_oid})
+    user_data = db.users.find_one({"_id": current_user.id})
     servers = user_data.get("servers", [])
-    if server_index >= len(servers): return jsonify({"error": "Server not found"}), 404
+
+    if server_index >= len(servers):
+        return jsonify({"error": "Server not found"}), 404
+
+    bot_data = servers[server_index]
+    bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
+
+    # Check if bot is already running
+    if bot_id in running_bots:
+        process = running_bots[bot_id]["process"]
+        if process.poll() is None:  # Still running
+            socketio.emit('log', {'data': f'⚠️ Bot {bot_id} is already running (PID: {process.pid})'}, room=bot_id)
+            return jsonify({"error": "Bot is already running"}), 400
+        else:
+            del running_bots[bot_id]
+
+    bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
+
+    socketio.emit('log', {'data': f'🔄 Starting bot {bot_id}...'}, room=bot_id)
+
+    # Pre-flight checks
+    if not os.path.isdir(bot_dir):
+        error_msg = f'❌ Workspace directory not found: {bot_dir}'
+        socketio.emit('log', {'data': error_msg}, room=bot_id)
+        return jsonify({"error": "Workspace not found"}), 404
+
+    # Validate token from database
+    token = bot_data.get("botToken")
+    if not token or len(token.strip()) < 50:
+        error_msg = f"❌ Invalid or missing BOT_TOKEN in the database."
+        socketio.emit('log', {'data': error_msg}, room=bot_id)
+        return jsonify({"error": "Invalid BOT_TOKEN"}), 400
+    socketio.emit('log', {'data': f'✅ Token validation passed.'}, room=bot_id)
+
+    # Check if bot_template.py exists
+    if not os.path.isfile("bot_template.py"):
+        error_msg = '❌ Bot template file not found: bot_template.py'
+        socketio.emit('log', {'data': error_msg}, room=bot_id)
+        return jsonify({"error": "Bot template not found"}), 500
+
+    # Install dependencies from requirements.txt in the bot's workspace
+    socketio.emit('log', {'data': '📦 Installing dependencies...'}, room=bot_id)
+    requirements_file = os.path.join(bot_dir, "requirements.txt")
+    if os.path.exists(requirements_file):
+        try:
+            install_command = [sys.executable, "-m", "pip", "install", "-r", requirements_file]
+            install_process = subprocess.run(
+                install_command,
+                cwd=bot_dir,
+                capture_output=True,
+                text=True,
+                encoding='utf-8',
+                timeout=300
+            )
+            if install_process.stdout:
+                for line in install_process.stdout.splitlines():
+                    socketio.emit('log', {'data': f'[pip] {line}'}, room=bot_id)
+            if install_process.returncode == 0:
+                socketio.emit('log', {'data': '✅ Dependencies installed successfully.'}, room=bot_id)
+            else:
+                if install_process.stderr:
+                    for line in install_process.stderr.splitlines():
+                        socketio.emit('log', {'data': f'[pip-error] {line}'}, room=bot_id)
+                error_msg = '❌ Failed to install dependencies. Please check logs.'
+                socketio.emit('log', {'data': error_msg}, room=bot_id)
+                return jsonify({"error": "Failed to install dependencies"}), 500
+        except Exception as e:
+            error_msg = f'❌ An unexpected error occurred during dependency installation: {str(e)}'
+            socketio.emit('log', {'data': error_msg}, room=bot_id)
+            return jsonify({"error": "Dependency installation failed"}), 500
+    else:
+        socketio.emit('log', {'data': '⚠️ requirements.txt not found, skipping dependency installation.'}, room=bot_id)
+
+    socketio.emit('log', {'data': f'✅ Pre-flight checks passed'}, room=bot_id)
+    
+    startup_command = [sys.executable, "-u", "bot_template.py"]
+    socketio.emit('log', {'data': f'🚀 Executing: {" ".join(startup_command)}'}, room=bot_id)
+
+    try:
+        # Create subprocess with proper environment
+        env = dict(os.environ)
+        env.update({
+            "PYTHONUNBUFFERED": "1",
+            "PYTHONIOENCODING": "utf-8",
+            "BOT_TOKEN": token,
+            "BOT_ID": bot_id
+        })
+
+        process = subprocess.Popen(
+            startup_command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            bufsize=1,
+            universal_newlines=True,
+            env=env
+        )
+
+        log_thread = threading.Thread(target=stream_bot_logs, args=(bot_id, process), daemon=True)
+        log_thread.start()
+
+        running_bots[bot_id] = {
+            "process": process,
+            "thread": log_thread,
+            "status": "running",
+            "started_at": datetime.datetime.now(),
+            "command": " ".join(startup_command)
+        }
+
+        socketio.emit('log', {'data': f'✅ Bot subprocess started (PID: {process.pid})'}, room=bot_id)
+
+        return jsonify({"success": True, "pid": process.pid, "command": " ".join(startup_command)})
+
+    except Exception as e:
+        error_msg = f'💥 Failed to start bot subprocess: {str(e)}'
+        socketio.emit('log', {'data': error_msg}, room=bot_id)
+        return jsonify({"error": f"Failed to start bot subprocess: {str(e)}"}), 500
+
+@app.route("/api/server/<int:server_index>/stop", methods=["POST"])
+@login_required
+def stop_bot(server_index):
+    user_data = db.users.find_one({"_id": current_user.id})
+    servers = user_data.get("servers", [])
+
+    if server_index >= len(servers):
+        return jsonify({"error": "Server not found"}), 404
+
+    bot_data = servers[server_index]
+    bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
+
+    if bot_id not in running_bots:
+        socketio.emit('log', {
+            'data': f'⚠️ Bot {bot_id} is not running'
+        }, room=bot_id)
+        return jsonify({"error": "Bot is not running"}), 400
+
+    bot_info = running_bots[bot_id]
+    process = bot_info["process"]
+
+    socketio.emit('log', {
+        'data': f'🛑 Stopping bot {bot_id} (PID: {process.pid})...'
+    }, room=bot_id)
+
+    try:
+        # Graceful termination
+        process.terminate()
+
+        try:
+            # Wait for graceful shutdown
+            process.wait(timeout=10)
+            socketio.emit('log', {
+                'data': f'✅ Bot stopped gracefully'
+            }, room=bot_id)
+        except subprocess.TimeoutExpired:
+            # Force kill if it doesn't stop gracefully
+            socketio.emit('log', {
+                'data': f'⚠️ Bot didn\'t stop gracefully, forcing termination...'
+            }, room=bot_id)
+            process.kill()
+            process.wait()
+            socketio.emit('log', {
+                'data': f'💀 Bot terminated forcefully'
+            }, room=bot_id)
+
+        # Clean up
+        del running_bots[bot_id]
+
+        return jsonify({"success": True})
+
+    except Exception as e:
+        error_msg = f'💥 Error stopping bot: {str(e)}'
+        socketio.emit('log', {'data': error_msg}, room=bot_id)
+        return jsonify({"error": f"Error stopping bot: {str(e)}"}), 500
+
+@app.route("/api/server/<int:server_index>/status", methods=["GET"])
+@login_required
+def bot_status(server_index):
+    user_data = db.users.find_one({"_id": current_user.id})
+    servers = user_data.get("servers", [])
+    
+    if server_index >= len(servers):
+        return jsonify({"error": "Server not found"}), 404
+
+    bot_data = servers[server_index]
+    bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
+
+    if bot_id in running_bots:
+        process = running_bots[bot_id]["process"]
+        if process.poll() is None:
+            return jsonify({
+                "status": "running",
+                "pid": process.pid,
+                "started_at": running_bots[bot_id]["started_at"].isoformat(),
+                "command": running_bots[bot_id]["command"]
+            })
+        else:
+            # Process died, clean up
+            del running_bots[bot_id]
+
+    return jsonify({"status": "stopped"})
+
+@app.route("/api/server/<int:server_index>/packages/install", methods=["POST"])
+@login_required
+def install_package(server_index):
+    package_name = request.json.get("package_name")
+    if not package_name:
+        return jsonify({"error": "Package name is required"}), 400
+
+    user_data = db.users.find_one({"_id": current_user.id})
+    servers = user_data.get("servers", [])
+
+    if server_index >= len(servers):
+        return jsonify({"error": "Server not found"}), 404
 
     bot_data = servers[server_index]
     bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
     bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
 
-    if bot_id in running_bots and running_bots[bot_id]['process'].poll() is None:
-        return jsonify({"error": "Bot is already running"}), 400
-    
-    token = bot_data.get("botToken")
-    if not token or len(str(token).strip()) < 50:
-        return jsonify({"error": "Bot token is missing or invalid"}), 400
-    
-    startup_command_str = bot_data.get("startup_command", "python -u bot_template.py")
-    
     try:
-        env = {**os.environ, "PYTHONUNBUFFERED": "1", "PYTHONIOENCODING": "utf-8", "BOT_TOKEN": token}
-        cmd_list = shlex.split(startup_command_str)
-        process = subprocess.Popen(
-            cmd_list, cwd=bot_dir, stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE, text=True, bufsize=1, env=env
+        # Install package in bot's directory context
+        result = subprocess.run(
+            ["pip", "install", package_name],
+            capture_output=True,
+            text=True,
+            cwd=bot_dir,
+            timeout=300  # 5 minute timeout
         )
-        log_thread = threading.Thread(target=stream_bot_logs, args=(bot_id, process), daemon=True)
-        log_thread.start()
-        running_bots[bot_id] = {"process": process, "thread": log_thread}
-        return jsonify({"success": True, "pid": process.pid})
-    except Exception as e:
-        logger.exception("Error starting bot")
-        return jsonify({"error": str(e)}), 500
 
-@app.route("/api/server/<int:server_index>/stop", methods=["POST"])
+        if result.returncode != 0:
+            return jsonify({"error": f"Failed to install package: {result.stderr}"}), 500
+
+        return jsonify({"success": True, "message": result.stdout})
+    except subprocess.TimeoutExpired:
+        return jsonify({"error": "Package installation timed out"}), 500
+    except Exception as e:
+        return jsonify({"error": f"Error installing package: {str(e)}"}), 500
+
+@app.route("/api/server/<int:server_index>/packages/uninstall", methods=["POST"])
 @login_required
-def stop_bot(server_index):
-    user_oid = ObjectId(current_user.id)
-    user_data = db.users.find_one({"_id": user_oid})
-    servers = user_data.get("servers", [])
-    if server_index >= len(servers): return jsonify({"error": "Server not found"}), 404
+def uninstall_package(server_index):
+    package_name = request.json.get("package_name")
+    if not package_name:
+        return jsonify({"error": "Package name is required"}), 400
 
-    bot_data = servers[server_index]
-    bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
-
-    if bot_id not in running_bots or running_bots[bot_id]['process'].poll() is not None:
-        return jsonify({"error": "Bot is not running"}), 400
-
-    process = running_bots[bot_id]["process"]
     try:
-        process.terminate()
-        try:
-            process.wait(timeout=10)
-        except subprocess.TimeoutExpired:
-            process.kill()
+        result = subprocess.run(
+            ["pip", "uninstall", "-y", package_name],
+            capture_output=True,
+            text=True,
+            timeout=300
+        )
+
+        if result.returncode != 0:
+            return jsonify({"error": f"Failed to uninstall package: {result.stderr}"}), 500
+
+        return jsonify({"success": True, "message": result.stdout})
+    except subprocess.TimeoutExpired:
+        return jsonify({"error": "Package uninstallation timed out"}), 500
     except Exception as e:
-        logger.exception("Error stopping bot")
-        return jsonify({"error": str(e)}), 500
-    
-    return jsonify({"success": True})
+        return jsonify({"error": f"Error uninstalling package: {str(e)}"}), 500
 
 if __name__ == "__main__":
     try:
-        logger.info("🚀 Starting Flask application...")
-        socketio.run(app, host='0.0.0.0', port=int(os.getenv("PORT", "30158")), debug=True, allow_unsafe_werkzeug=True)
+        print("🚀 Starting Flask application...")
+        print(f"BOT_WORKSPACES_PATH: {BOT_WORKSPACES_PATH}")
+        socketio.run(app, host='0.0.0.0', port=30158, debug=True, allow_unsafe_werkzeug=True)
     except KeyboardInterrupt:
-        logger.info("Shutting down by keyboard interrupt...")
-    finally:
+        print("\nShutting down...")
         cleanup_bot_processes()

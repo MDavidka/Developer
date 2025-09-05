@@ -1247,6 +1247,10 @@
 
             // Bot controls - JAVÍTOTT VERZIÓ
             document.getElementById('start-bot-btn').addEventListener('click', async () => {
+                // Automatically open the console
+                mobileConsole.classList.add('open');
+                consoleToggle.classList.add('active');
+
                 try {
                     const startBtn = document.getElementById('start-bot-btn');
                     startBtn.disabled = true;
