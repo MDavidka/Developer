@@ -420,10 +420,18 @@ def create_file(server_index):
     try:
         if file_type == "folder":
             os.makedirs(full_path, exist_ok=True)
+            db.users.update_one(
+                {"_id": current_user.id, f"servers.{server_index}.server_name": bot_data['server_name']},
+                {"$push": {"servers.$.files": {"path": path, "type": "folder"}}}
+            )
         else:
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
             with open(full_path, "w", encoding='utf-8') as f:
                 f.write("")
+            db.users.update_one(
+                {"_id": current_user.id, f"servers.{server_index}.server_name": bot_data['server_name']},
+                {"$push": {"servers.$.files": {"path": path, "type": "file", "content": ""}}}
+            )
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"error": f"Error creating file/folder: {str(e)}"}), 500
@@ -449,8 +457,17 @@ def delete_file(server_index):
         if os.path.isdir(full_path):
             import shutil
             shutil.rmtree(full_path)
+            # Remove the folder and all its contents from the database
+            db.users.update_one(
+                {"_id": current_user.id, f"servers.{server_index}.server_name": bot_data['server_name']},
+                {"$pull": {"servers.$.files": {"path": {"$regex": f"^{path}(/.*)?$"}}}}
+            )
         elif os.path.isfile(full_path):
             os.remove(full_path)
+            db.users.update_one(
+                {"_id": current_user.id, f"servers.{server_index}.server_name": bot_data['server_name']},
+                {"$pull": {"servers.$.files": {"path": path}}}
+            )
         else:
             return jsonify({"error": "File or folder not found"}), 404
         return jsonify({"success": True})
@@ -602,7 +619,8 @@ def start_bot(server_index):
             text=True,
             bufsize=1,
             universal_newlines=True,
-            env=env
+            env=env,
+            cwd=bot_dir
         )
 
         log_thread = threading.Thread(target=stream_bot_logs, args=(bot_id, process), daemon=True)
