@@ -1242,3 +1242,187 @@
                         console.error('Error creating folder:', error);
                         alert('Network error occurred');
                     }
+                }
+            });
+
+            // Bot controls - JAVÍTOTT VERZIÓ
+            document.getElementById('start-bot-btn').addEventListener('click', async () => {
+                // Automatically open the console
+                mobileConsole.classList.add('open');
+                consoleToggle.classList.add('active');
+
+                try {
+                    const startBtn = document.getElementById('start-bot-btn');
+                    startBtn.disabled = true;
+                    startBtn.innerHTML = '<div class="spinner"></div> Starting...';
+                    
+                    const response = await fetch(`/api/server/${serverIndex}/start`, { 
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok && data.success) {
+                        botStatus.textContent = 'Status: online';
+                        // Add success message to console
+                        addConsoleMessage('✅ Bot started successfully', 'success');
+                    } else {
+                        console.error('Error starting bot:', data.error);
+                        addConsoleMessage(`❌ Failed to start bot: ${data.error}`, 'error');
+                        alert(`Failed to start bot: ${data.error}`);
+                    }
+                } catch (error) {
+                    console.error('Network error:', error);
+                    addConsoleMessage(`💥 Network error: ${error.message}`, 'error');
+                    alert(`Network error: ${error.message}`);
+                } finally {
+                    const startBtn = document.getElementById('start-bot-btn');
+                    startBtn.disabled = false;
+                    startBtn.innerHTML = '<span class="icon-play"></span> Start';
+                }
+            });
+
+            document.getElementById('stop-bot-btn').addEventListener('click', async () => {
+                try {
+                    const stopBtn = document.getElementById('stop-bot-btn');
+                    stopBtn.disabled = true;
+                    stopBtn.innerHTML = '<div class="spinner"></div> Stopping...';
+                    
+                    const response = await fetch(`/api/server/${serverIndex}/stop`, { 
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok && data.success) {
+                        botStatus.textContent = 'Status: offline';
+                        addConsoleMessage('⏹ Bot stopped successfully', 'success');
+                    } else {
+                        console.error('Error stopping bot:', data.error);
+                        addConsoleMessage(`❌ Failed to stop bot: ${data.error}`, 'error');
+                        alert(`Failed to stop bot: ${data.error}`);
+                    }
+                } catch (error) {
+                    console.error('Network error:', error);
+                    addConsoleMessage(`💥 Network error: ${error.message}`, 'error');
+                    alert(`Network error: ${error.message}`);
+                } finally {
+                    const stopBtn = document.getElementById('stop-bot-btn');
+                    stopBtn.disabled = false;
+                    stopBtn.innerHTML = '<span class="icon-stop"></span> Stop';
+                }
+            });
+
+            // Helper function to add console messages
+            function addConsoleMessage(message, type = 'info') {
+                const line = document.createElement('div');
+                line.className = 'console-line';
+                const timestamp = new Date().toLocaleTimeString();
+                line.textContent = `[${timestamp}] ${message}`;
+                
+                if (type === 'error') {
+                    line.style.color = '#ff4444';
+                } else if (type === 'success') {
+                    line.style.color = '#00aa00';
+                }
+                
+                consoleOutput.appendChild(line);
+                consoleOutput.scrollTop = consoleOutput.scrollHeight;
+            }
+
+            // Socket.IO for console
+            const socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + '/editor');
+
+            socket.on('connect', () => {
+                console.log('Socket.IO connected');
+                socket.emit('join', { bot_id: botId });
+            });
+
+            socket.on('disconnect', () => {
+                console.log('Socket.IO disconnected');
+                addConsoleMessage('🔌 Connection lost', 'error');
+            });
+
+            socket.on('log', (msg) => {
+                const line = document.createElement('div');
+                line.className = 'console-line';
+                line.textContent = msg.data;
+                consoleOutput.appendChild(line);
+                consoleOutput.scrollTop = consoleOutput.scrollHeight;
+            });
+
+            // Touch gestures
+            let touchStartX = 0;
+            let touchStartY = 0;
+
+            document.addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            });
+
+            document.addEventListener('touchmove', (e) => {
+                if (!touchStartX || !touchStartY) return;
+
+                const touchEndX = e.touches[0].clientX;
+                const touchEndY = e.touches[0].clientY;
+                const deltaX = touchStartX - touchEndX;
+                const deltaY = touchStartY - touchEndY;
+
+                // Swipe right to open sidebar (from left edge)
+                if (touchStartX < 20 && deltaX < -100 && Math.abs(deltaY) < 50) {
+                    openSidebar();
+                }
+                
+                // Swipe left to close sidebar
+                if (sidebar.classList.contains('open') && deltaX > 100 && Math.abs(deltaY) < 50) {
+                    closeSidebar();
+                }
+            });
+
+            // Prevent iOS bounce scroll
+            document.addEventListener('touchmove', (e) => {
+                if (e.target.closest('.console-output') || 
+                    e.target.closest('.file-tree') || 
+                    e.target.closest('.CodeMirror-scroll') ||
+                    e.target.closest('.mobile-tabs')) {
+                    return;
+                }
+                e.preventDefault();
+            }, { passive: false });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey || e.metaKey) {
+                    if (e.key === 's') {
+                        e.preventDefault();
+                        if (!saveBtn.disabled) saveFile();
+                    }
+                    if (e.key === '`') {
+                        e.preventDefault();
+                        consoleToggle.click();
+                    }
+                }
+            });
+
+            // Initialize
+            renderFileTree({{ bot.files_tree | tojson }});
+            
+            // Check initial bot status
+            fetch(`/api/server/${serverIndex}/status`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status) {
+                        botStatus.textContent = `Status: ${data.status}`;
+                    }
+                })
+                .catch(console.error);
+        });
+    </script>
+</body>
+</html>
