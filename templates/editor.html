@@ -27,7 +27,7 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
             background: #101010;
-            color: #e0e0e0;
+            color: #ffffff;
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
@@ -36,29 +36,52 @@
             touch-action: manipulation;
         }
 
-        /* Frosted Glass Effect */
+        /* Glassmorphism Effects */
         .glass {
-            background: rgba(26, 26, 26, 0.8);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .glass-light {
-            background: rgba(42, 42, 42, 0.6);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        .glass-button {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Header */
+        .glass-button:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-button:active {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(0);
+            box-shadow: 0 4px 16px rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-button:disabled {
+            background: rgba(255, 255, 255, 0.02);
+            border-color: rgba(255, 255, 255, 0.05);
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Header - Larger on Mobile */
         .header {
-            background: rgba(26, 26, 26, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 0 16px;
-            height: 56px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 0 20px;
+            height: 68px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -72,68 +95,54 @@
         .header-left {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 16px;
             flex: 1;
             min-width: 0;
         }
 
         .mobile-menu-btn {
-            width: 40px;
-            height: 40px;
-            border: none;
-            background: rgba(42, 42, 42, 0.6);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            cursor: pointer;
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 12px;
-            font-size: 18px;
+            font-size: 20px;
             flex-shrink: 0;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            color: #e0e0e0;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .mobile-menu-btn:hover {
-            background: rgba(42, 42, 42, 0.8);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        .mobile-menu-btn:active {
-            transform: translateY(0);
-            background: rgba(55, 55, 55, 0.9);
+            color: #ffffff;
+            cursor: pointer;
+            border: none;
         }
 
         .logo {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             font-weight: 600;
-            font-size: 16px;
+            font-size: 18px;
             text-decoration: none;
-            color: #e0e0e0;
+            color: #ffffff;
         }
 
         .logo-icon {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 8px;
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #fff;
-            font-size: 16px;
+            color: #ffffff;
+            font-size: 18px;
             font-weight: 700;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .current-file {
-            color: #a0a0a0;
-            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 16px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -144,54 +153,26 @@
         .header-right {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
             flex-shrink: 0;
         }
 
         .header-btn {
-            width: 40px;
-            height: 40px;
-            border: none;
-            background: rgba(42, 42, 42, 0.6);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border-radius: 12px;
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 16px;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            color: #e0e0e0;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .header-btn:hover {
-            background: rgba(42, 42, 42, 0.8);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        .header-btn:active {
-            transform: translateY(0);
-            background: rgba(55, 55, 55, 0.9);
-        }
-
-        .header-btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .header-btn:disabled:hover {
-            transform: none;
-            box-shadow: none;
+            font-size: 18px;
+            color: #ffffff;
+            border: none;
         }
 
         .header-btn.active {
-            background: rgba(102, 126, 234, 0.8);
-            color: #fff;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
         }
 
         /* Main Layout */
@@ -205,23 +186,23 @@
         .main-container {
             flex: 1;
             display: flex;
-            margin-top: 56px;
+            margin-top: 68px;
             overflow: hidden;
         }
 
         /* Sidebar */
         .sidebar {
             position: fixed;
-            top: 56px;
+            top: 68px;
             left: 0;
             width: 100%;
-            height: calc(100vh - 56px);
-            background: rgba(26, 26, 26, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            height: calc(100vh - 68px);
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
             z-index: 900;
             transform: translateX(-100%);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
         }
@@ -232,17 +213,17 @@
 
         .sidebar-overlay {
             position: fixed;
-            top: 56px;
+            top: 68px;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
+            background: rgba(16, 16, 16, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             z-index: 800;
             opacity: 0;
             visibility: hidden;
-            transition: all 0.3s ease;
+            transition: all 0.4s ease;
         }
 
         .sidebar-overlay.active {
@@ -251,101 +232,84 @@
         }
 
         .sidebar-header {
-            padding: 24px 20px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 28px 24px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
 
         .sidebar-title {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 600;
-            color: #e0e0e0;
+            color: #ffffff;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
         .sidebar-actions {
             display: flex;
-            gap: 8px;
+            gap: 10px;
         }
 
         .sidebar-btn {
-            width: 36px;
-            height: 36px;
-            border: none;
-            background: rgba(42, 42, 42, 0.6);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border-radius: 10px;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 16px;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            color: #e0e0e0;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .sidebar-btn:hover {
-            background: rgba(42, 42, 42, 0.8);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        .sidebar-btn:active {
-            transform: translateY(0);
-            background: rgba(55, 55, 55, 0.9);
+            font-size: 18px;
+            color: #ffffff;
+            border: none;
         }
 
         .file-tree {
             flex: 1;
             overflow-y: auto;
-            padding: 12px 0;
+            padding: 16px 0;
         }
 
         .file-item {
             display: flex;
             align-items: center;
-            padding: 14px 20px;
+            padding: 18px 24px;
             cursor: pointer;
-            font-size: 15px;
+            font-size: 16px;
             border: none;
             background: none;
             width: 100%;
             text-align: left;
-            gap: 12px;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            min-height: 48px;
-            color: #e0e0e0;
+            gap: 14px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 56px;
+            color: #ffffff;
             border-radius: 0;
             font-weight: 500;
         }
 
         .file-item:hover {
-            background: rgba(42, 42, 42, 0.4);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
         }
 
         .file-item:active {
-            background: rgba(55, 55, 55, 0.6);
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .file-item.active {
-            background: rgba(102, 126, 234, 0.6);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            color: #fff;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-left: 3px solid #ffffff;
         }
 
         .file-icon {
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             flex-shrink: 0;
         }
 
@@ -360,15 +324,16 @@
 
         /* Mobile Tabs */
         .mobile-tabs {
-            background: rgba(26, 26, 26, 0.9);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             overflow-x: auto;
             overflow-y: hidden;
             white-space: nowrap;
             -webkit-overflow-scrolling: touch;
             display: none;
+            height: 52px;
         }
 
         .mobile-tabs::-webkit-scrollbar {
@@ -378,68 +343,70 @@
         .tabs-wrapper {
             display: inline-flex;
             min-width: 100%;
+            height: 100%;
         }
 
         .mobile-tab {
             display: inline-flex;
             align-items: center;
-            padding: 16px 24px;
+            padding: 16px 28px;
             border: none;
             background: none;
             cursor: pointer;
-            font-size: 14px;
-            color: #a0a0a0;
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.6);
             border-bottom: 2px solid transparent;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            gap: 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            gap: 12px;
             white-space: nowrap;
-            min-width: 140px;
+            min-width: 160px;
             justify-content: center;
             flex-shrink: 0;
             font-weight: 500;
+            height: 100%;
         }
 
         .mobile-tab.active {
-            color: #e0e0e0;
-            border-bottom-color: #667eea;
-            background: rgba(102, 126, 234, 0.1);
+            color: #ffffff;
+            border-bottom-color: #ffffff;
+            background: rgba(255, 255, 255, 0.05);
         }
 
         .mobile-tab:hover {
-            background: rgba(42, 42, 42, 0.4);
-            color: #e0e0e0;
+            background: rgba(255, 255, 255, 0.04);
+            color: #ffffff;
         }
 
         .mobile-tab:active {
-            background: rgba(55, 55, 55, 0.6);
+            background: rgba(255, 255, 255, 0.08);
         }
 
         .tab-close {
-            width: 20px;
-            height: 20px;
-            border-radius: 6px;
+            width: 22px;
+            height: 22px;
+            border-radius: 8px;
             border: none;
             background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 14px;
-            margin-left: 8px;
-            color: #a0a0a0;
+            margin-left: 10px;
+            color: rgba(255, 255, 255, 0.7);
             transition: all 0.2s ease;
         }
 
         .tab-close:hover {
             background: rgba(255, 255, 255, 0.2);
-            color: #fff;
+            color: #ffffff;
             transform: scale(1.1);
         }
 
         .tab-close:active {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.25);
             transform: scale(0.95);
         }
 
@@ -458,39 +425,39 @@
         .CodeMirror {
             height: 100% !important;
             font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
-            font-size: 14px;
+            font-size: 15px;
             line-height: 1.6;
             background: #101010 !important;
-            color: #e0e0e0 !important;
+            color: #ffffff !important;
         }
 
         .CodeMirror-gutters {
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(26, 26, 26, 0.8) !important;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.02) !important;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
         }
 
         .CodeMirror-linenumber {
-            color: #666 !important;
-            padding: 0 8px;
-            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4) !important;
+            padding: 0 10px;
+            font-size: 13px;
             font-weight: 500;
         }
 
         .CodeMirror-cursor {
-            border-left: 2px solid #667eea !important;
+            border-left: 2px solid #ffffff !important;
         }
 
         .CodeMirror-selected {
-            background: rgba(102, 126, 234, 0.2) !important;
+            background: rgba(255, 255, 255, 0.1) !important;
         }
 
         .CodeMirror-focused .CodeMirror-selected {
-            background: rgba(102, 126, 234, 0.3) !important;
+            background: rgba(255, 255, 255, 0.15) !important;
         }
 
-        /* Empty State - Optimized for Mobile */
+        /* Empty State - Centered and Optimized */
         .mobile-empty-state {
             flex: 1;
             display: flex;
@@ -498,120 +465,123 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 40px 24px;
+            padding: 48px 32px;
             min-height: 0;
         }
 
         .empty-icon {
-            width: 80px;
-            height: 80px;
-            background: rgba(42, 42, 42, 0.6);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
+            width: 96px;
+            height: 96px;
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 24px;
-            color: #667eea;
+            margin-bottom: 32px;
+            color: rgba(255, 255, 255, 0.6);
         }
 
         .mobile-empty-state h3 {
-            font-size: 20px;
+            font-size: 24px;
             font-weight: 600;
-            margin-bottom: 12px;
-            color: #e0e0e0;
+            margin-bottom: 16px;
+            color: #ffffff;
         }
 
         .mobile-empty-state p {
-            color: #a0a0a0;
-            font-size: 16px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 17px;
             line-height: 1.5;
-            max-width: 280px;
+            max-width: 320px;
         }
 
         /* Mobile Status Bar */
         .mobile-status-bar {
-            height: 52px;
-            background: rgba(26, 26, 26, 0.9);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            height: 60px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 20px;
-            font-size: 12px;
-            color: #a0a0a0;
+            padding: 0 24px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
         }
 
         .status-left {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 20px;
         }
 
         .save-btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 12px;
-            background: rgba(42, 42, 42, 0.6);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            color: #e0e0e0;
-            font-size: 14px;
+            padding: 12px 24px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            color: #ffffff;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
-            gap: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            gap: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
         }
 
         .save-btn:disabled {
-            opacity: 0.4;
+            background: rgba(255, 255, 255, 0.02);
+            border-color: rgba(255, 255, 255, 0.04);
+            opacity: 0.3;
             cursor: not-allowed;
             transform: none;
         }
 
         .save-btn:not(:disabled):hover {
-            background: rgba(42, 42, 42, 0.8);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(255, 255, 255, 0.1);
         }
 
         .save-btn:not(:disabled):active {
-            background: rgba(55, 55, 55, 0.9);
+            background: rgba(255, 255, 255, 0.2);
             transform: translateY(0);
         }
 
         .save-btn.primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #fff;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 4px 16px rgba(255, 255, 255, 0.1);
         }
 
         .save-btn.primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(255, 255, 255, 0.15);
         }
 
-        /* Mobile Console - Optimized */
+        /* Mobile Console */
         .mobile-console {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            height: 50vh;
-            background: rgba(26, 26, 26, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            height: 55vh;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
             z-index: 700;
             transform: translateY(100%);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
         }
@@ -624,179 +594,158 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 16px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(42, 42, 42, 0.3);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
         }
 
         .console-title {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 600;
-            color: #e0e0e0;
+            color: #ffffff;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
         .console-actions {
             display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
+            gap: 12px;
             align-items: center;
         }
 
+        /* Simplified Console Buttons - Only Icons */
         .console-btn {
-            padding: 8px 14px;
-            border: none;
-            border-radius: 8px;
-            background: rgba(42, 42, 42, 0.6);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            color: #e0e0e0;
-            font-size: 12px;
-            font-weight: 600;
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            color: #ffffff;
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
-            gap: 6px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            min-width: 70px;
             justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            font-size: 16px;
         }
 
         .console-btn:hover {
-            background: rgba(42, 42, 42, 0.8);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(255, 255, 255, 0.1);
         }
 
         .console-btn:active {
-            background: rgba(55, 55, 55, 0.9);
+            background: rgba(255, 255, 255, 0.2);
             transform: translateY(0);
         }
 
         .console-btn:disabled {
-            opacity: 0.4;
+            background: rgba(255, 255, 255, 0.02);
+            border-color: rgba(255, 255, 255, 0.04);
+            opacity: 0.3;
             cursor: not-allowed;
-            transform: none;
-        }
-
-        .console-btn:disabled:hover {
-            transform: none;
-            box-shadow: none;
+            transform: none !important;
+            box-shadow: none !important;
         }
 
         .console-btn.running {
-            background: rgba(34, 197, 94, 0.8);
-            color: #fff;
-            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
-        }
-
-        .console-btn.running:hover {
-            background: rgba(34, 197, 94, 0.9);
-            box-shadow: 0 6px 16px rgba(34, 197, 94, 0.4);
-        }
-
-        .console-btn.danger {
-            background: rgba(239, 68, 68, 0.8);
-            color: #fff;
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-        }
-
-        .console-btn.danger:hover {
-            background: rgba(239, 68, 68, 0.9);
-            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 16px rgba(255, 255, 255, 0.1);
         }
 
         .console-close {
-            width: 36px;
-            height: 36px;
-            border: none;
-            background: rgba(42, 42, 42, 0.6);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 10px;
-            font-size: 16px;
-            color: #e0e0e0;
+            font-size: 18px;
+            color: #ffffff;
             transition: all 0.2s ease;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .console-close:hover {
-            background: rgba(239, 68, 68, 0.8);
-            color: #fff;
+            background: rgba(255, 255, 255, 0.12);
             transform: scale(1.05);
         }
 
         .console-close:active {
-            background: rgba(239, 68, 68, 0.9);
+            background: rgba(255, 255, 255, 0.15);
             transform: scale(0.95);
         }
 
         .console-output {
             flex: 1;
-            padding: 16px 20px;
+            padding: 20px 24px;
             overflow-y: auto;
             font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
-            font-size: 13px;
+            font-size: 14px;
             line-height: 1.5;
-            background: rgba(16, 16, 16, 0.8);
+            background: rgba(16, 16, 16, 0.4);
             -webkit-overflow-scrolling: touch;
-            color: #e0e0e0;
+            color: #ffffff;
         }
 
         .console-line {
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             word-wrap: break-word;
-            padding: 2px 0;
+            padding: 3px 0;
+            opacity: 0.9;
         }
 
         .console-line.error {
-            color: #ff6b6b;
+            opacity: 1;
             font-weight: 500;
         }
 
         .console-line.warning {
-            color: #ffa500;
+            opacity: 0.8;
             font-weight: 500;
         }
 
         .console-line.success {
-            color: #22c55e;
+            opacity: 1;
             font-weight: 500;
         }
 
         .console-line.info {
-            color: #60a5fa;
+            opacity: 0.7;
         }
 
         /* Desktop Styles */
         @media (min-width: 768px) {
             .header {
-                height: 64px;
-                padding: 0 24px;
+                height: 72px;
+                padding: 0 32px;
             }
 
             .main-container {
-                margin-top: 64px;
+                margin-top: 72px;
                 flex-direction: row;
             }
 
             .sidebar {
                 position: relative;
                 top: 0;
-                width: 300px;
+                width: 320px;
                 height: 100%;
                 transform: translateX(0);
                 transition: none;
-                border-right: 1px solid rgba(255, 255, 255, 0.1);
+                border-right: 1px solid rgba(255, 255, 255, 0.08);
             }
 
             .sidebar-overlay {
@@ -812,60 +761,61 @@
             }
 
             .mobile-console {
-                height: 320px;
+                height: 360px;
             }
 
             .header-left {
-                gap: 16px;
+                gap: 20px;
             }
 
             .current-file {
-                font-size: 16px;
+                font-size: 17px;
             }
 
             .breadcrumb {
                 display: flex;
                 align-items: center;
-                gap: 8px;
-                color: #a0a0a0;
-                font-size: 14px;
+                gap: 10px;
+                color: rgba(255, 255, 255, 0.6);
+                font-size: 15px;
             }
 
             .breadcrumb-separator {
-                color: #666;
+                color: rgba(255, 255, 255, 0.3);
             }
 
             .console-actions {
-                flex-wrap: nowrap;
+                gap: 16px;
             }
 
             .console-btn {
-                min-width: 80px;
+                width: 48px;
+                height: 48px;
             }
 
             .empty-icon {
-                width: 100px;
-                height: 100px;
+                width: 120px;
+                height: 120px;
             }
 
             .mobile-empty-state h3 {
-                font-size: 24px;
+                font-size: 28px;
             }
 
             .mobile-empty-state p {
                 font-size: 18px;
-                max-width: 400px;
+                max-width: 440px;
             }
         }
 
         /* Large screens */
         @media (min-width: 1200px) {
             .sidebar {
-                width: 340px;
+                width: 360px;
             }
 
             .mobile-console {
-                height: 380px;
+                height: 420px;
             }
         }
 
@@ -874,34 +824,32 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 6px 12px;
+            padding: 8px 16px;
             border-radius: 12px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            background: rgba(42, 42, 42, 0.6);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .status-indicator.online {
-            background: rgba(34, 197, 94, 0.2);
-            color: #22c55e;
-            border-color: rgba(34, 197, 94, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
         .status-indicator.offline {
-            background: rgba(239, 68, 68, 0.2);
-            color: #ef4444;
-            border-color: rgba(239, 68, 68, 0.3);
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.08);
+            opacity: 0.6;
         }
 
         .status-indicator.running {
-            background: rgba(102, 126, 234, 0.2);
-            color: #667eea;
-            border-color: rgba(102, 126, 234, 0.3);
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
         }
 
         .status-dot {
@@ -914,7 +862,7 @@
 
         @keyframes pulse {
             0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            50% { opacity: 0.4; }
         }
 
         /* Touch optimizations */
@@ -930,18 +878,18 @@
         }
 
         ::-webkit-scrollbar-track {
-            background: rgba(26, 26, 26, 0.5);
+            background: rgba(255, 255, 255, 0.02);
         }
 
         ::-webkit-scrollbar-thumb {
-            background: rgba(102, 126, 234, 0.6);
+            background: rgba(255, 255, 255, 0.15);
             border-radius: 4px;
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(102, 126, 234, 0.8);
+            background: rgba(255, 255, 255, 0.25);
         }
 
         /* Mobile scrollbars */
@@ -955,47 +903,47 @@
         /* Context Menu */
         .context-menu {
             position: absolute;
-            background: rgba(42, 42, 42, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 8px 0;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border-radius: 16px;
+            padding: 12px 0;
+            box-shadow: 0 16px 64px rgba(0, 0, 0, 0.4);
             z-index: 1000;
-            min-width: 180px;
+            min-width: 200px;
         }
 
         .context-menu-item {
-            padding: 12px 20px;
-            color: #e0e0e0;
+            padding: 16px 24px;
+            color: #ffffff;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 15px;
             border: none;
             background: none;
             width: 100%;
             text-align: left;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
             font-weight: 500;
             transition: all 0.2s ease;
         }
 
         .context-menu-item:hover {
-            background: rgba(102, 126, 234, 0.3);
-            color: #fff;
+            background: rgba(255, 255, 255, 0.08);
+            color: #ffffff;
         }
 
         .context-menu-item:disabled {
-            color: #666;
+            color: rgba(255, 255, 255, 0.3);
             cursor: not-allowed;
         }
 
         .context-menu-separator {
             height: 1px;
-            background: rgba(255, 255, 255, 0.1);
-            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.08);
+            margin: 12px 0;
         }
 
         /* Spinner animation */
@@ -1009,55 +957,54 @@
 
         /* Selection colors */
         ::selection {
-            background: rgba(102, 126, 234, 0.6);
-            color: #fff;
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
         }
 
         ::-moz-selection {
-            background: rgba(102, 126, 234, 0.6);
-            color: #fff;
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
         }
 
         /* Landscape orientation adjustments */
         @media (orientation: landscape) and (max-height: 500px) {
             .header {
-                height: 48px;
+                height: 56px;
             }
             
             .main-container {
-                margin-top: 48px;
+                margin-top: 56px;
             }
             
             .sidebar {
-                top: 48px;
-                height: calc(100vh - 48px);
+                top: 56px;
+                height: calc(100vh - 56px);
             }
             
             .sidebar-overlay {
-                top: 48px;
+                top: 56px;
             }
             
             .mobile-console {
-                height: 60vh;
+                height: 65vh;
             }
             
             .file-item {
-                padding: 10px 20px;
-                min-height: 40px;
+                padding: 12px 24px;
+                min-height: 44px;
             }
             
             .mobile-tab {
-                padding: 12px 16px;
+                padding: 12px 20px;
             }
 
             .console-actions {
-                gap: 6px;
+                gap: 8px;
             }
 
             .console-btn {
-                padding: 6px 10px;
-                font-size: 11px;
-                min-width: 60px;
+                width: 40px;
+                height: 40px;
             }
         }
 
@@ -1078,7 +1025,7 @@
         <!-- Header -->
         <header class="header">
             <div class="header-left">
-                <button class="mobile-menu-btn touch-target" id="mobile-menu-btn" title="Menu">
+                <button class="mobile-menu-btn glass-button touch-target" id="mobile-menu-btn" title="Menu">
                     <i data-lucide="menu"></i>
                 </button>
                 <a href="#" class="logo">
@@ -1092,10 +1039,10 @@
                 </nav>
             </div>
             <div class="header-right">
-                <button class="header-btn touch-target" id="save-btn-header" disabled title="Save File">
+                <button class="header-btn glass-button touch-target" id="save-btn-header" disabled title="Save File">
                     <i data-lucide="save"></i>
                 </button>
-                <button class="header-btn touch-target" id="console-toggle" title="Toggle Console">
+                <button class="header-btn glass-button touch-target" id="console-toggle" title="Toggle Console">
                     <i data-lucide="terminal"></i>
                 </button>
             </div>
@@ -1114,10 +1061,10 @@
                         Files
                     </div>
                     <div class="sidebar-actions">
-                        <button class="sidebar-btn touch-target" id="new-file-btn" title="New File">
+                        <button class="sidebar-btn glass-button touch-target" id="new-file-btn" title="New File">
                             <i data-lucide="file-plus"></i>
                         </button>
-                        <button class="sidebar-btn touch-target" id="new-folder-btn" title="New Folder">
+                        <button class="sidebar-btn glass-button touch-target" id="new-folder-btn" title="New Folder">
                             <i data-lucide="folder-plus"></i>
                         </button>
                     </div>
@@ -1140,7 +1087,7 @@
                 <div class="mobile-editor-container" id="editor-container">
                     <div class="mobile-empty-state" id="empty-state">
                         <div class="empty-icon">
-                            <i data-lucide="file-text" size="32"></i>
+                            <i data-lucide="file-text" size="36"></i>
                         </div>
                         <h3>No file selected</h3>
                         <p>Select a file from the sidebar to start editing your code</p>
@@ -1156,7 +1103,7 @@
                             <span>Offline</span>
                         </div>
                     </div>
-                    <button class="save-btn touch-target" id="save-btn" disabled>
+                    <button class="save-btn glass-button touch-target" id="save-btn" disabled>
                         <i data-lucide="save" size="16"></i>
                         Save
                     </button>
@@ -1168,28 +1115,25 @@
         <div class="mobile-console" id="mobile-console">
             <div class="console-header">
                 <div class="console-title">
-                    <i data-lucide="terminal" size="18"></i>
+                    <i data-lucide="terminal" size="20"></i>
                     Console
                 </div>
                 <div class="console-actions">
-                    <button class="console-btn touch-target" id="start-bot-btn">
-                        <i data-lucide="play" size="14"></i>
-                        Start
+                    <!-- Only show start OR stop button based on state -->
+                    <button class="console-btn touch-target" id="start-bot-btn" title="Start Bot">
+                        <i data-lucide="play" size="18"></i>
                     </button>
-                    <button class="console-btn touch-target" id="stop-bot-btn" disabled>
-                        <i data-lucide="square" size="14"></i>
-                        Stop
+                    <button class="console-btn touch-target" id="stop-bot-btn" disabled style="display: none;" title="Stop Bot">
+                        <i data-lucide="square" size="16"></i>
                     </button>
-                    <button class="console-btn touch-target" id="restart-bot-btn" disabled>
-                        <i data-lucide="rotate-cw" size="14"></i>
-                        Restart
+                    <button class="console-btn touch-target" id="restart-bot-btn" disabled style="display: none;" title="Restart Bot">
+                        <i data-lucide="rotate-cw" size="16"></i>
                     </button>
-                    <button class="console-btn touch-target" id="clear-console-btn">
-                        <i data-lucide="trash-2" size="14"></i>
-                        Clear
+                    <button class="console-btn touch-target" id="clear-console-btn" title="Clear Console">
+                        <i data-lucide="trash-2" size="16"></i>
                     </button>
                     <button class="console-close touch-target" id="console-close">
-                        <i data-lucide="x" size="18"></i>
+                        <i data-lucide="x" size="20"></i>
                     </button>
                 </div>
             </div>
@@ -1317,19 +1261,19 @@
 
             function updateBotControlButtons() {
                 if (botRunning) {
-                    startBotBtn.disabled = true;
+                    startBotBtn.style.display = 'none';
+                    stopBotBtn.style.display = 'flex';
+                    restartBotBtn.style.display = 'flex';
                     stopBotBtn.disabled = false;
                     restartBotBtn.disabled = false;
-                    startBotBtn.classList.remove('running');
                     stopBotBtn.classList.add('running');
                     restartBotBtn.classList.add('running');
                 } else {
+                    startBotBtn.style.display = 'flex';
+                    stopBotBtn.style.display = 'none';
+                    restartBotBtn.style.display = 'none';
                     startBotBtn.disabled = false;
-                    stopBotBtn.disabled = true;
-                    restartBotBtn.disabled = true;
                     startBotBtn.classList.remove('running');
-                    stopBotBtn.classList.remove('running');
-                    restartBotBtn.classList.remove('running');
                 }
                 lucide.createIcons();
             }
@@ -1345,7 +1289,6 @@
                 socket.emit('stop_bot', { server_index: serverIndex, bot_id: botId });
                 addConsoleMessage('Stopping bot...', 'info');
                 stopBotBtn.disabled = true;
-                stopBotBtn.classList.add('danger');
             });
 
             restartBotBtn.addEventListener('click', function() {
