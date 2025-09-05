@@ -1072,6 +1072,17 @@
             opacity: 0.7;
         }
 
+        .console-indicator {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: yellow;
+            border-radius: 50%;
+            right: 20px;
+            top: calc(16px + 56px + 16px + 56px + 16px + 56px - 15px);
+            z-index: 1000;
+        }
+
         /* Desktop Styles */
         @media (min-width: 768px) {
             .header {
@@ -1506,6 +1517,7 @@
         <button class="edge-button glass-button console-toggle touch-target" id="console-toggle" title="Toggle Console">
             <i data-lucide="terminal"></i>
         </button>
+        <div class="console-indicator"></div>
 
         <!-- Sidebar Overlay -->
         <div class="sidebar-overlay" id="sidebar-overlay"></div>
@@ -1557,9 +1569,9 @@
                 <div class="mobile-status-bar">
                     <div class="status-left">
                         <span id="cursor-position">Ln 1, Col 1</span>
-                        <div class="status-indicator offline" id="bot-status">
+                        <div class="status-indicator {{ 'online' if bot.status == 'online' else 'offline' }}" id="bot-status">
                             <div class="status-dot"></div>
-                            <span>Offline</span>
+                            <span>{{ 'Online' if bot.status == 'online' else 'Offline' }}</span>
                         </div>
                     </div>
                     <button class="save-btn glass-button touch-target" id="save-btn" disabled>
