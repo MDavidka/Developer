@@ -220,6 +220,105 @@
             top: 16px;
         }
 
+        /* Vertical hiding container for Save & Console buttons with toggle ^ button */
+        .hide-buttons-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            position: fixed;
+            right: 16px;
+            bottom: 100px;
+            z-index: 1100;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 16px;
+            padding: 8px;
+            backdrop-filter: blur(30px) saturate(1.2);
+            -webkit-backdrop-filter: blur(30px) saturate(1.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .hide-buttons-toggle {
+            background: rgba(255, 255, 255, 0.04);
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            color: #fff;
+            font-weight: 700;
+            font-size: 16px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+        }
+
+        .hide-buttons-toggle:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .hide-buttons-toggle:active {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(0);
+        }
+
+        /* Hidden state styles */
+        .hide-buttons-container.hide-save-console {
+            height: 36px;
+            width: 48px;
+            flex-direction: row;
+            padding: 0;
+            border-radius: 16px;
+            overflow: hidden;
+            justify-content: center;
+            box-shadow: none;
+        }
+
+        .hide-buttons-container.hide-save-console .save-btn-header,
+        .hide-buttons-container.hide-save-console .console-toggle {
+            display: none;
+        }
+
+        /* Console button with status dot */
+        .console-btn {
+            position: relative;
+        }
+
+        /* Fixed console status dot - orange by default, positioned in button's bottom-right with cutout */
+        .console-indicator {
+            background-color: orange !important;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            position: absolute;
+            right: 6px;
+            bottom: 6px;
+            pointer-events: none;
+            box-shadow: 0 0 4px rgba(0,0,0,0.5);
+            clip-path: polygon(0 0, 100% 0, 100% 70%, 70% 100%, 0 100%);
+            z-index: 1001;
+            transition: background-color 0.3s ease;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .console-indicator.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Green state when bot is running */
+        .console-indicator.running {
+            background-color: #00ff00 !important;
+        }
+
         /* Right Side - User Profile and Action Buttons */
         .user-profile {
             position: fixed;
@@ -347,17 +446,6 @@
             height: 1px;
             background: rgba(255, 255, 255, 0.05);
             margin: 8px 0;
-        }
-
-        /* Right side action buttons - positioned symmetrically */
-        .save-btn-header {
-            right: 16px;
-            top: calc(16px + 56px + 16px);
-        }
-
-        .console-toggle {
-            right: 16px;
-            top: calc(16px + 56px + 16px + 56px + 16px);
         }
 
         /* Main Layout */
@@ -970,6 +1058,7 @@
             border: 1px solid rgba(255, 255, 255, 0.06);
             font-size: 16px;
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+            position: relative;
         }
 
         .console-btn:hover {
@@ -1072,15 +1161,26 @@
             opacity: 0.7;
         }
 
-        .console-indicator {
-            position: fixed;
-            width: 10px;
-            height: 10px;
-            background-color: yellow;
-            border-radius: 50%;
-            right: 20px;
-            top: calc(16px + 56px + 16px + 56px + 16px + 56px - 15px);
-            z-index: 1000;
+        /* Editor view: Hide Save button, Console toggle, and AI input - Keep header and numbered lines */
+        .editor-only-view .hide-buttons-container,
+        .editor-only-view .ai-chat-container {
+            display: none !important;
+        }
+
+        /* Ensure code editor content area uses full height in editor-only view */
+        .editor-only-view .content-area {
+            height: calc(100vh - 104px);
+            overflow: auto;
+        }
+
+        /* Mobile tabs: Single tab visible on screen */
+        @media (max-width: 767px) {
+            .mobile-tabs {
+                overflow-x: hidden !important;
+            }
+            .mobile-tabs .mobile-tab:not(.active) {
+                display: none;
+            }
         }
 
         /* Desktop Styles */
@@ -1131,6 +1231,14 @@
                 padding: 0 12px; /* Increased padding for desktop */
             }
 
+            /* Desktop keeps multiple tabs visible (existing behavior preserved) */
+            .mobile-tabs {
+                overflow-x: auto;
+            }
+            .mobile-tabs .mobile-tab {
+                display: inline-flex;
+            }
+
             .mobile-console {
                 height: 360px;
             }
@@ -1160,19 +1268,6 @@
 
             .mobile-empty-state {
                 padding: 48px 32px 160px;
-            }
-
-            /* Desktop symmetrical positioning */
-            .save-btn-header {
-                top: calc(16px + 56px + 16px);
-            }
-
-            .console-toggle {
-                top: calc(16px + 56px + 16px + 56px + 16px);
-            }
-
-            .user-dropdown {
-                top: calc(16px + 56px + 16px);
             }
 
             /* Don't hide buttons on desktop */
@@ -1311,4 +1406,547 @@
 
         /* Mobile scrollbars */
         @media (max-width: 767px) {
-            ::-webkit-scrollb
+            ::-webkit-scrollbar {
+                width: 4px;
+                height: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <a href="#" class="logo">
+                <div class="logo-icon">C</div>
+                <div class="current-file">
+                    <span class="file-path">main.py</span>
+                    <span class="file-separator">/</span>
+                    Code Editor
+                </div>
+            </a>
+        </div>
+
+        <!-- Left Edge Button - Mobile Menu -->
+        <button class="edge-button mobile-menu-btn" onclick="toggleSidebar()">
+            ☰
+        </button>
+
+        <!-- Vertical Hide Container for Save & Console Buttons -->
+        <div class="hide-buttons-container" id="hideButtonsContainer">
+            <button class="hide-buttons-toggle" onclick="toggleButtonVisibility()">^</button>
+            <button class="save-btn-header edge-button" id="saveBtn" onclick="saveFile()">💾</button>
+            <button class="console-toggle edge-button console-btn" id="consoleToggle" onclick="toggleConsole()">
+                ⚡
+                <div class="console-indicator" id="consoleIndicator"></div>
+            </button>
+        </div>
+
+        <!-- Right Edge Button - User Profile -->
+        <div class="user-profile" onclick="toggleUserDropdown()">
+            <img src="image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E" alt="User Avatar" class="user-avatar">
+        </div>
+
+        <!-- User Dropdown -->
+        <div class="user-dropdown" id="userDropdown">
+            <div class="user-dropdown-header">
+                <img src="image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E" alt="User Avatar" class="user-dropdown-avatar">
+                <div class="user-dropdown-info">
+                    <h3>Developer</h3>
+                    <p>Pro Account</p>
+                </div>
+            </div>
+            <button class="user-dropdown-item" onclick="showProfile()">
+                👤 Profile
+            </button>
+            <button class="user-dropdown-item" onclick="showSettings()">
+                ⚙️ Settings
+            </button>
+            <div class="user-dropdown-separator"></div>
+            <button class="user-dropdown-item" onclick="logout()">
+                🚪 Logout
+            </button>
+        </div>
+
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+        <!-- Enhanced Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">
+                    📁 Files
+                </h2>
+                <div class="sidebar-actions">
+                    <button class="sidebar-btn glass-button" onclick="createNewFile()">+</button>
+                    <button class="sidebar-btn glass-button" onclick="refreshFiles()">↻</button>
+                </div>
+            </div>
+            <div class="file-tree">
+                <button class="file-item active" onclick="openFile('main.py')">
+                    <span class="file-icon">🐍</span>
+                    main.py
+                </button>
+                <button class="file-item" onclick="openFile('utils.py')">
+                    <span class="file-icon">🔧</span>
+                    utils.py
+                </button>
+                <button class="file-item" onclick="openFile('config.json')">
+                    <span class="file-icon">⚙️</span>
+                    config.json
+                </button>
+                <button class="file-item" onclick="openFile('README.md')">
+                    <span class="file-icon">📄</span>
+                    README.md
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Container -->
+        <div class="main-container">
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Mobile Tabs -->
+                <div class="mobile-tabs" id="mobileTabs">
+                    <div class="tabs-wrapper">
+                        <button class="mobile-tab active" onclick="switchTab('main.py')">
+                            🐍 main.py
+                            <button class="tab-close" onclick="closeTab('main.py', event)">×</button>
+                        </button>
+                        <button class="mobile-tab" onclick="switchTab('utils.py')">
+                            🔧 utils.py
+                            <button class="tab-close" onclick="closeTab('utils.py', event)">×</button>
+                        </button>
+                        <button class="mobile-tab" onclick="switchTab('config.json')">
+                            ⚙️ config.json
+                            <button class="tab-close" onclick="closeTab('config.json', event)">×</button>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mobile Editor Container -->
+                <div class="mobile-editor-container">
+                    <div class="editor-wrapper" id="editorWrapper">
+                        <!-- Empty State -->
+                        <div class="mobile-empty-state" id="emptyState">
+                            <div class="empty-icon">📝</div>
+                            <h3>No File Open</h3>
+                            <p>Select a file from the sidebar or create a new one to start coding</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enhanced Status Bar -->
+                <div class="mobile-status-bar">
+                    <div class="status-left">
+                        <div class="status-indicator online">
+                            <div class="status-dot"></div>
+                            Connected
+                        </div>
+                        <span>Line 1, Col 1</span>
+                        <span>Python</span>
+                    </div>
+                    <div class="status-right">
+                        <span>UTF-8</span>
+                        <span>Ln 1</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Mobile Console -->
+        <div class="mobile-console" id="mobileConsole">
+            <div class="console-header">
+                <h3 class="console-title">
+                    ⚡ Console
+                </h3>
+                <div class="console-actions">
+                    <button class="console-btn" id="runBtn" onclick="runCode()">
+                        ▶️
+                    </button>
+                    <button class="console-btn" onclick="clearConsole()">
+                        🗑️
+                    </button>
+                    <button class="console-close" onclick="closeConsole()">
+                        ×
+                    </button>
+                </div>
+            </div>
+            <div class="console-output" id="consoleOutput">
+                <div class="console-line info">Console ready. Click the run button to execute your code.</div>
+            </div>
+        </div>
+
+        <!-- AI Chat Interface -->
+        <div class="ai-chat-container" id="aiChatContainer">
+            <!-- AI Suggestions -->
+            <div class="ai-suggestions">
+                <div class="suggestion-chip" onclick="sendSuggestion('Fix syntax errors')">Fix syntax errors</div>
+                <div class="suggestion-chip" onclick="sendSuggestion('Optimize code')">Optimize code</div>
+                <div class="suggestion-chip" onclick="sendSuggestion('Add comments')">Add comments</div>
+                <div class="suggestion-chip" onclick="sendSuggestion('Explain this function')">Explain function</div>
+            </div>
+
+            <!-- AI Input -->
+            <div class="ai-input-container">
+                <input type="text" class="ai-input" id="aiInput" placeholder="Ask AI anything about your code..." onkeypress="handleAIInput(event)">
+                <button class="ai-send-btn" id="aiSendBtn" onclick="sendAIMessage()">
+                    ➤
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let currentFile = 'main.py';
+        let editor = null;
+        let isConsoleOpen = false;
+        let isSidebarOpen = false;
+        let isUserDropdownOpen = false;
+        let isHiddenButtonsMode = false;
+        let isEditorOnlyView = false;
+
+        // Initialize CodeMirror when a file is opened
+        function initializeEditor(filename, content = '') {
+            const editorWrapper = document.getElementById('editorWrapper');
+            const emptyState = document.getElementById('emptyState');
+            
+            // Hide empty state and show tabs
+            emptyState.style.display = 'none';
+            document.getElementById('mobileTabs').style.display = 'flex';
+            
+            // Clear existing editor
+            editorWrapper.innerHTML = '<textarea id="codeEditor"></textarea>';
+            
+            // Initialize CodeMirror
+            editor = CodeMirror.fromTextArea(document.getElementById('codeEditor'), {
+                mode: getFileMode(filename),
+                theme: 'material-darker',
+                lineNumbers: true,
+                lineWrapping: true,
+                indentUnit: 4,
+                tabSize: 4,
+                indentWithTabs: false,
+                autoCloseBrackets: true,
+                matchBrackets: true,
+                foldGutter: true,
+                gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+            });
+            
+            editor.setValue(content);
+            editor.focus();
+            
+            // Update current file indicator
+            updateCurrentFileDisplay(filename);
+        }
+
+        function getFileMode(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            switch(ext) {
+                case 'py': return 'python';
+                case 'js': return 'javascript';
+                case 'json': return 'application/json';
+                case 'md': return 'markdown';
+                case 'html': return 'htmlmixed';
+                case 'css': return 'css';
+                default: return 'text/plain';
+            }
+        }
+
+        function updateCurrentFileDisplay(filename) {
+            const filePathElement = document.querySelector('.file-path');
+            if (filePathElement) {
+                filePathElement.textContent = filename;
+            }
+            currentFile = filename;
+        }
+
+        // Sidebar functions
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const buttons = document.querySelectorAll('.edge-button');
+            
+            isSidebarOpen = !isSidebarOpen;
+            
+            if (isSidebarOpen) {
+                sidebar.classList.add('open');
+                overlay.classList.add('active');
+                // Hide edge buttons on mobile
+                if (window.innerWidth < 768) {
+                    buttons.forEach(btn => btn.classList.add('hidden'));
+                }
+            } else {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+                buttons.forEach(btn => btn.classList.remove('hidden'));
+            }
+        }
+
+        function closeSidebar() {
+            if (isSidebarOpen) {
+                toggleSidebar();
+            }
+        }
+
+        // File operations
+        function openFile(filename) {
+            // Sample content for demonstration
+            const sampleContent = {
+                'main.py': '# Main Python file\nprint("Hello, World!")\n\ndef main():\n    pass\n\nif __name__ == "__main__":\n    main()',
+                'utils.py': '# Utility functions\n\ndef helper_function():\n    """A useful helper function"""\n    return True',
+                'config.json': '{\n  "name": "My Project",\n  "version": "1.0.0",\n  "description": "A sample project"\n}',
+                'README.md': '# My Project\n\nThis is a sample project created with the code editor.\n\n## Features\n\n- Feature 1\n- Feature 2\n- Feature 3'
+            };
+
+            initializeEditor(filename, sampleContent[filename] || '// New file\n');
+            
+            // Update active file in sidebar
+            document.querySelectorAll('.file-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update active tab
+            updateActiveTab(filename);
+            
+            // Close sidebar on mobile after selecting file
+            if (window.innerWidth < 768 && isSidebarOpen) {
+                closeSidebar();
+            }
+        }
+
+        function updateActiveTab(filename) {
+            document.querySelectorAll('.mobile-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.textContent.includes(filename)) {
+                    tab.classList.add('active');
+                }
+            });
+        }
+
+        function switchTab(filename) {
+            openFile(filename);
+        }
+
+        function closeTab(filename, event) {
+            event.stopPropagation();
+            // Implementation for closing tabs
+            console.log('Closing tab:', filename);
+        }
+
+        function createNewFile() {
+            const filename = prompt('Enter filename:');
+            if (filename) {
+                initializeEditor(filename, '');
+            }
+        }
+
+        function refreshFiles() {
+            console.log('Refreshing files...');
+        }
+
+        // Button visibility toggle
+        function toggleButtonVisibility() {
+            const container = document.getElementById('hideButtonsContainer');
+            const toggle = container.querySelector('.hide-buttons-toggle');
+            
+            isHiddenButtonsMode = !isHiddenButtonsMode;
+            
+            if (isHiddenButtonsMode) {
+                container.classList.add('hide-save-console');
+                toggle.textContent = 'v';
+            } else {
+                container.classList.remove('hide-save-console');
+                toggle.textContent = '^';
+            }
+        }
+
+        // Save function
+        function saveFile() {
+            if (editor && currentFile) {
+                const content = editor.getValue();
+                console.log('Saving file:', currentFile, content);
+                
+                // Show save feedback
+                const saveBtn = document.getElementById('saveBtn');
+                const originalText = saveBtn.innerHTML;
+                saveBtn.innerHTML = '✓';
+                saveBtn.classList.add('primary');
+                
+                setTimeout(() => {
+                    saveBtn.innerHTML = originalText;
+                    saveBtn.classList.remove('primary');
+                }, 1000);
+            }
+        }
+
+        // Console functions
+        function toggleConsole() {
+            const console = document.getElementById('mobileConsole');
+            const indicator = document.getElementById('consoleIndicator');
+            
+            isConsoleOpen = !isConsoleOpen;
+            
+            if (isConsoleOpen) {
+                console.classList.add('open');
+                indicator.classList.add('visible');
+            } else {
+                console.classList.remove('open');
+                indicator.classList.remove('visible');
+            }
+        }
+
+        function closeConsole() {
+            if (isConsoleOpen) {
+                toggleConsole();
+            }
+        }
+
+        function runCode() {
+            const runBtn = document.getElementById('runBtn');
+            const indicator = document.getElementById('consoleIndicator');
+            const output = document.getElementById('consoleOutput');
+            
+            if (editor) {
+                const code = editor.getValue();
+                
+                // Show running state
+                runBtn.classList.add('running');
+                indicator.classList.add('running');
+                
+                // Add output
+                const timestamp = new Date().toLocaleTimeString();
+                output.innerHTML += `<div class="console-line info">[${timestamp}] Running code...</div>`;
+                output.innerHTML += `<div class="console-line success">Hello, World!</div>`;
+                output.innerHTML += `<div class="console-line info">[${timestamp}] Execution completed.</div>`;
+                
+                // Scroll to bottom
+                output.scrollTop = output.scrollHeight;
+                
+                // Reset running state
+                setTimeout(() => {
+                    runBtn.classList.remove('running');
+                    indicator.classList.remove('running');
+                }, 2000);
+            }
+        }
+
+        function clearConsole() {
+            const output = document.getElementById('consoleOutput');
+            output.innerHTML = '<div class="console-line info">Console cleared.</div>';
+        }
+
+        // User dropdown
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            isUserDropdownOpen = !isUserDropdownOpen;
+            
+            if (isUserDropdownOpen) {
+                dropdown.classList.add('active');
+            } else {
+                dropdown.classList.remove('active');
+            }
+        }
+
+        function showProfile() {
+            console.log('Show profile');
+            toggleUserDropdown();
+        }
+
+        function showSettings() {
+            console.log('Show settings');
+            toggleUserDropdown();
+        }
+
+        function logout() {
+            console.log('Logout');
+            toggleUserDropdown();
+        }
+
+        // AI Chat functions
+        function sendAIMessage() {
+            const input = document.getElementById('aiInput');
+            const message = input.value.trim();
+            
+            if (message) {
+                console.log('AI Message:', message);
+                input.value = '';
+            }
+        }
+
+        function sendSuggestion(suggestion) {
+            const input = document.getElementById('aiInput');
+            input.value = suggestion;
+            sendAIMessage();
+        }
+
+        function handleAIInput(event) {
+            if (event.key === 'Enter') {
+                sendAIMessage();
+            }
+        }
+
+        // Editor-only view toggle (for external use)
+        function toggleEditorOnlyView() {
+            const body = document.body;
+            isEditorOnlyView = !isEditorOnlyView;
+            
+            if (isEditorOnlyView) {
+                body.classList.add('editor-only-view');
+            } else {
+                body.classList.remove('editor-only-view');
+            }
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            const userDropdown = document.getElementById('userDropdown');
+            const userProfile = document.querySelector('.user-profile');
+            
+            if (!userProfile.contains(event.target) && !userDropdown.contains(event.target)) {
+                if (isUserDropdownOpen) {
+                    toggleUserDropdown();
+                }
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 768 && isSidebarOpen) {
+                // Reset sidebar state on desktop
+                closeSidebar();
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            // Ctrl/Cmd + S to save
+            if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+                event.preventDefault();
+                saveFile();
+            }
+            
+            // Ctrl/Cmd + ` to toggle console
+            if ((event.ctrlKey || event.metaKey) && event.key === '`') {
+                event.preventDefault();
+                toggleConsole();
+            }
+            
+            // F11 to toggle editor-only view
+            if (event.key === 'F11') {
+                event.preventDefault();
+                toggleEditorOnlyView();
+            }
+        });
+
+        // Initialize empty state
+        document.addEventListener('DOMContentLoaded', function() {
+            // Start with empty state visible
+            document.getElementById('emptyState').style.display = 'flex';
+            document.getElementById('mobileTabs').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
