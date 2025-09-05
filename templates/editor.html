@@ -220,97 +220,6 @@
             top: 16px;
         }
 
-        /* Vertical hiding container for Save & Console buttons with toggle ^ button */
-        .hide-buttons-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            position: fixed;
-            right: 16px;
-            bottom: 200px;
-            z-index: 1100;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 16px;
-            padding: 8px;
-            backdrop-filter: blur(30px) saturate(1.2);
-            -webkit-backdrop-filter: blur(30px) saturate(1.2);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-        }
-
-        .hide-buttons-toggle {
-            background: rgba(255, 255, 255, 0.04);
-            border: none;
-            border-radius: 14px;
-            cursor: pointer;
-            color: #fff;
-            font-weight: 700;
-            font-size: 16px;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            user-select: none;
-            transition: background 0.3s ease;
-        }
-
-        .hide-buttons-toggle:hover {
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        /* Hidden state styles */
-        .hide-buttons-container.hide-save-console {
-            height: 36px;
-            width: 48px;
-            flex-direction: row;
-            padding: 0;
-            border-radius: 16px;
-            overflow: hidden;
-            justify-content: center;
-            box-shadow: none;
-        }
-
-        .hide-buttons-container.hide-save-console .save-btn-header,
-        .hide-buttons-container.hide-save-console .console-toggle {
-            display: none;
-        }
-
-        /* Console button positioning inside container */
-        .hide-buttons-container .save-btn-header,
-        .hide-buttons-container .console-toggle {
-            position: relative !important;
-            right: auto !important;
-            top: auto !important;
-            bottom: auto !important;
-        }
-
-        /* Console button with status indicator */
-        .console-btn,
-        .console-toggle {
-            position: relative;
-        }
-
-        .console-indicator {
-            background-color: orange !important;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            position: absolute;
-            right: 6px;
-            bottom: 6px;
-            pointer-events: none;
-            box-shadow: 0 0 4px rgba(0,0,0,0.5);
-            clip-path: polygon(0 0, 100% 0, 100% 70%, 70% 100%, 0 100%);
-            z-index: 1001;
-            transition: background-color 0.3s ease;
-        }
-
-        .console-indicator.running {
-            background-color: #00ff00 !important;
-        }
-
         /* Right Side - User Profile and Action Buttons */
         .user-profile {
             position: fixed;
@@ -438,6 +347,17 @@
             height: 1px;
             background: rgba(255, 255, 255, 0.05);
             margin: 8px 0;
+        }
+
+        /* Right side action buttons - positioned symmetrically */
+        .save-btn-header {
+            right: 16px;
+            top: calc(16px + 56px + 16px);
+        }
+
+        .console-toggle {
+            right: 16px;
+            top: calc(16px + 56px + 16px + 56px + 16px);
         }
 
         /* Main Layout */
@@ -1152,26 +1072,15 @@
             opacity: 0.7;
         }
 
-        /* Editor view: Hide Save button, Console toggle, and AI input - Keep header and numbered lines */
-        .editor-only-view .hide-buttons-container,
-        .editor-only-view .ai-chat-container {
-            display: none !important;
-        }
-
-        /* Ensure code editor content area uses full height */
-        .editor-only-view .content-area {
-            height: calc(100vh - 104px);
-            overflow: auto;
-        }
-
-        /* Mobile tabs: Single tab visible on screen */
-        @media (max-width: 767px) {
-            .mobile-tabs {
-                overflow-x: hidden !important;
-            }
-            .mobile-tabs .mobile-tab:not(.active) {
-                display: none;
-            }
+        .console-indicator {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: yellow;
+            border-radius: 50%;
+            right: 20px;
+            top: calc(16px + 56px + 16px + 56px + 16px + 56px - 15px);
+            z-index: 1000;
         }
 
         /* Desktop Styles */
@@ -1220,11 +1129,6 @@
             .mobile-tabs {
                 display: flex;
                 padding: 0 12px; /* Increased padding for desktop */
-                overflow-x: auto !important;
-            }
-
-            .mobile-tabs .mobile-tab {
-                display: inline-flex;
             }
 
             .mobile-console {
@@ -1256,6 +1160,15 @@
 
             .mobile-empty-state {
                 padding: 48px 32px 160px;
+            }
+
+            /* Desktop symmetrical positioning */
+            .save-btn-header {
+                top: calc(16px + 56px + 16px);
+            }
+
+            .console-toggle {
+                top: calc(16px + 56px + 16px + 56px + 16px);
             }
 
             .user-dropdown {
@@ -1396,424 +1309,625 @@
             background: rgba(255, 255, 255, 0.15);
         }
 
+        /* Mobile scrollbars */
+        @media (max-width: 767px) {
+            ::-webkit-scrollbar {
+                width: 3px;
+                height: 3px;
+            }
+        }
+
+        /* Context Menu */
+        .context-menu {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(30px) saturate(1.3);
+            -webkit-backdrop-filter: blur(30px) saturate(1.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 12px 0;
+            box-shadow: 0 16px 64px rgba(0, 0, 0, 0.4),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.03);
+            z-index: 1000;
+            min-width: 200px;
+        }
+
+        .context-menu-item {
+            padding: 16px 24px;
+            color: rgba(255, 255, 255, 0.9);
+            cursor: pointer;
+            font-size: 15px;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .context-menu-item:hover {
+            background: rgba(255, 255, 255, 0.04);
+            color: #ffffff;
+        }
+
+        .context-menu-item:disabled {
+            color: rgba(255, 255, 255, 0.25);
+            cursor: not-allowed;
+        }
+
+        .context-menu-separator {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.04);
+            margin: 12px 0;
+        }
+
+        /* Spinner animation */
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Enhanced Selection colors */
+        ::selection {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+        }
+
+        ::-moz-selection {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+        }
+
+        /* Landscape orientation adjustments */
+        @media (orientation: landscape) and (max-height: 500px) {
+            .header {
+                height: 48px;
+                margin-top: 4px;
+                padding: 12px 20px;
+            }
+            
+            .main-container {
+                margin-top: 84px; /* Adjusted for increased padding */
+            }
+            
+            .sidebar {
+                top: 84px;
+                height: calc(100vh - 84px);
+            }
+            
+            .sidebar-overlay {
+                top: 84px;
+            }
+            
+            .mobile-console {
+                height: 65vh;
+            }
+            
+            .file-item {
+                padding: 12px 24px;
+                min-height: 44px;
+            }
+            
+            .mobile-tab {
+                padding: 12px 20px;
+            }
+
+            .console-actions {
+                gap: 8px;
+            }
+
+            .console-btn {
+                width: 40px;
+                height: 40px;
+            }
+
+            .save-btn-header {
+                top: calc(16px + 56px + 8px);
+            }
+
+            .console-toggle {
+                top: calc(16px + 56px + 8px + 56px + 8px);
+            }
+
+            .user-dropdown {
+                top: calc(16px + 56px + 8px);
+            }
+
+            .ai-chat-container {
+                padding: 12px 16px;
+                gap: 8px;
+            }
+        }
+
+        /* iOS safe area support */
+        @supports (padding: max(0px)) {
+            .app-container {
+                padding-bottom: max(0px, env(safe-area-inset-bottom));
+            }
+            
+            .ai-chat-container {
+                padding-bottom: max(16px, calc(16px + env(safe-area-inset-bottom)));
+            }
+
+            .mobile-console {
+                padding-bottom: max(0px, env(safe-area-inset-bottom));
+            }
+        }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <!-- Fixed Header -->
-        <div class="header">
-            <div class="logo">
-                <div class="logo-icon">CE</div>
-                <div class="current-file">
-                    <span class="file-path">Code Editor</span>
+        <!-- Normalized Header -->
+        <header class="header">
+            <a href="#" class="logo">
+                <div class="logo-icon">E</div>
+                <span class="current-file" id="current-file">
+                    <span class="file-path">Editor</span>
                     <span class="file-separator">/</span>
-                    <span>Ready to code</span>
-                </div>
-            </div>
+                    <span id="current-file-name">Select a file</span>
+                </span>
+            </a>
+        </header>
+
+        <!-- Left Side: Menu Button -->
+        <button class="edge-button glass-button mobile-menu-btn touch-target" id="mobile-menu-btn" title="Menu">
+            <i data-lucide="menu"></i>
+        </button>
+        
+        <!-- Right Side: User Profile -->
+        <div class="user-profile touch-target" id="user-profile" title="User Profile">
+            <img src="{{ user.avatar_url or url_for('static', filename='img/default_avatar.png') }}" alt="User Avatar" class="user-avatar">
         </div>
 
-        <!-- Left Edge - Mobile Menu Button -->
-        <button class="edge-button mobile-menu-btn" onclick="toggleSidebar()">☰</button>
-
-        <!-- Right Edge - Hide Buttons Container -->
-        <div class="hide-buttons-container" id="hideButtonsContainer">
-            <button class="hide-buttons-toggle" onclick="toggleButtonVisibility()">^</button>
-            <button class="save-btn-header edge-button" id="saveBtn">💾</button>
-            <button class="console-toggle edge-button" id="consoleToggle" onclick="toggleConsole()">
-                ⚡
-                <div class="console-indicator" id="consoleIndicator"></div>
-            </button>
-        </div>
-
-        <!-- Right Edge - User Profile -->
-        <div class="user-profile" onclick="toggleUserDropdown()">
-            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E" alt="User" class="user-avatar">
-        </div>
-
-        <!-- User Dropdown Menu -->
-        <div class="user-dropdown" id="userDropdown">
+        <!-- User Dropdown -->
+        <div class="user-dropdown" id="user-dropdown">
             <div class="user-dropdown-header">
-                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E" alt="User" class="user-dropdown-avatar">
+                <img src="{{ user.avatar_url or url_for('static', filename='img/default_avatar.png') }}" alt="User Avatar" class="user-dropdown-avatar">
                 <div class="user-dropdown-info">
-                    <h3>Developer</h3>
-                    <p>Online</p>
+                    <h3>{{ user.username or 'User' }}</h3>
+                    <p>Developer</p>
                 </div>
             </div>
-            <button class="user-dropdown-item" onclick="switchView('editor')">📝 Editor View</button>
-            <button class="user-dropdown-item" onclick="exportProject()">📤 Export Project</button>
+            <a href="{{ url_for('dashboard') if url_for else '#' }}" class="user-dropdown-item">
+                <i data-lucide="layout-dashboard" size="16"></i>
+                Dashboard
+            </a>
+            <a href="https://sycord.com" class="user-dropdown-item">
+                <i data-lucide="external-link" size="16"></i>
+                Sycord.com
+            </a>
             <div class="user-dropdown-separator"></div>
-            <button class="user-dropdown-item" onclick="showSettings()">⚙️ Settings</button>
-            <button class="user-dropdown-item" onclick="showHelp()">❓ Help</button>
+            <a href="{{ url_for('logout') if url_for else '#' }}" class="user-dropdown-item">
+                <i data-lucide="log-out" size="16"></i>
+                Logout
+            </a>
         </div>
-
-        <!-- Sidebar -->
-        <div class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-title">
-                    📁 Files
-                </div>
-                <div class="sidebar-actions">
-                    <button class="sidebar-btn glass-button" onclick="createNewFile()">+</button>
-                </div>
-            </div>
-            <div class="file-tree">
-                <button class="file-item" onclick="openFile('main.py')">
-                    <span class="file-icon">🐍</span>
-                    main.py
-                </button>
-                <button class="file-item" onclick="openFile('utils.js')">
-                    <span class="file-icon">📜</span>
-                    utils.js
-                </button>
-                <button class="file-item" onclick="openFile('styles.css')">
-                    <span class="file-icon">🎨</span>
-                    styles.css
-                </button>
-            </div>
-        </div>
+        
+        <!-- Right Side Action Buttons - Below User Profile -->
+        <button class="edge-button glass-button save-btn-header touch-target" id="save-btn-header" disabled title="Save File">
+            <i data-lucide="save"></i>
+        </button>
+        
+        <button class="edge-button glass-button console-toggle touch-target" id="console-toggle" title="Toggle Console">
+            <i data-lucide="terminal"></i>
+        </button>
+        <div class="console-indicator"></div>
 
         <!-- Sidebar Overlay -->
-        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
         <!-- Main Container -->
         <div class="main-container">
+            <!-- Sidebar -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-title">
+                        <i data-lucide="folder-open"></i>
+                        Files
+                    </div>
+                    <div class="sidebar-actions">
+                        <button class="sidebar-btn glass-button touch-target" id="new-file-btn" title="New File">
+                            <i data-lucide="file-plus"></i>
+                        </button>
+                        <button class="sidebar-btn glass-button touch-target" id="new-folder-btn" title="New Folder">
+                            <i data-lucide="folder-plus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="file-tree" id="file-tree">
+                    <!-- Files will be populated here -->
+                </div>
+            </aside>
+
             <!-- Content Area -->
-            <div class="content-area">
+            <main class="content-area">
                 <!-- Mobile Tabs -->
-                <div class="mobile-tabs" style="display: flex;">
-                    <div class="tabs-wrapper">
-                        <button class="mobile-tab active" onclick="switchTab('main.py')">
-                            🐍 main.py
-                        </button>
-                        <button class="mobile-tab" onclick="switchTab('utils.js')">
-                            📜 utils.js
-                            <button class="tab-close" onclick="closeTab('utils.js')">×</button>
-                        </button>
-                        <button class="mobile-tab" onclick="switchTab('styles.css')">
-                            🎨 styles.css
-                            <button class="tab-close" onclick="closeTab('styles.css')">×</button>
-                        </button>
+                <div class="mobile-tabs" id="mobile-tabs">
+                    <div class="tabs-wrapper" id="tabs-wrapper">
+                        <!-- Tabs will be populated here -->
                     </div>
                 </div>
 
-                <!-- Mobile Editor Container -->
-                <div class="mobile-editor-container">
-                    <!-- Empty State -->
-                    <div class="mobile-empty-state">
-                        <div class="empty-icon">📝</div>
-                        <h3>Welcome to Code Editor</h3>
-                        <p>Select a file from the sidebar or create a new one to start coding</p>
-                    </div>
-
-                    <!-- Editor will be initialized here -->
-                    <div class="editor-wrapper" id="editorWrapper" style="display: none;">
-                        <textarea id="codeEditor"></textarea>
+                <!-- Editor -->
+                <div class="mobile-editor-container" id="editor-container">
+                    <div class="mobile-empty-state" id="empty-state">
+                        <div class="empty-icon">
+                            <i data-lucide="file-text" size="28"></i>
+                        </div>
+                        <h3>Select a file to edit</h3>
+                        <p>Choose a file from the sidebar to start editing your code</p>
                     </div>
                 </div>
-            </div>
+
+                <!-- Mobile Status Bar -->
+                <div class="mobile-status-bar">
+                    <div class="status-left">
+                        <span id="cursor-position">Ln 1, Col 1</span>
+                        <div class="status-indicator {{ 'online' if bot.status == 'online' else 'offline' }}" id="bot-status">
+                            <div class="status-dot"></div>
+                            <span>{{ 'Online' if bot.status == 'online' else 'Offline' }}</span>
+                        </div>
+                    </div>
+                    <button class="save-btn glass-button touch-target" id="save-btn" disabled>
+                        <i data-lucide="save" size="16"></i>
+                        Save
+                    </button>
+                </div>
+            </main>
         </div>
 
-        <!-- Mobile Status Bar -->
-        <div class="mobile-status-bar">
-            <div class="status-left">
-                <div class="status-indicator online">
-                    <div class="status-dot"></div>
-                    Connected
-                </div>
-            </div>
-            <button class="save-btn" onclick="saveFile()">
-                💾 Save
-            </button>
-        </div>
-
-        <!-- AI Chat Interface -->
-        <div class="ai-chat-container" id="aiChatContainer">
+        <!-- AI Chat Interface at Bottom - Transparent Input -->
+        <div class="ai-chat-container" id="ai-chat-container">
+            <!-- AI Suggestions -->
             <div class="ai-suggestions">
-                <div class="suggestion-chip" onclick="applySuggestion('Fix syntax')">Fix syntax</div>
-                <div class="suggestion-chip" onclick="applySuggestion('Add comments')">Add comments</div>
-                <div class="suggestion-chip" onclick="applySuggestion('Optimize code')">Optimize code</div>
+                <button class="suggestion-chip" data-suggestion="fix code">fix code</button>
+                <button class="suggestion-chip" data-suggestion="add a function">add a function</button>
+                <button class="suggestion-chip" data-suggestion="clear up">clear up</button>
             </div>
+            
+            <!-- AI Input -->
             <div class="ai-input-container">
-                <input type="text" class="ai-input" placeholder="Ask AI to help with your code..." id="aiInput">
-                <button class="ai-send-btn" onclick="sendAIMessage()">
-                    ➤
+                <input type="text" class="ai-input" id="ai-input" placeholder="Ask AI to help with your code...">
+                <button class="ai-send-btn" id="ai-send-btn" title="Send">
+                    <i data-lucide="send" size="14"></i>
                 </button>
             </div>
         </div>
 
         <!-- Mobile Console -->
-        <div class="mobile-console" id="mobileConsole">
+        <div class="mobile-console" id="mobile-console">
             <div class="console-header">
                 <div class="console-title">
-                    ⚡ Console
+                    <i data-lucide="terminal" size="20"></i>
+                    Console
                 </div>
                 <div class="console-actions">
-                    <button class="console-btn" onclick="runCode()" title="Run">▶</button>
-                    <button class="console-btn" onclick="stopCode()" title="Stop">⏹</button>
-                    <button class="console-btn" onclick="clearConsole()" title="Clear">🗑</button>
-                    <button class="console-close" onclick="toggleConsole()">×</button>
+                    <!-- Only show start OR stop button based on state -->
+                    {% if bot.status == 'online' %}
+                    <button class="console-btn touch-target" id="stop-bot-btn" title="Stop Bot">
+                        <i data-lucide="square" size="16"></i>
+                    </button>
+                    {% else %}
+                    <button class="console-btn touch-target" id="start-bot-btn" title="Start Bot">
+                        <i data-lucide="play" size="18"></i>
+                    </button>
+                    {% endif %}
+                    <button class="console-btn touch-target" id="restart-bot-btn" disabled style="display: none;" title="Restart Bot">
+                        <i data-lucide="rotate-cw" size="16"></i>
+                    </button>
+                    <button class="console-btn touch-target" id="clear-console-btn" title="Clear Console">
+                        <i data-lucide="trash-2" size="16"></i>
+                    </button>
+                    <button class="console-close touch-target" id="console-close">
+                        <i data-lucide="x" size="20"></i>
+                    </button>
                 </div>
             </div>
-            <div class="console-output" id="consoleOutput">
-                <div class="console-line info">Console ready. Run your code to see output...</div>
+            <div class="console-output" id="console-output">
+                <div class="console-line">Welcome to the console...</div>
+                <div class="console-line">Bot status: <span id="console-bot-status">Stopped</span></div>
             </div>
         </div>
     </div>
 
     <script>
-        let editor;
-        let sidebarOpen = false;
-        let consoleOpen = false;
-        let userDropdownOpen = false;
-        let currentFile = null;
-        let isEditorOnlyView = false;
+        // Initialize Lucide icons
+        lucide.createIcons();
 
-        // Initialize CodeMirror
-        function initEditor() {
-            const textarea = document.getElementById('codeEditor');
-            editor = CodeMirror.fromTextArea(textarea, {
-                mode: 'python',
-                theme: 'material-darker',
-                lineNumbers: true,
-                lineWrapping: true,
-                autoCloseBrackets: true,
-                matchBrackets: true,
-                indentUnit: 4,
-                tabSize: 4,
-                indentWithTabs: false
-            });
+        // Get elements
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const saveBtnHeader = document.getElementById('save-btn-header');
+        const consoleToggle = document.getElementById('console-toggle');
+        const aiChatContainer = document.getElementById('ai-chat-container');
 
-            // Set editor content
-            editor.setValue(`# Welcome to Code Editor
-print("Hello, World!")
-
-# Start coding here...
-def main():
-    pass
-
-if __name__ == "__main__":
-    main()`);
-        }
-
-        // Toggle functions
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            const buttons = document.querySelectorAll('.edge-button');
+        // Mobile menu toggle with button hiding
+        mobileMenuBtn.addEventListener('click', () => {
+            const isOpen = sidebar.classList.toggle('open');
+            sidebarOverlay.classList.toggle('active');
             
-            sidebarOpen = !sidebarOpen;
-            
-            if (sidebarOpen) {
-                sidebar.classList.add('open');
-                overlay.classList.add('active');
-                buttons.forEach(btn => btn.classList.add('hidden'));
-            } else {
-                sidebar.classList.remove('open');
-                overlay.classList.remove('active');
-                buttons.forEach(btn => btn.classList.remove('hidden'));
-            }
-        }
-
-        function toggleConsole() {
-            const console = document.getElementById('mobileConsole');
-            consoleOpen = !consoleOpen;
-            
-            if (consoleOpen) {
-                console.classList.add('open');
-            } else {
-                console.classList.remove('open');
-            }
-        }
-
-        function toggleUserDropdown() {
-            const dropdown = document.getElementById('userDropdown');
-            userDropdownOpen = !userDropdownOpen;
-            
-            if (userDropdownOpen) {
-                dropdown.classList.add('active');
-            } else {
-                dropdown.classList.remove('active');
-            }
-        }
-
-        // Hide/Show buttons functionality
-        function toggleButtonVisibility() {
-            const container = document.getElementById('hideButtonsContainer');
-            const toggle = container.querySelector('.hide-buttons-toggle');
-            
-            container.classList.toggle('hide-save-console');
-            
-            if (container.classList.contains('hide-save-console')) {
-                toggle.textContent = 'v';
-            } else {
-                toggle.textContent = '^';
-            }
-        }
-
-        // Switch to editor-only view
-        function switchView(view) {
-            const body = document.body;
-            
-            if (view === 'editor') {
-                body.classList.toggle('editor-only-view');
-                isEditorOnlyView = !isEditorOnlyView;
-            }
-            
-            toggleUserDropdown();
-        }
-
-        // Console status indicator
-        function updateConsoleStatus(isRunning) {
-            const indicator = document.getElementById('consoleIndicator');
-            if (isRunning) {
-                indicator.classList.add('running');
-            } else {
-                indicator.classList.remove('running');
-            }
-        }
-
-        // File operations
-        function openFile(filename) {
-            currentFile = filename;
-            document.getElementById('editorWrapper').style.display = 'block';
-            document.querySelector('.mobile-empty-state').style.display = 'none';
-            
-            // Update header
-            document.querySelector('.current-file .file-path').textContent = filename;
-            
-            // Update active tab
-            document.querySelectorAll('.mobile-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            document.querySelectorAll('.file-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            // Initialize editor if not already done
-            if (!editor) {
-                initEditor();
-            }
-            
-            // Close sidebar on mobile
+            // Hide/show buttons and AI chat when sidebar opens/closes on mobile
             if (window.innerWidth < 768) {
-                toggleSidebar();
-            }
-        }
-
-        function switchTab(filename) {
-            openFile(filename);
-        }
-
-        function closeTab(filename) {
-            // Close tab logic here
-            event.stopPropagation();
-        }
-
-        function createNewFile() {
-            const filename = prompt('Enter filename:');
-            if (filename) {
-                openFile(filename);
-            }
-        }
-
-        function saveFile() {
-            if (editor && currentFile) {
-                const content = editor.getValue();
-                console.log('Saving file:', currentFile, content);
-                // Save logic here
-            }
-        }
-
-        // Console operations
-        function runCode() {
-            if (!editor) return;
-            
-            const code = editor.getValue();
-            const output = document.getElementById('consoleOutput');
-            
-            // Clear previous output
-            output.innerHTML = '';
-            
-            // Add running indicator
-            updateConsoleStatus(true);
-            
-            // Simulate code execution
-            output.innerHTML += '<div class="console-line info">Running code...</div>';
-            
-            setTimeout(() => {
-                output.innerHTML += '<div class="console-line success">Hello, World!</div>';
-                output.innerHTML += '<div class="console-line info">Process finished with exit code 0</div>';
-                updateConsoleStatus(false);
-            }, 1000);
-        }
-
-        function stopCode() {
-            updateConsoleStatus(false);
-            const output = document.getElementById('consoleOutput');
-            output.innerHTML += '<div class="console-line error">Process terminated by user</div>';
-        }
-
-        function clearConsole() {
-            document.getElementById('consoleOutput').innerHTML = 
-                '<div class="console-line info">Console cleared</div>';
-        }
-
-        // AI Chat functions
-        function sendAIMessage() {
-            const input = document.getElementById('aiInput');
-            const message = input.value.trim();
-            
-            if (message) {
-                console.log('AI Message:', message);
-                input.value = '';
-                // AI processing logic here
-            }
-        }
-
-        function applySuggestion(suggestion) {
-            document.getElementById('aiInput').value = suggestion;
-            sendAIMessage();
-        }
-
-        // Other functions
-        function exportProject() {
-            console.log('Exporting project...');
-            toggleUserDropdown();
-        }
-
-        function showSettings() {
-            console.log('Opening settings...');
-            toggleUserDropdown();
-        }
-
-        function showHelp() {
-            console.log('Opening help...');
-            toggleUserDropdown();
-        }
-
-        // Close dropdowns when clicking outside
-        document.addEventListener('click', function(event) {
-            const userProfile = document.querySelector('.user-profile');
-            const userDropdown = document.getElementById('userDropdown');
-            
-            if (!userProfile.contains(event.target) && !userDropdown.contains(event.target)) {
-                userDropdown.classList.remove('active');
-                userDropdownOpen = false;
+                if (isOpen) {
+                    saveBtnHeader.classList.add('hidden');
+                    consoleToggle.classList.add('hidden');
+                    aiChatContainer.classList.add('hidden');
+                } else {
+                    saveBtnHeader.classList.remove('hidden');
+                    consoleToggle.classList.remove('hidden');
+                    aiChatContainer.classList.remove('hidden');
+                }
             }
         });
 
-        // Handle Enter key in AI input
-        document.getElementById('aiInput').addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('active');
+            
+            // Show buttons and AI chat when sidebar closes
+            if (window.innerWidth < 768) {
+                saveBtnHeader.classList.remove('hidden');
+                consoleToggle.classList.remove('hidden');
+                aiChatContainer.classList.remove('hidden');
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                // Desktop: always show buttons and AI chat
+                saveBtnHeader.classList.remove('hidden');
+                consoleToggle.classList.remove('hidden');
+                aiChatContainer.classList.remove('hidden');
+            } else {
+                // Mobile: hide if sidebar is open
+                if (sidebar.classList.contains('open')) {
+                    saveBtnHeader.classList.add('hidden');
+                    consoleToggle.classList.add('hidden');
+                    aiChatContainer.classList.add('hidden');
+                }
+            }
+        });
+
+        // User profile dropdown
+        const userProfile = document.getElementById('user-profile');
+        const userDropdown = document.getElementById('user-dropdown');
+
+        userProfile.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userDropdown.classList.toggle('active');
+        });
+
+        document.addEventListener('click', () => {
+            userDropdown.classList.remove('active');
+        });
+
+        userDropdown.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        // Console toggle
+        const mobileConsole = document.getElementById('mobile-console');
+        const consoleClose = document.getElementById('console-close');
+
+        consoleToggle.addEventListener('click', () => {
+            mobileConsole.classList.toggle('open');
+            consoleToggle.classList.toggle('active');
+        });
+
+        consoleClose.addEventListener('click', () => {
+            mobileConsole.classList.remove('open');
+            consoleToggle.classList.remove('active');
+        });
+
+        // Console buttons
+        const startBotBtn = document.getElementById('start-bot-btn');
+        const stopBotBtn = document.getElementById('stop-bot-btn');
+        const restartBotBtn = document.getElementById('restart-bot-btn');
+        const clearConsoleBtn = document.getElementById('clear-console-btn');
+        const consoleOutput = document.getElementById('console-output');
+
+        clearConsoleBtn.addEventListener('click', () => {
+            consoleOutput.innerHTML = '<div class="console-line">Console cleared...</div>';
+        });
+
+        // AI Chat functionality
+        const aiInput = document.getElementById('ai-input');
+        const aiSendBtn = document.getElementById('ai-send-btn');
+        const suggestionChips = document.querySelectorAll('.suggestion-chip');
+
+        // Suggestion chips
+        suggestionChips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                const suggestion = chip.getAttribute('data-suggestion');
+                aiInput.value = suggestion;
+                aiInput.focus();
+                aiSendBtn.disabled = false;
+            });
+        });
+
+        // AI input and send
+        aiInput.addEventListener('input', () => {
+            aiSendBtn.disabled = aiInput.value.trim() === '';
+        });
+
+        aiInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !aiSendBtn.disabled) {
                 sendAIMessage();
             }
         });
 
-        // Initialize on load
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set initial console status
-            updateConsoleStatus(false);
+        aiSendBtn.addEventListener('click', () => {
+            if (!aiSendBtn.disabled) {
+                sendAIMessage();
+            }
+        });
+
+        function sendAIMessage() {
+            const message = aiInput.value.trim();
+            if (message) {
+                console.log('AI Message:', message);
+                // TODO: Implement AI message sending
+                aiInput.value = '';
+                aiSendBtn.disabled = true;
+            }
+        }
+
+        // Save buttons
+        const saveBtn = document.getElementById('save-btn');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Code Editor initialized');
+            aiSendBtn.disabled = true; // Start with disabled send button
+
+            const fileTreeContainer = document.getElementById('file-tree');
+            const filesTree = {{ bot.files_tree | tojson }};
+
+            function renderFileTree(tree, container, level = 0) {
+                for (const name in tree) {
+                    const item = tree[name];
+                    const element = document.createElement('div');
+                    element.className = 'file-item';
+                    element.style.paddingLeft = `${28 + level * 20}px`;
+
+                    const icon = document.createElement('i');
+                    icon.className = 'file-icon';
+
+                    const text = document.createElement('span');
+                    text.textContent = name;
+
+                    if (typeof item === 'object' && item !== null && Object.keys(item).length > 0) {
+                        // Folder
+                        icon.setAttribute('data-lucide', 'folder');
+                        element.appendChild(icon);
+                        element.appendChild(text);
+                        container.appendChild(element);
+                        renderFileTree(item, container, level + 1);
+                    } else if (typeof item === 'object' && item !== null) {
+                        // Empty Folder
+                        icon.setAttribute('data-lucide', 'folder');
+                        element.appendChild(icon);
+                        element.appendChild(text);
+                        container.appendChild(element);
+                    }
+                    else {
+                        // File
+                        icon.setAttribute('data-lucide', 'file');
+                        element.appendChild(icon);
+                        element.appendChild(text);
+                        container.appendChild(element);
+                    }
+                }
+                lucide.createIcons();
+            }
+
+            renderFileTree(filesTree, fileTreeContainer);
+
+            const startBotBtn = document.getElementById('start-bot-btn');
+            const stopBotBtn = document.getElementById('stop-bot-btn');
+            const newFileBtn = document.getElementById('new-file-btn');
+            const newFolderBtn = document.getElementById('new-folder-btn');
+            const serverIndex = {{ bot.server_index }};
+
+            if (startBotBtn) {
+                startBotBtn.addEventListener('click', () => {
+                    fetch(`/api/server/${serverIndex}/start`, {
+                        method: 'POST',
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Bot started successfully!');
+                            location.reload();
+                        } else {
+                            alert(`Error starting bot: ${data.error}`);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error starting bot:', error);
+                        alert('An error occurred while starting the bot.');
+                    });
+                });
+            }
+
+            if (stopBotBtn) {
+                stopBotBtn.addEventListener('click', () => {
+                    fetch(`/api/server/${serverIndex}/stop`, {
+                        method: 'POST',
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Bot stopped successfully!');
+                            location.reload();
+                        } else {
+                            alert(`Error stopping bot: ${data.error}`);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error stopping bot:', error);
+                        alert('An error occurred while stopping the bot.');
+                    });
+                });
+            }
+
+            newFileBtn.addEventListener('click', () => {
+                const path = prompt('Enter the path for the new file:');
+                if (path) {
+                    fetch(`/api/server/${serverIndex}/files/create`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ path: path, type: 'file' }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert(`Error creating file: ${data.error}`);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error creating file:', error);
+                        alert('An error occurred while creating the file.');
+                    });
+                }
+            });
+
+            newFolderBtn.addEventListener('click', () => {
+                const path = prompt('Enter the path for the new folder:');
+                if (path) {
+                    fetch(`/api/server/${serverIndex}/files/create`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ path: path, type: 'folder' }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert(`Error creating folder: ${data.error}`);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error creating folder:', error);
+                        alert('An error occurred while creating the folder.');
+                    });
+                }
+            });
         });
     </script>
 </body>
