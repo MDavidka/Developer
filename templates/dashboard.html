@@ -5,8 +5,370 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Sycord for Developers</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <style>
-        /* Updated styles for frosted glass inputs and modal */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+            background: #101010;
+            color: #ffffff;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            min-height: 100vh;
+            touch-action: manipulation;
+        }
+
+        /* Enhanced Glassmorphism Effects */
+        .glass {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(30px) saturate(1.3);
+            -webkit-backdrop-filter: blur(30px) saturate(1.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 
+                        0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .glass-button {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(25px) saturate(1.2);
+            -webkit-backdrop-filter: blur(25px) saturate(1.2);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03),
+                        0 4px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .glass-button:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.12);
+            transform: translateY(-1px);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05),
+                        0 8px 24px rgba(0, 0, 0, 0.25);
+        }
+
+        .glass-button:active {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(0);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04),
+                        0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .glass-button:disabled {
+            background: rgba(255, 255, 255, 0.01);
+            border-color: rgba(255, 255, 255, 0.03);
+            opacity: 0.2;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Normalized Header from Editor */
+        .header {
+            background: rgba(255, 255, 255, 0.015);
+            backdrop-filter: blur(35px) saturate(1.4);
+            -webkit-backdrop-filter: blur(35px) saturate(1.4);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 0 0 20px 20px;
+            padding: 14px 24px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            top: 0;
+            left: calc(16px + 56px + 16px);
+            right: calc(16px + 56px + 16px);
+            z-index: 998;
+            margin-top: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.02);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            text-decoration: none;
+            color: #ffffff;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 700;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+        }
+
+        .logo-text {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .logo-dev {
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
+        }
+
+        /* Edge Buttons (Disabled but Styled) */
+        .edge-button {
+            position: fixed;
+            width: 56px;
+            height: 56px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: not-allowed;
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.3);
+            border: none;
+            z-index: 999;
+            background: rgba(255, 255, 255, 0.008);
+            backdrop-filter: blur(25px) saturate(1.2);
+            -webkit-backdrop-filter: blur(25px) saturate(1.2);
+            border: 1px solid rgba(255, 255, 255, 0.02);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.01),
+                        0 4px 16px rgba(0, 0, 0, 0.1);
+            opacity: 0.3;
+        }
+
+        /* Left Side - Menu button (disabled) */
+        .menu-btn {
+            left: 16px;
+            top: 16px;
+        }
+
+        /* Right Side - User Profile */
+        .user-profile {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            width: 56px;
+            height: 56px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.025);
+            backdrop-filter: blur(25px) saturate(1.2);
+            -webkit-backdrop-filter: blur(25px) saturate(1.2);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 999;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02),
+                        0 4px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .user-profile:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04),
+                        0 8px 24px rgba(0, 0, 0, 0.25);
+        }
+
+        .user-profile:active {
+            background: rgba(255, 255, 255, 0.07);
+            transform: translateY(0);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03),
+                        0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .user-avatar {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 16px;
+        }
+
+        /* Right side disabled buttons */
+        .save-btn-header {
+            right: 16px;
+            top: calc(16px + 56px + 16px);
+        }
+
+        .console-toggle {
+            right: 16px;
+            top: calc(16px + 56px + 16px + 56px + 16px);
+        }
+
+        /* Main Layout */
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-top: 96px; /* Space for header */
+        }
+
+        .app-main {
+            flex: 1;
+            padding: 32px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Dashboard Toolbar */
+        .dashboard-toolbar {
+            margin-bottom: 32px;
+            text-align: center;
+        }
+
+        .dashboard-toolbar h2 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+
+        /* Bot Grid */
+        .bot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        /* Bot Cards with Enhanced Glassmorphism */
+        .bot-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(30px) saturate(1.3);
+            -webkit-backdrop-filter: blur(30px) saturate(1.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 24px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05),
+                        0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .bot-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-4px);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08),
+                        0 16px 48px rgba(0, 0, 0, 0.3);
+        }
+
+        .bot-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .bot-info h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+
+        .server-name {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .bot-avatar-large-square {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Actions */
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .button-2 {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px 20px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+        }
+
+        .button-2:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04),
+                        0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .button-2:active {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(0);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            grid-column: 1 / -1;
+        }
+
+        .empty-state p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 24px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            margin-top: auto;
+        }
+
+        /* Modal Styles with Enhanced Glassmorphism */
         #create-bot-modal {
             display: none;
             position: fixed;
@@ -14,100 +376,244 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             z-index: 1000;
             justify-content: center;
             align-items: center;
             animation: fadeIn 0.3s ease-in-out;
         }
+
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
+
         .modal-content {
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 10px;
-            padding: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(30px) saturate(1.3);
+            -webkit-backdrop-filter: blur(30px) saturate(1.3);
+            border-radius: 20px;
+            padding: 32px;
             width: 90%;
             max-width: 500px;
             position: relative;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 16px 64px rgba(0, 0, 0, 0.4),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
+
         .close-modal {
             position: absolute;
-            top: 10px;
-            right: 15px;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
+            top: 16px;
+            right: 20px;
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            font-size: 16px;
             cursor: pointer;
-            color: #fff;
+            color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
         }
+
+        .close-modal:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 24px;
         }
+
         .form-group label {
             display: block;
-            margin-bottom: 0.5rem;
+            margin-bottom: 8px;
             font-weight: 600;
             color: #fff;
+            font-size: 14px;
         }
+
         .form-group input {
             width: 100%;
-            padding: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 4px;
-            font-size: 1rem;
-            background: rgba(255, 255, 255, 0.1);
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            font-size: 14px;
+            background: transparent;
             color: #fff;
-            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
         }
+
         .form-group input:focus {
             outline: none;
-            border-color: rgba(76, 175, 80, 0.6);
-            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.02);
         }
+
         .form-group input::placeholder {
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(255, 255, 255, 0.5);
         }
+
         .helper-text {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
             display: block;
-            margin-top: 0.3rem;
+            margin-top: 4px;
         }
+
         .error-text {
-            color: #ff6b6b;
-            font-size: 0.8rem;
+            color: rgba(255, 100, 100, 0.9);
+            font-size: 12px;
             display: none;
-            margin-top: 0.3rem;
+            margin-top: 4px;
         }
+
         .form-actions {
             display: flex;
             justify-content: flex-end;
-            gap: 10px;
-            margin-top: 1.5rem;
+            gap: 12px;
+            margin-top: 24px;
         }
+
         #loading-spinner {
             display: none;
             animation: spin 1s linear infinite;
             color: #fff;
         }
+
         @keyframes spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
+
+        /* Desktop Styles */
+        @media (min-width: 768px) {
+            .header {
+                height: 64px;
+                padding: 18px 28px;
+                left: calc(16px + 56px + 16px);
+                right: calc(16px + 56px + 16px);
+                border-radius: 0 0 24px 24px;
+            }
+
+            .logo-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+            }
+
+            .app-container {
+                padding-top: 104px;
+            }
+
+            .app-main {
+                padding: 48px 40px;
+            }
+
+            .dashboard-toolbar h2 {
+                font-size: 32px;
+            }
+
+            .bot-grid {
+                grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+                gap: 32px;
+            }
+
+            .bot-card {
+                padding: 32px;
+            }
+
+            .bot-info h3 {
+                font-size: 22px;
+            }
+
+            .bot-avatar-large-square {
+                width: 64px;
+                height: 64px;
+            }
+        }
+
+        /* Large screens */
+        @media (min-width: 1200px) {
+            .bot-grid {
+                grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            }
+        }
+
+        /* Touch optimizations */
+        .touch-target {
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        /* Enhanced Scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Enhanced Selection colors */
+        ::selection {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+        }
+
+        ::-moz-selection {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+        }
     </style>
 </head>
 <body class="app-container">
-    <header class="app-header">
-        <div class="logo">Sycord <span class="logo-dev">Dev</span></div>
-        <a href="{{ url_for('logout') }}" title="Logout">
-            <img src="{{ user.avatar_url or url_for('static', filename='img/default_avatar.png') }}" alt="User Avatar" class="avatar">
-        </a>
+    <!-- Matching Header from Editor -->
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">S</div>
+            <span class="logo-text">Sycord <span class="logo-dev">Dev</span></span>
+        </div>
     </header>
+
+    <!-- Left Side - Menu Button (Disabled) -->
+    <button class="edge-button menu-btn" disabled title="Menu (Disabled)">
+        <i data-lucide="menu"></i>
+    </button>
+
+    <!-- Right Side - User Profile -->
+    <a href="{{ url_for('logout') }}" class="user-profile" title="Logout">
+        <img src="{{ user.avatar_url or url_for('static', filename='img/default_avatar.png') }}" alt="User Avatar" class="user-avatar">
+    </a>
+
+    <!-- Right Side Disabled Buttons -->
+    <button class="edge-button save-btn-header" disabled title="Save (Disabled)">
+        <i data-lucide="save"></i>
+    </button>
+
+    <button class="edge-button console-toggle" disabled title="Console (Disabled)">
+        <i data-lucide="terminal"></i>
+    </button>
 
     <main class="app-main">
         <div class="dashboard-toolbar">
@@ -117,7 +623,7 @@
         <div class="bot-grid">
             {% if servers %}
                 {% for server in servers %}
-                    <div class="bot-card frosted-glass">
+                    <div class="bot-card">
                         <div class="bot-card-header">
                             <div class="bot-info">
                                 <h3>{{ server.customBotName }}</h3>
@@ -132,7 +638,7 @@
                     </div>
                 {% endfor %}
             {% else %}
-                <div class="bot-card empty-state frosted-glass">
+                <div class="bot-card empty-state">
                     <p>No bots found. They are created on our main website.</p>
                 </div>
             {% endif %}
@@ -143,8 +649,40 @@
         <p>Sycord for Developers.</p>
     </footer>
 
+    <!-- Modal (if needed) -->
+    <div id="create-bot-modal">
+        <div class="modal-content">
+            <button class="close-modal">&times;</button>
+            <h3>Create New Bot</h3>
+            <form id="create-bot-form">
+                <div class="form-group">
+                    <label for="bot-name">Bot Name</label>
+                    <input type="text" id="bot-name" name="bot_name" placeholder="Enter bot name" required>
+                    <span class="helper-text">Choose a unique name for your bot</span>
+                    <span class="error-text">This field is required</span>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="button-2" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="button-2">
+                        <span id="loading-spinner">⟳</span>
+                        Create Bot
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
-        // Bot start/stop logic might need to be re-evaluated based on new backend
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Modal functionality (if needed)
+        function closeModal() {
+            document.getElementById('create-bot-modal').style.display = 'none';
+        }
+
+        // Bot management logic can be added here
+        console.log('Dashboard initialized with editor styling');
     </script>
 </body>
 </html>
