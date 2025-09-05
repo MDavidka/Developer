@@ -1431,22 +1431,12 @@
                 </div>
             </div>
             <div class="file-tree">
-                <button class="file-item active" onclick="openFile('main.py')">
+                {% for file in bot.files %}
+                <button class="file-item" onclick="openFile('{{ file.path }}')">
                     <i data-lucide="file-text" class="file-icon"></i>
-                    main.py
+                    {{ file.path }}
                 </button>
-                <button class="file-item" onclick="openFile('utils.py')">
-                    <i data-lucide="file-text" class="file-icon"></i>
-                    utils.py
-                </button>
-                <button class="file-item" onclick="openFile('config.json')">
-                    <i data-lucide="settings" class="file-icon"></i>
-                    config.json
-                </button>
-                <button class="file-item" onclick="openFile('README.md')">
-                    <i data-lucide="book-open" class="file-icon"></i>
-                    README.md
-                </button>
+                {% endfor %}
             </div>
         </aside>
 
@@ -1563,6 +1553,26 @@
         let isEditorMode = false;
         let isFileEditing = false;
         let consoleStatus = 'offline'; // offline, running, ready
+        let currentOpenFile = null;
+        const botId = "{{ bot._id }}";
+        const serverIndex = "{{ bot.server_index }}";
+
+        const socket = io("/editor");
+
+        socket.on('connect', () => {
+            console.log('Connected to socket server');
+            socket.emit('join', { bot_id: botId });
+        });
+
+        socket.on('log', (data) => {
+            const output = document.getElementById('consoleOutput');
+            const line = document.createElement('div');
+            line.className = 'console-line';
+            line.textContent = data.data;
+            output.appendChild(line);
+            output.scrollTop = output.scrollHeight;
+        });
+
 
         // Initialize CodeMirror
         function initializeEditor() {
@@ -1670,70 +1680,55 @@
             const dot = document.getElementById('consoleStatusDot');
             
             dot.className = 'console-status-dot';
-            switch(status) {
-                case 'running':
-                    dot.classList.add('running');
-                    break;
-                case 'ready':
-                    // Default orange color
-                    break;
-                case 'offline':
-                    dot.classList.add('offline');
-                    break;
+            if (status === 'running') {
+                dot.classList.add('running');
+            } else if (status === 'stopped') {
+                dot.classList.add('offline');
             }
+        }
+
+        function checkBotStatus() {
+            fetch(`/api/server/${serverIndex}/status`)
+                .then(response => response.json())
+                .then(data => {
+                    updateConsoleStatus(data.status);
+                    const runBtn = document.getElementById('runBtn');
+                    const stopBtn = document.getElementById('stopBtn');
+                    if (data.status === 'running') {
+                        runBtn.disabled = true;
+                        stopBtn.disabled = false;
+                    } else {
+                        runBtn.disabled = false;
+                        stopBtn.disabled = true;
+                    }
+                });
         }
 
         // Console control functions
         function runCode() {
-            const runBtn = document.getElementById('runBtn');
-            const stopBtn = document.getElementById('stopBtn');
-            const output = document.getElementById('consoleOutput');
-            
-            runBtn.disabled = true;
-            runBtn.classList.add('running');
-            stopBtn.disabled = false;
-            
-            updateConsoleStatus('running');
-            
-            // Add running message
-            const runningLine = document.createElement('div');
-            runningLine.className = 'console-line info';
-            runningLine.textContent = '> Running code...';
-            output.appendChild(runningLine);
-            
-            // Simulate code execution
-            setTimeout(() => {
-                const resultLine = document.createElement('div');
-                resultLine.className = 'console-line success';
-                resultLine.textContent = 'Code executed successfully!';
-                output.appendChild(resultLine);
-                
-                runBtn.disabled = false;
-                runBtn.classList.remove('running');
-                stopBtn.disabled = true;
-                updateConsoleStatus('ready');
-                
-                output.scrollTop = output.scrollHeight;
-            }, 2000);
+            fetch(`/api/server/${serverIndex}/start`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateConsoleStatus('running');
+                    } else {
+                        alert('Error starting bot: ' + data.error);
+                    }
+                    checkBotStatus();
+                });
         }
 
         function stopCode() {
-            const runBtn = document.getElementById('runBtn');
-            const stopBtn = document.getElementById('stopBtn');
-            const output = document.getElementById('consoleOutput');
-            
-            runBtn.disabled = false;
-            runBtn.classList.remove('running');
-            stopBtn.disabled = true;
-            
-            updateConsoleStatus('ready');
-            
-            const stoppedLine = document.createElement('div');
-            stoppedLine.className = 'console-line warning';
-            stoppedLine.textContent = 'Execution stopped by user';
-            output.appendChild(stoppedLine);
-            
-            output.scrollTop = output.scrollHeight;
+            fetch(`/api/server/${serverIndex}/stop`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateConsoleStatus('stopped');
+                    } else {
+                        alert('Error stopping bot: ' + data.error);
+                    }
+                    checkBotStatus();
+                });
         }
 
         function clearConsole() {
@@ -1743,6 +1738,8 @@
 
         // File functions
         function openFile(filename) {
+            currentOpenFile = filename;
+
             // Update active file item
             document.querySelectorAll('.file-item').forEach(item => {
                 item.classList.remove('active');
@@ -1755,14 +1752,20 @@
             // Show editor and hide empty state
             document.getElementById('emptyState').style.display = 'none';
             document.getElementById('editorWrapper').style.display = 'block';
-            document.querySelector('.mobile-tabs').style.display = 'flex';
-            
-            // Set file editing state (this hides AI chat)
-            setFileEditingState(true);
             
             if (!editor) {
                 initializeEditor();
             }
+
+            fetch(`/api/server/${serverIndex}/file?path=${filename}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.content !== undefined) {
+                        editor.setValue(data.content);
+                    } else {
+                        alert('Error loading file: ' + data.error);
+                    }
+                });
             
             // Close sidebar on mobile
             if (window.innerWidth < 768) {
@@ -1770,36 +1773,37 @@
             }
         }
 
-        function closeFile() {
-            // Show empty state and hide editor
-            document.getElementById('emptyState').style.display = 'flex';
-            document.getElementById('editorWrapper').style.display = 'none';
-            document.querySelector('.mobile-tabs').style.display = 'none';
-            
-            // Clear file editing state (this shows AI chat)
-            setFileEditingState(false);
-            
-            // Update header
-            document.querySelector('.file-path').textContent = 'No file selected';
-            
-            // Clear active file
-            document.querySelectorAll('.file-item').forEach(item => {
-                item.classList.remove('active');
-            });
-        }
-
         function saveFile() {
-            // Simulate saving
-            const saveBtn = document.querySelector('.save-btn');
-            const originalText = saveBtn.innerHTML;
-            
-            saveBtn.innerHTML = '<i data-lucide="check"></i>Saved';
-            lucide.createIcons();
-            
-            setTimeout(() => {
-                saveBtn.innerHTML = '<i data-lucide="save"></i>Save';
-                lucide.createIcons();
-            }, 2000);
+            if (!currentOpenFile) {
+                alert("No file is open to save.");
+                return;
+            }
+
+            const content = editor.getValue();
+            fetch(`/api/server/${serverIndex}/file?path=${currentOpenFile}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ content: content })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const saveBtn = document.querySelector('.save-btn');
+                    const originalText = saveBtn.innerHTML;
+
+                    saveBtn.innerHTML = '<i data-lucide="check"></i>Saved';
+                    lucide.createIcons();
+
+                    setTimeout(() => {
+                        saveBtn.innerHTML = '<i data-lucide="save"></i>Save';
+                        lucide.createIcons();
+                    }, 2000);
+                } else {
+                    alert('Error saving file: ' + data.error);
+                }
+            });
         }
 
         function newFile() {
@@ -1848,7 +1852,8 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             lucide.createIcons();
-            updateConsoleStatus('offline');
+            checkBotStatus();
+            setInterval(checkBotStatus, 5000);
             
             // Show tabs on desktop if window is large enough
             if (window.innerWidth >= 768) {
