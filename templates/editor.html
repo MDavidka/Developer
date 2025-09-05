@@ -241,6 +241,9 @@
             overflow: hidden;
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02),
                         0 4px 16px rgba(0, 0, 0, 0.2);
+            font-size: 16px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
         }
 
         .user-profile:hover {
@@ -263,6 +266,12 @@
             height: 100%;
             object-fit: cover;
             border-radius: 16px;
+        }
+
+        .user-initials {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
         }
 
         /* User Profile Dropdown */
@@ -305,6 +314,13 @@
             height: 40px;
             border-radius: 12px;
             object-fit: cover;
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
         }
 
         .user-dropdown-info h3 {
@@ -485,10 +501,14 @@
             box-shadow: none;
         }
 
-        /* Editor Mode */
+        /* Editor Mode and File Editing State */
         body.editor-mode .action-buttons-container,
         body.editor-mode .ai-chat-container,
         body.editor-mode .mobile-status-bar {
+            display: none;
+        }
+
+        body.file-editing .ai-chat-container {
             display: none;
         }
 
@@ -1470,17 +1490,19 @@
             <i data-lucide="menu"></i>
         </button>
 
-        <!-- User Profile -->
-        <div class="user-profile" onclick="toggleUserDropdown()">
-            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face" alt="User Avatar" class="user-avatar">
+        <!-- User Profile with Dynamic Avatar -->
+        <div class="user-profile" onclick="toggleUserDropdown()" id="userProfile">
+            <!-- Avatar will be loaded dynamically -->
         </div>
 
         <!-- User Profile Dropdown -->
         <div class="user-dropdown" id="userDropdown">
             <div class="user-dropdown-header">
-                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face" alt="User Avatar" class="user-dropdown-avatar">
+                <div class="user-dropdown-avatar" id="dropdownAvatar">
+                    <!-- Avatar will be loaded dynamically -->
+                </div>
                 <div class="user-dropdown-info">
-                    <h3>John Doe</h3>
+                    <h3 id="userName">John Doe</h3>
                     <p>Developer</p>
                 </div>
             </div>
@@ -1581,7 +1603,7 @@
                 <!-- Mobile Editor Container -->
                 <div class="mobile-editor-container">
                     <!-- Empty State -->
-                    <div class="mobile-empty-state">
+                    <div class="mobile-empty-state" id="emptyState">
                         <div class="empty-icon">
                             <i data-lucide="code"></i>
                         </div>
@@ -1590,7 +1612,7 @@
                     </div>
 
                     <!-- Editor will be inserted here -->
-                    <div class="editor-wrapper" style="display: none;">
+                    <div class="editor-wrapper" style="display: none;" id="editorWrapper">
                         <textarea id="code-editor"></textarea>
                     </div>
                 </div>
@@ -1598,7 +1620,7 @@
         </div>
 
         <!-- Enhanced Status Bar -->
-        <div class="mobile-status-bar">
+        <div class="mobile-status-bar" id="statusBar">
             <div class="status-left">
                 <button class="save-btn primary" onclick="saveFile()">
                     <i data-lucide="save"></i>
@@ -1665,7 +1687,57 @@
         let isConsoleOpen = false;
         let isActionButtonsCollapsed = false;
         let isEditorMode = false;
+        let isFileEditing = false;
         let consoleStatus = 'offline'; // offline, running, ready
+        let currentUser = {
+            name: 'John Doe',
+            email: 'john@example.com',
+            avatar: null // Will be set dynamically
+        };
+
+        // User avatar functionality
+        function getInitials(name) {
+            return name.split(' ').map(n => n[0]).join('').toUpperCase();
+        }
+
+        function loadUserAvatar() {
+            const userProfile = document.getElementById('userProfile');
+            const dropdownAvatar = document.getElementById('dropdownAvatar');
+            const userName = document.getElementById('userName');
+            
+            // Set user name
+            userName.textContent = currentUser.name;
+            
+            // Try to load avatar image
+            if (currentUser.avatar) {
+                const img = new Image();
+                img.onload = function() {
+                    // Avatar loaded successfully
+                    userProfile.innerHTML = `<img src="${currentUser.avatar}" alt="User Avatar" class="user-avatar">`;
+                    dropdownAvatar.innerHTML = `<img src="${currentUser.avatar}" alt="User Avatar" class="user-avatar">`;
+                };
+                img.onerror = function() {
+                    // Avatar failed to load, use initials
+                    const initials = getInitials(currentUser.name);
+                    userProfile.innerHTML = `<div class="user-initials">${initials}</div>`;
+                    dropdownAvatar.innerHTML = `<div class="user-initials">${initials}</div>`;
+                };
+                img.src = currentUser.avatar;
+            } else {
+                // No avatar URL, use initials
+                const initials = getInitials(currentUser.name);
+                userProfile.innerHTML = `<div class="user-initials">${initials}</div>`;
+                dropdownAvatar.innerHTML = `<div class="user-initials">${initials}</div>`;
+            }
+        }
+
+        // Set user data (this would normally come from your backend/auth system)
+        function setUserData(name, email, avatarUrl) {
+            currentUser.name = name;
+            currentUser.email = email;
+            currentUser.avatar = avatarUrl;
+            loadUserAvatar();
+        }
 
         // Initialize CodeMirror
         function initializeEditor() {
@@ -1679,6 +1751,12 @@
                 indentWithTabs: false,
                 lineWrapping: true
             });
+        }
+
+        // File editing state management
+        function setFileEditingState(editing) {
+            isFileEditing = editing;
+            document.body.classList.toggle('file-editing', editing);
         }
 
         // Sidebar functions
@@ -1866,9 +1944,12 @@
             document.querySelector('.file-path').textContent = filename;
             
             // Show editor and hide empty state
-            document.querySelector('.mobile-empty-state').style.display = 'none';
-            document.querySelector('.editor-wrapper').style.display = 'block';
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('editorWrapper').style.display = 'block';
             document.querySelector('.mobile-tabs').style.display = 'flex';
+            
+            // Set file editing state (this hides AI chat)
+            setFileEditingState(true);
             
             if (!editor) {
                 initializeEditor();
@@ -1880,10 +1961,28 @@
             }
         }
 
+        function closeFile() {
+            // Show empty state and hide editor
+            document.getElementById('emptyState').style.display = 'flex';
+            document.getElementById('editorWrapper').style.display = 'none';
+            document.querySelector('.mobile-tabs').style.display = 'none';
+            
+            // Clear file editing state (this shows AI chat)
+            setFileEditingState(false);
+            
+            // Update header
+            document.querySelector('.file-path').textContent = 'No file selected';
+            
+            // Clear active file
+            document.querySelectorAll('.file-item').forEach(item => {
+                item.classList.remove('active');
+            });
+        }
+
         function saveFile() {
             // Simulate saving
             const saveBtn = document.querySelector('.save-btn');
-            const originalText = saveBtn.textContent;
+            const originalText = saveBtn.innerHTML;
             
             saveBtn.innerHTML = '<i data-lucide="check"></i>Saved';
             lucide.createIcons();
@@ -1900,6 +1999,8 @@
 
         function closeTab(filename) {
             console.log('Close tab:', filename);
+            // If this is the last/only tab, close the file
+            closeFile();
         }
 
         // AI functions
@@ -1939,11 +2040,15 @@
         document.addEventListener('DOMContentLoaded', function() {
             lucide.createIcons();
             updateConsoleStatus('offline');
+            loadUserAvatar();
             
             // Show tabs on desktop if window is large enough
             if (window.innerWidth >= 768) {
                 document.querySelector('.mobile-tabs').style.display = 'flex';
             }
+            
+            // Example: Set user data (you would get this from your auth system)
+            // setUserData('Jane Smith', 'jane@example.com', 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face');
         });
     </script>
 </body>
