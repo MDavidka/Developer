@@ -74,14 +74,14 @@
             box-shadow: none !important;
         }
 
-        /* Header - Simplified Layout */
+        /* Minimized Header */
         .header {
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             padding: 0 20px;
-            height: 68px;
+            height: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -97,23 +97,23 @@
             align-items: center;
             gap: 12px;
             font-weight: 600;
-            font-size: 18px;
+            font-size: 16px;
             text-decoration: none;
             color: #ffffff;
         }
 
         .logo-icon {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             background: rgba(255, 255, 255, 0.12);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
-            border-radius: 12px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #ffffff;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 700;
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
@@ -121,7 +121,7 @@
         /* Updated file display - shows "Editor / filename" */
         .current-file {
             color: rgba(255, 255, 255, 0.7);
-            font-size: 16px;
+            font-size: 15px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -136,34 +136,92 @@
 
         .file-separator {
             color: rgba(255, 255, 255, 0.4);
-            margin: 0 8px;
+            margin: 0 6px;
         }
 
-        /* Edge Positioned Buttons */
-        .edge-button {
+        /* Top Edge Positioned Buttons */
+        .top-edge-button {
             position: fixed;
-            width: 56px;
-            height: 56px;
-            border-radius: 18px;
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 20px;
+            font-size: 18px;
+            color: #ffffff;
+            border: none;
+            z-index: 1001;
+            top: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .top-edge-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(255, 255, 255, 0.15);
+        }
+
+        .top-edge-button:active {
+            transform: translateY(0);
+        }
+
+        .top-edge-button:disabled {
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .top-edge-button.active {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(255, 255, 255, 0.2);
+        }
+
+        /* Left Top - Menu Button */
+        .mobile-menu-btn {
+            left: 12px;
+        }
+
+        /* Right Top - Profile Button */
+        .profile-btn {
+            right: 12px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .profile-btn:hover {
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Edge Positioned Action Buttons */
+        .edge-button {
+            position: fixed;
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
             color: #ffffff;
             border: none;
             z-index: 999;
-            top: 80px;
+            right: 12px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .edge-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 40px rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(255, 255, 255, 0.15);
         }
 
         .edge-button:active {
-            transform: translateY(-1px);
+            transform: translateY(0);
         }
 
         .edge-button:disabled {
@@ -177,19 +235,13 @@
             box-shadow: 0 8px 32px rgba(255, 255, 255, 0.2);
         }
 
-        /* Left Edge Button - Menu */
-        .mobile-menu-btn {
-            left: 16px;
-        }
-
         /* Right Edge Buttons - Save and Console */
         .save-btn-header {
-            right: 16px;
+            top: 72px; /* Below profile button */
         }
 
         .console-toggle {
-            right: 16px;
-            top: 148px; /* 80px + 56px + 12px spacing */
+            top: 132px; /* Below save button */
         }
 
         /* Main Layout */
@@ -203,17 +255,17 @@
         .main-container {
             flex: 1;
             display: flex;
-            margin-top: 68px;
+            margin-top: 48px;
             overflow: hidden;
         }
 
         /* Sidebar */
         .sidebar {
             position: fixed;
-            top: 68px;
+            top: 48px;
             left: 0;
             width: 100%;
-            height: calc(100vh - 68px);
+            height: calc(100vh - 48px);
             background: rgba(255, 255, 255, 0.02);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
@@ -230,7 +282,7 @@
 
         .sidebar-overlay {
             position: fixed;
-            top: 68px;
+            top: 48px;
             left: 0;
             right: 0;
             bottom: 0;
@@ -249,7 +301,7 @@
         }
 
         .sidebar-header {
-            padding: 28px 24px 24px;
+            padding: 24px 20px 20px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
             align-items: center;
@@ -257,7 +309,7 @@
         }
 
         .sidebar-title {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 600;
             color: #ffffff;
             display: flex;
@@ -267,18 +319,18 @@
 
         .sidebar-actions {
             display: flex;
-            gap: 10px;
+            gap: 8px;
         }
 
         .sidebar-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 16px;
             color: #ffffff;
             border: none;
         }
@@ -292,16 +344,16 @@
         .file-item {
             display: flex;
             align-items: center;
-            padding: 18px 24px;
+            padding: 16px 20px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 15px;
             border: none;
             background: none;
             width: 100%;
             text-align: left;
-            gap: 14px;
+            gap: 12px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            min-height: 56px;
+            min-height: 52px;
             color: #ffffff;
             border-radius: 0;
             font-weight: 500;
@@ -325,8 +377,8 @@
         }
 
         .file-icon {
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             flex-shrink: 0;
         }
 
@@ -350,7 +402,7 @@
             white-space: nowrap;
             -webkit-overflow-scrolling: touch;
             display: none;
-            height: 52px;
+            height: 48px;
         }
 
         .mobile-tabs::-webkit-scrollbar {
@@ -366,17 +418,17 @@
         .mobile-tab {
             display: inline-flex;
             align-items: center;
-            padding: 16px 28px;
+            padding: 14px 24px;
             border: none;
             background: none;
             cursor: pointer;
-            font-size: 15px;
+            font-size: 14px;
             color: rgba(255, 255, 255, 0.6);
             border-bottom: 2px solid transparent;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            gap: 12px;
+            gap: 10px;
             white-space: nowrap;
-            min-width: 160px;
+            min-width: 140px;
             justify-content: center;
             flex-shrink: 0;
             font-weight: 500;
@@ -399,9 +451,9 @@
         }
 
         .tab-close {
-            width: 22px;
-            height: 22px;
-            border-radius: 8px;
+            width: 20px;
+            height: 20px;
+            border-radius: 6px;
             border: none;
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -410,8 +462,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
-            margin-left: 10px;
+            font-size: 12px;
+            margin-left: 8px;
             color: rgba(255, 255, 255, 0.7);
             transition: all 0.2s ease;
         }
@@ -442,7 +494,7 @@
         .CodeMirror {
             height: 100% !important;
             font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
-            font-size: 15px;
+            font-size: 14px;
             line-height: 1.6;
             background: #101010 !important;
             color: #ffffff !important;
@@ -457,8 +509,8 @@
 
         .CodeMirror-linenumber {
             color: rgba(255, 255, 255, 0.4) !important;
-            padding: 0 10px;
-            font-size: 13px;
+            padding: 0 8px;
+            font-size: 12px;
             font-weight: 500;
         }
 
@@ -482,42 +534,42 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 48px 32px 120px;
+            padding: 40px 28px 100px;
             min-height: 0;
         }
 
         .empty-icon {
-            width: 96px;
-            height: 96px;
+            width: 80px;
+            height: 80px;
             background: rgba(255, 255, 255, 0.06);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 32px;
+            margin-bottom: 28px;
             color: rgba(255, 255, 255, 0.6);
         }
 
         .mobile-empty-state h3 {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 600;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             color: #ffffff;
         }
 
         .mobile-empty-state p {
             color: rgba(255, 255, 255, 0.6);
-            font-size: 17px;
+            font-size: 15px;
             line-height: 1.5;
-            max-width: 320px;
+            max-width: 280px;
         }
 
         /* Mobile Status Bar */
         .mobile-status-bar {
-            height: 60px;
+            height: 56px;
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
@@ -525,31 +577,31 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 24px;
-            font-size: 13px;
+            padding: 0 20px;
+            font-size: 12px;
             color: rgba(255, 255, 255, 0.7);
         }
 
         .status-left {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 16px;
         }
 
         .save-btn {
-            padding: 12px 24px;
-            border-radius: 16px;
+            padding: 10px 20px;
+            border-radius: 14px;
             background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             color: #ffffff;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             border: 1px solid rgba(255, 255, 255, 0.12);
         }
 
@@ -591,7 +643,7 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: 55vh;
+            height: 50vh;
             background: rgba(255, 255, 255, 0.02);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
@@ -611,7 +663,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 20px 24px;
+            padding: 18px 20px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             background: rgba(255, 255, 255, 0.02);
             backdrop-filter: blur(15px);
@@ -619,25 +671,25 @@
         }
 
         .console-title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
             color: #ffffff;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .console-actions {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             align-items: center;
         }
 
         /* Simplified Console Buttons - Only Icons */
         .console-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: 14px;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
             background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
@@ -648,7 +700,7 @@
             align-items: center;
             justify-content: center;
             border: 1px solid rgba(255, 255, 255, 0.12);
-            font-size: 16px;
+            font-size: 14px;
         }
 
         .console-btn:hover {
@@ -679,9 +731,9 @@
         }
 
         .console-close {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
             background: rgba(255, 255, 255, 0.06);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
@@ -689,7 +741,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-size: 16px;
             color: #ffffff;
             transition: all 0.2s ease;
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -707,10 +759,10 @@
 
         .console-output {
             flex: 1;
-            padding: 20px 24px;
+            padding: 18px 20px;
             overflow-y: auto;
             font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
-            font-size: 14px;
+            font-size: 13px;
             line-height: 1.5;
             background: rgba(16, 16, 16, 0.4);
             -webkit-overflow-scrolling: touch;
@@ -718,9 +770,9 @@
         }
 
         .console-line {
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             word-wrap: break-word;
-            padding: 3px 0;
+            padding: 2px 0;
             opacity: 0.9;
         }
 
@@ -743,22 +795,75 @@
             opacity: 0.7;
         }
 
+        /* Profile Dropdown */
+        .profile-dropdown {
+            position: fixed;
+            top: 68px;
+            right: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 12px 0;
+            box-shadow: 0 16px 64px rgba(0, 0, 0, 0.4);
+            z-index: 1002;
+            min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .profile-dropdown.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .profile-dropdown-item {
+            padding: 14px 20px;
+            color: #ffffff;
+            cursor: pointer;
+            font-size: 14px;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .profile-dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+        }
+
+        .profile-dropdown-separator {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.08);
+            margin: 8px 0;
+        }
+
         /* Desktop Styles */
         @media (min-width: 768px) {
             .header {
-                height: 72px;
-                padding: 0 32px;
+                height: 56px;
+                padding: 0 28px;
             }
 
             .main-container {
-                margin-top: 72px;
+                margin-top: 56px;
                 flex-direction: row;
             }
 
             .sidebar {
                 position: relative;
                 top: 0;
-                width: 320px;
+                width: 300px;
                 height: 100%;
                 transform: translateX(0);
                 transition: none;
@@ -778,58 +883,66 @@
             }
 
             .mobile-console {
-                height: 360px;
+                height: 320px;
             }
 
             .current-file {
-                font-size: 17px;
+                font-size: 16px;
             }
 
             .console-actions {
-                gap: 16px;
+                gap: 12px;
             }
 
             .console-btn {
-                width: 48px;
-                height: 48px;
+                width: 44px;
+                height: 44px;
             }
 
             .empty-icon {
-                width: 120px;
-                height: 120px;
+                width: 100px;
+                height: 100px;
             }
 
             .mobile-empty-state h3 {
-                font-size: 28px;
+                font-size: 24px;
             }
 
             .mobile-empty-state p {
-                font-size: 18px;
-                max-width: 440px;
+                font-size: 16px;
+                max-width: 360px;
             }
 
             .mobile-empty-state {
-                padding: 48px 32px 160px;
+                padding: 40px 28px 120px;
             }
 
             /* Desktop edge button positioning */
+            .top-edge-button {
+                top: 16px;
+            }
+
             .edge-button {
-                top: 88px;
+                top: 76px;
             }
 
             .console-toggle {
-                top: 156px;
+                top: 136px;
+            }
+
+            .profile-dropdown {
+                top: 76px;
             }
         }
 
         /* Large screens */
         @media (min-width: 1200px) {
             .sidebar {
-                width: 360px;
+                width: 340px;
             }
 
             .mobile-console {
-                height: 420px;
+                height: 380px;
             }
         }
 
@@ -837,10 +950,10 @@
         .status-indicator {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            border-radius: 12px;
-            font-size: 12px;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 11px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -867,8 +980,8 @@
         }
 
         .status-dot {
-            width: 6px;
-            height: 6px;
+            width: 5px;
+            height: 5px;
             border-radius: 50%;
             background: currentColor;
             animation: pulse 2s infinite;
@@ -887,8 +1000,8 @@
 
         /* Scrollbars */
         ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
         }
 
         ::-webkit-scrollbar-track {
@@ -897,7 +1010,7 @@
 
         ::-webkit-scrollbar-thumb {
             background: rgba(255, 255, 255, 0.15);
-            border-radius: 4px;
+            border-radius: 3px;
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
         }
@@ -909,8 +1022,8 @@
         /* Mobile scrollbars */
         @media (max-width: 767px) {
             ::-webkit-scrollbar {
-                width: 3px;
-                height: 3px;
+                width: 2px;
+                height: 2px;
             }
         }
 
@@ -925,21 +1038,21 @@
             padding: 12px 0;
             box-shadow: 0 16px 64px rgba(0, 0, 0, 0.4);
             z-index: 1000;
-            min-width: 200px;
+            min-width: 180px;
         }
 
         .context-menu-item {
-            padding: 16px 24px;
+            padding: 14px 20px;
             color: #ffffff;
             cursor: pointer;
-            font-size: 15px;
+            font-size: 14px;
             border: none;
             background: none;
             width: 100%;
             text-align: left;
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
             font-weight: 500;
             transition: all 0.2s ease;
         }
@@ -957,7 +1070,7 @@
         .context-menu-separator {
             height: 1px;
             background: rgba(255, 255, 255, 0.08);
-            margin: 12px 0;
+            margin: 10px 0;
         }
 
         /* Spinner animation */
@@ -983,50 +1096,54 @@
         /* Landscape orientation adjustments */
         @media (orientation: landscape) and (max-height: 500px) {
             .header {
-                height: 56px;
+                height: 44px;
             }
             
             .main-container {
-                margin-top: 56px;
+                margin-top: 44px;
             }
             
             .sidebar {
-                top: 56px;
-                height: calc(100vh - 56px);
+                top: 44px;
+                height: calc(100vh - 44px);
             }
             
             .sidebar-overlay {
-                top: 56px;
+                top: 44px;
             }
             
             .mobile-console {
-                height: 65vh;
+                height: 60vh;
             }
             
             .file-item {
-                padding: 12px 24px;
-                min-height: 44px;
+                padding: 10px 20px;
+                min-height: 40px;
             }
             
             .mobile-tab {
-                padding: 12px 20px;
+                padding: 10px 16px;
             }
 
             .console-actions {
-                gap: 8px;
+                gap: 6px;
             }
 
             .console-btn {
-                width: 40px;
-                height: 40px;
+                width: 36px;
+                height: 36px;
+            }
+
+            .top-edge-button {
+                top: 8px;
             }
 
             .edge-button {
-                top: 68px;
+                top: 60px;
             }
 
             .console-toggle {
-                top: 136px;
+                top: 112px;
             }
         }
 
@@ -1044,7 +1161,7 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Header -->
+        <!-- Minimized Header -->
         <header class="header">
             <a href="#" class="logo">
                 <div class="logo-icon">E</div>
@@ -1056,11 +1173,18 @@
             </a>
         </header>
 
-        <!-- Edge Positioned Buttons -->
-        <button class="edge-button glass-button mobile-menu-btn touch-target" id="mobile-menu-btn" title="Menu">
+        <!-- Top Edge Positioned Buttons -->
+        <!-- Left: Menu Button -->
+        <button class="top-edge-button glass-button mobile-menu-btn touch-target" id="mobile-menu-btn" title="Menu">
             <i data-lucide="menu"></i>
         </button>
         
+        <!-- Right: Profile Button -->
+        <button class="top-edge-button profile-btn touch-target" id="profile-btn" title="Profile">
+            i need
+        </button>
+        
+        <!-- Right Edge Buttons (Vertical) -->
         <button class="edge-button glass-button save-btn-header touch-target" id="save-btn-header" disabled title="Save File">
             <i data-lucide="save"></i>
         </button>
@@ -1068,6 +1192,23 @@
         <button class="edge-button glass-button console-toggle touch-target" id="console-toggle" title="Toggle Console">
             <i data-lucide="terminal"></i>
         </button>
+
+        <!-- Profile Dropdown -->
+        <div class="profile-dropdown" id="profile-dropdown">
+            <button class="profile-dropdown-item" id="profile-settings">
+                <i data-lucide="settings" size="16"></i>
+                Settings
+            </button>
+            <button class="profile-dropdown-item" id="profile-account">
+                <i data-lucide="user" size="16"></i>
+                Account
+            </button>
+            <div class="profile-dropdown-separator"></div>
+            <button class="profile-dropdown-item" id="profile-logout">
+                <i data-lucide="log-out" size="16"></i>
+                Logout
+            </button>
+        </div>
 
         <!-- Sidebar Overlay -->
         <div class="sidebar-overlay" id="sidebar-overlay"></div>
@@ -1108,7 +1249,7 @@
                 <div class="mobile-editor-container" id="editor-container">
                     <div class="mobile-empty-state" id="empty-state">
                         <div class="empty-icon">
-                            <i data-lucide="file-text" size="36"></i>
+                            <i data-lucide="file-text" size="32"></i>
                         </div>
                         <h3>Select a file to edit</h3>
                         <p>Choose a file from the sidebar to start editing your code</p>
@@ -1125,7 +1266,7 @@
                         </div>
                     </div>
                     <button class="save-btn glass-button touch-target" id="save-btn" disabled>
-                        <i data-lucide="save" size="16"></i>
+                        <i data-lucide="save" size="14"></i>
                         Save
                     </button>
                 </div>
@@ -1136,25 +1277,25 @@
         <div class="mobile-console" id="mobile-console">
             <div class="console-header">
                 <div class="console-title">
-                    <i data-lucide="terminal" size="20"></i>
+                    <i data-lucide="terminal" size="18"></i>
                     Console
                 </div>
                 <div class="console-actions">
                     <!-- Only show start OR stop button based on state -->
                     <button class="console-btn touch-target" id="start-bot-btn" title="Start Bot">
-                        <i data-lucide="play" size="18"></i>
+                        <i data-lucide="play" size="16"></i>
                     </button>
                     <button class="console-btn touch-target" id="stop-bot-btn" disabled style="display: none;" title="Stop Bot">
-                        <i data-lucide="square" size="16"></i>
+                        <i data-lucide="square" size="14"></i>
                     </button>
                     <button class="console-btn touch-target" id="restart-bot-btn" disabled style="display: none;" title="Restart Bot">
-                        <i data-lucide="rotate-cw" size="16"></i>
+                        <i data-lucide="rotate-cw" size="14"></i>
                     </button>
                     <button class="console-btn touch-target" id="clear-console-btn" title="Clear Console">
-                        <i data-lucide="trash-2" size="16"></i>
+                        <i data-lucide="trash-2" size="14"></i>
                     </button>
                     <button class="console-close touch-target" id="console-close">
-                        <i data-lucide="x" size="20"></i>
+                        <i data-lucide="x" size="18"></i>
                     </button>
                 </div>
             </div>
@@ -1167,16 +1308,16 @@
         <!-- Context Menu -->
         <div class="context-menu" id="context-menu" style="display: none;">
             <button class="context-menu-item" id="rename-file">
-                <i data-lucide="edit-3" size="16"></i>
+                <i data-lucide="edit-3" size="14"></i>
                 Rename
             </button>
             <button class="context-menu-item" id="delete-file">
-                <i data-lucide="trash-2" size="16"></i>
+                <i data-lucide="trash-2" size="14"></i>
                 Delete
             </button>
             <div class="context-menu-separator"></div>
             <button class="context-menu-item" id="download-file">
-                <i data-lucide="download" size="16"></i>
+                <i data-lucide="download" size="14"></i>
                 Download
             </button>
         </div>
@@ -1194,6 +1335,8 @@
             const sidebar = document.getElementById('sidebar');
             const sidebarOverlay = document.getElementById('sidebar-overlay');
             const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const profileBtn = document.getElementById('profile-btn');
+            const profileDropdown = document.getElementById('profile-dropdown');
             const fileTree = document.getElementById('file-tree');
             const mobileTabs = document.getElementById('mobile-tabs');
             const tabsWrapper = document.getElementById('tabs-wrapper');
@@ -1223,6 +1366,45 @@
             let socket = null;
             let botRunning = false;
             let selectedFile = null;
+
+            // Profile dropdown toggle
+            profileBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isActive = profileDropdown.classList.contains('active');
+                hideAllDropdowns();
+                if (!isActive) {
+                    profileDropdown.classList.add('active');
+                }
+            });
+
+            // Profile dropdown actions
+            document.getElementById('profile-settings').addEventListener('click', () => {
+                // Handle settings
+                console.log('Settings clicked');
+                hideAllDropdowns();
+            });
+
+            document.getElementById('profile-account').addEventListener('click', () => {
+                // Handle account
+                console.log('Account clicked');
+                hideAllDropdowns();
+            });
+
+            document.getElementById('profile-logout').addEventListener('click', () => {
+                // Handle logout
+                if (confirm('Are you sure you want to logout?')) {
+                    // i need - logout logic
+                    window.location.href = '/logout';
+                }
+                hideAllDropdowns();
+            });
+
+            function hideAllDropdowns() {
+                profileDropdown.classList.remove('active');
+                contextMenu.style.display = 'none';
+            }
+
+            document.addEventListener('click', hideAllDropdowns);
 
             // Initialize Socket.IO connection
             function initSocket() {
@@ -1371,6 +1553,7 @@
             function showContextMenu(e, filePath) {
                 e.preventDefault();
                 selectedFile = filePath;
+                hideAllDropdowns();
                 contextMenu.style.display = 'block';
                 contextMenu.style.left = `${e.pageX}px`;
                 contextMenu.style.top = `${e.pageY}px`;
@@ -1380,8 +1563,6 @@
                 contextMenu.style.display = 'none';
                 selectedFile = null;
             }
-
-            document.addEventListener('click', hideContextMenu);
 
             // Context menu actions
             document.getElementById('rename-file').addEventListener('click', async () => {
@@ -1647,7 +1828,7 @@
                 closeBtn.className = 'tab-close touch-target';
                 const closeIcon = document.createElement('i');
                 closeIcon.setAttribute('data-lucide', 'x');
-                closeIcon.setAttribute('size', '14');
+                closeIcon.setAttribute('size', '12');
                 closeBtn.appendChild(closeIcon);
                 closeBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
