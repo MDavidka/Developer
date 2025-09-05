@@ -60,7 +60,7 @@ class User(UserMixin):
     @staticmethod
     def get(user_id):
         user_data = db.users.find_one({"_id": ObjectId(user_id)})
-        if user_data:
+        if user_
             return User(
                 id=user_data["_id"],
                 username=user_data["username"],
@@ -203,6 +203,22 @@ aiohttp>=3.8.0
             with open(os.path.join(bot_dir, "requirements.txt"), "w") as f:
                 f.write(requirements_content)
 
+            # Create a default bot_template.py
+            default_bot = '''\
+import os, discord, asyncio
+TOKEN = os.getenv("BOT_TOKEN")
+intents = discord.Intents.default()
+client = discord.Client(intents=intents)
+
+@client.event
+async def on_ready():
+    print(f"Logged in as {client.user} (ID: {client.user.id})")
+
+client.run(TOKEN)
+'''
+            with open(os.path.join(bot_dir, "bot_template.py"), "w", encoding="utf-8") as f:
+                f.write(default_bot)
+
             # Set the new default startup command. This is for display purposes.
             new_startup_command = "python -u bot_template.py"
             db.users.update_one(
@@ -213,7 +229,8 @@ aiohttp>=3.8.0
             db.users.update_one(
                 {"_id": current_user.id},
                 {"$set": {f"servers.{i}.files": [
-                    {"path": "requirements.txt", "type": "file", "content": requirements_content}
+                    {"path": "requirements.txt", "type": "file", "content": requirements_content},
+                    {"path": "bot_template.py", "type": "file", "content": default_bot}
                 ]}}
             )
 
@@ -582,7 +599,7 @@ def start_bot(server_index):
     socketio.emit('log', {'data': f'✅ Token validation passed.'}, room=bot_id)
 
     # Check if bot_template.py exists
-    if not os.path.isfile("bot_template.py"):
+    if not os.path.isfile(os.path.join(bot_dir, "bot_template.py")):
         error_msg = '❌ Bot template file not found: bot_template.py'
         socketio.emit('log', {'data': error_msg}, room=bot_id)
         return jsonify({"error": "Bot template not found"}), 500
@@ -637,6 +654,7 @@ def start_bot(server_index):
 
         process = subprocess.Popen(
             startup_command,
+            cwd=bot_dir,                 # <-- run in the workspace that has the code
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
@@ -806,7 +824,7 @@ def uninstall_package(server_index):
     except subprocess.TimeoutExpired:
         return jsonify({"error": "Package uninstallation timed out"}), 500
     except Exception as e:
-        return jsonify({"error": f"Error uninstalling package: {str(e)}"}), 500
+        return jupytext({"error": f"Error uninstalling package: {str(e)}"}), 500
 
 if __name__ == "__main__":
     try:
