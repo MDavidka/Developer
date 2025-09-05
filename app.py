@@ -284,12 +284,10 @@ def editor(server_index):
     else:
         bot_data['status'] = "offline"
 
-    file_tree = build_file_tree(bot_data.get('files', []))
-    bot_data['files_tree'] = file_tree
     bot_data['_id'] = bot_id
     bot_data['server_index'] = server_index
 
-    return render_template("editor.html", bot=bot_data, user=current_user)
+    return render_template("editor.html", bot=bot_data, user=current_user, files=bot_data.get('files', []))
 
 # Debug endpoint
 @app.route("/api/server/<int:server_index>/debug", methods=["GET"])
@@ -378,6 +376,7 @@ def test_discord_connection(server_index):
 @app.route("/api/server/<int:server_index>/file", methods=["GET", "POST"])
 @login_required
 def file_content(server_index):
+    logger.info(f"File content requested for server {server_index} by user {current_user.id}")
     user_data = db.users.find_one({"_id": current_user.id})
     servers = user_data.get("servers", [])
     if server_index >= len(servers):
@@ -394,28 +393,36 @@ def file_content(server_index):
     full_path = os.path.join(bot_dir, path)
 
     if request.method == "GET":
+        logger.info(f"Reading file: {full_path}")
         try:
             with open(full_path, "r", encoding='utf-8') as f:
                 content = f.read()
+            logger.info(f"File read successfully: {full_path}")
             return jsonify({"content": content})
         except FileNotFoundError:
+            logger.warning(f"File not found: {full_path}")
             return jsonify({"error": "File not found"}), 404
         except Exception as e:
+            logger.error(f"Error reading file {full_path}: {e}")
             return jsonify({"error": f"Error reading file: {str(e)}"}), 500
 
     if request.method == "POST":
+        logger.info(f"Writing to file: {full_path}")
         try:
             content = request.json.get("content", "")
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
             with open(full_path, "w", encoding='utf-8') as f:
                 f.write(content)
+            logger.info(f"File saved successfully: {full_path}")
             return jsonify({"success": True})
         except Exception as e:
+            logger.error(f"Error saving file {full_path}: {e}")
             return jsonify({"error": f"Error saving file: {str(e)}"}), 500
 
 @app.route("/api/server/<int:server_index>/files/create", methods=["POST"])
 @login_required
 def create_file(server_index):
+    logger.info(f"File creation requested for server {server_index} by user {current_user.id}")
     path = request.json.get("path")
     file_type = request.json.get("type")
     if not path or not file_type:
@@ -456,6 +463,7 @@ def create_file(server_index):
 @app.route("/api/server/<int:server_index>/files/delete", methods=["POST"])
 @login_required
 def delete_file(server_index):
+    logger.info(f"File deletion requested for server {server_index} by user {current_user.id}")
     path = request.json.get("path")
     if not path:
         return jsonify({"error": "Path is required"}), 400
@@ -493,6 +501,7 @@ def delete_file(server_index):
 
 def stream_bot_logs(bot_id, process):
     """Enhanced log streaming with proper process management using select"""
+    logger.info(f"Starting log stream for bot_id: {bot_id}")
     try:
         socketio.emit('log', {
             'data': f'[{datetime.datetime.now().strftime("%H:%M:%S")}] 🚀 Bot process started (PID: {process.pid})'
@@ -547,11 +556,13 @@ def stream_bot_logs(bot_id, process):
 
 @socketio.on('connect', namespace='/editor')
 def editor_connect():
+    logger.info(f"Client connected to /editor namespace: {request.sid}")
     emit('log', {'data': '🔌 Connected to console...'})
 
 @socketio.on('join', namespace='/editor')
 def on_join(data):
     bot_id = data['bot_id']
+    logger.info(f"Client {request.sid} joining room {bot_id}")
     join_room(bot_id)
 
     # Check if bot is running and send status
@@ -569,6 +580,7 @@ def on_join(data):
 @app.route("/api/server/<int:server_index>/start", methods=["POST"])
 @login_required
 def start_bot(server_index):
+    logger.info(f"Start bot request for server {server_index} by user {current_user.id}")
     user_data = db.users.find_one({"_id": current_user.id})
     servers = user_data.get("servers", [])
 
@@ -647,6 +659,7 @@ def start_bot(server_index):
 @app.route("/api/server/<int:server_index>/stop", methods=["POST"])
 @login_required
 def stop_bot(server_index):
+    logger.info(f"Stop bot request for server {server_index} by user {current_user.id}")
     user_data = db.users.find_one({"_id": current_user.id})
     servers = user_data.get("servers", [])
 
@@ -703,6 +716,7 @@ def stop_bot(server_index):
 @app.route("/api/server/<int:server_index>/status", methods=["GET"])
 @login_required
 def bot_status(server_index):
+    logger.info(f"Bot status request for server {server_index} by user {current_user.id}")
     user_data = db.users.find_one({"_id": current_user.id})
     servers = user_data.get("servers", [])
     
