@@ -87,11 +87,11 @@
             -webkit-backdrop-filter: blur(35px) saturate(1.4);
             border: 1px solid rgba(255, 255, 255, 0.04);
             border-radius: 0 0 20px 20px;
-            padding: 14px 24px;
+            padding: 14px 24px; /* Increased padding */
             height: 56px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
             position: fixed;
             top: 0;
             left: calc(16px + 56px + 16px);
@@ -150,43 +150,9 @@
             margin: 0 6px;
         }
 
-        /* Focus Mode Toggle in Header */
-        .focus-toggle {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            color: rgba(255, 255, 255, 0.8);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .focus-toggle:hover {
-            background: rgba(255, 255, 255, 0.06);
-            color: #ffffff;
-            transform: translateY(-1px);
-        }
-
-        .focus-toggle:active {
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateY(0);
-        }
-
-        .focus-toggle.active {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.15);
-            color: #ffffff;
-        }
-
         /* Normalized Edge Buttons */
         .edge-button {
+            position: fixed;
             width: 56px;
             height: 56px;
             border-radius: 18px;
@@ -197,6 +163,7 @@
             font-size: 20px;
             color: rgba(255, 255, 255, 0.9);
             border: none;
+            z-index: 999;
             background: rgba(255, 255, 255, 0.025);
             backdrop-filter: blur(25px) saturate(1.2);
             -webkit-backdrop-filter: blur(25px) saturate(1.2);
@@ -204,7 +171,6 @@
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02),
                         0 4px 16px rgba(0, 0, 0, 0.2);
-            position: relative;
         }
 
         .edge-button:hover {
@@ -240,91 +206,8 @@
                         0 8px 24px rgba(0, 0, 0, 0.2);
         }
 
-        /* Console Status Dot - Fixed positioning */
-        .console-status-dot {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #ff6b35; /* Orange by default */
-            right: 6px;
-            bottom: 6px;
-            z-index: 1001;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 0 2px #101010;
-        }
-
-        .console-status-dot.connected {
-            background: #4ade80; /* Green when bot started */
-        }
-
-        .console-status-dot.idle {
-            background: #6b7280; /* Gray when idle */
-        }
-
-        /* Action Buttons Container - Collapsible */
-        .action-buttons-container {
-            position: fixed;
-            right: 16px;
-            top: calc(16px + 56px + 16px);
-            z-index: 999;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .action-buttons-toggle {
-            width: 56px;
-            height: 32px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.9);
-            border: none;
-            background: rgba(255, 255, 255, 0.025);
-            backdrop-filter: blur(25px) saturate(1.2);
-            -webkit-backdrop-filter: blur(25px) saturate(1.2);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02),
-                        0 4px 16px rgba(0, 0, 0, 0.2);
-        }
-
-        .action-buttons-toggle:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.1);
-            transform: translateY(-1px);
-        }
-
-        .action-buttons-toggle.collapsed {
-            transform: rotate(180deg);
-        }
-
-        .action-buttons-toggle.collapsed:hover {
-            transform: translateY(-1px) rotate(180deg);
-        }
-
-        .action-buttons-list {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            transform-origin: top center;
-        }
-
-        .action-buttons-list.hidden {
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-20px) scaleY(0.8);
-            pointer-events: none;
-        }
-
         /* Hide buttons when sidebar is open */
-        .action-buttons-container.hidden {
+        .edge-button.hidden {
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
@@ -333,46 +216,11 @@
 
         /* Left Side - Menu button */
         .mobile-menu-btn {
-            position: fixed;
             left: 16px;
             top: 16px;
-            width: 56px;
-            height: 56px;
-            border-radius: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 20px;
-            color: rgba(255, 255, 255, 0.9);
-            border: none;
-            z-index: 999;
-            background: rgba(255, 255, 255, 0.025);
-            backdrop-filter: blur(25px) saturate(1.2);
-            -webkit-backdrop-filter: blur(25px) saturate(1.2);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02),
-                        0 4px 16px rgba(0, 0, 0, 0.2);
         }
 
-        .mobile-menu-btn:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.1);
-            color: #ffffff;
-            transform: translateY(-2px);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04),
-                        0 8px 24px rgba(0, 0, 0, 0.25);
-        }
-
-        .mobile-menu-btn:active {
-            background: rgba(255, 255, 255, 0.07);
-            transform: translateY(0);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03),
-                        0 2px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        /* Right Side - User Profile */
+        /* Right Side - User Profile and Action Buttons */
         .user-profile {
             position: fixed;
             top: 16px;
@@ -501,6 +349,17 @@
             margin: 8px 0;
         }
 
+        /* Right side action buttons - positioned symmetrically */
+        .save-btn-header {
+            right: 16px;
+            top: calc(16px + 56px + 16px);
+        }
+
+        .console-toggle {
+            right: 16px;
+            top: calc(16px + 56px + 16px + 56px + 16px);
+        }
+
         /* Main Layout */
         .app-container {
             height: 100vh;
@@ -512,17 +371,17 @@
         .main-container {
             flex: 1;
             display: flex;
-            margin-top: 96px;
+            margin-top: 96px; /* Increased from 72px to add more padding */
             overflow: hidden;
         }
 
         /* Enhanced Sidebar */
         .sidebar {
             position: fixed;
-            top: 96px;
+            top: 96px; /* Adjusted to match main-container */
             left: 0;
             width: 100%;
-            height: calc(100vh - 96px);
+            height: calc(100vh - 96px); /* Adjusted height */
             background: rgba(255, 255, 255, 0.008);
             backdrop-filter: blur(30px) saturate(1.3);
             -webkit-backdrop-filter: blur(30px) saturate(1.3);
@@ -541,7 +400,7 @@
 
         .sidebar-overlay {
             position: fixed;
-            top: 96px;
+            top: 96px; /* Adjusted to match sidebar */
             left: 0;
             right: 0;
             bottom: 0;
@@ -560,7 +419,7 @@
         }
 
         .sidebar-header {
-            padding: 32px 28px 28px;
+            padding: 32px 28px 28px; /* Increased padding */
             border-bottom: 1px solid rgba(255, 255, 255, 0.04);
             background: rgba(255, 255, 255, 0.01);
             backdrop-filter: blur(20px);
@@ -600,13 +459,13 @@
         .file-tree {
             flex: 1;
             overflow-y: auto;
-            padding: 20px 0;
+            padding: 20px 0; /* Increased padding */
         }
 
         .file-item {
             display: flex;
             align-items: center;
-            padding: 20px 28px;
+            padding: 20px 28px; /* Increased padding */
             cursor: pointer;
             font-size: 16px;
             border: none;
@@ -656,7 +515,7 @@
             position: relative;
         }
 
-        /* Mobile Tabs - Desktop vs Mobile behavior */
+        /* Mobile Tabs with padding */
         .mobile-tabs {
             background: rgba(255, 255, 255, 0.015);
             backdrop-filter: blur(25px) saturate(1.2);
@@ -669,7 +528,7 @@
             -webkit-overflow-scrolling: touch;
             display: none;
             height: 52px;
-            padding: 0 8px;
+            padding: 0 8px; /* Added padding */
         }
 
         .mobile-tabs::-webkit-scrollbar {
@@ -685,7 +544,7 @@
         .mobile-tab {
             display: inline-flex;
             align-items: center;
-            padding: 16px 32px;
+            padding: 16px 32px; /* Increased padding */
             border: none;
             background: none;
             cursor: pointer;
@@ -793,7 +652,7 @@
             background: rgba(255, 255, 255, 0.12) !important;
         }
 
-        /* Empty State */
+        /* Empty State - Moved down by 26% total (20% + 6%) */
         .mobile-empty-state {
             flex: 1;
             display: flex;
@@ -803,7 +662,7 @@
             text-align: center;
             padding: 48px 32px 120px;
             min-height: 0;
-            transform: translateY(26%);
+            transform: translateY(26%); /* Increased from 20% to 26% */
         }
 
         .empty-icon {
@@ -836,7 +695,7 @@
             max-width: 280px;
         }
 
-        /* AI Chat Interface at Bottom */
+        /* AI Chat Interface at Bottom - Transparent Input */
         .ai-chat-container {
             position: fixed;
             bottom: 0;
@@ -901,13 +760,13 @@
             transform: translateY(0);
         }
 
-        /* AI Input */
+        /* AI Input - Transparent Background */
         .ai-input-container {
             display: flex;
             gap: 12px;
             align-items: center;
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: transparent; /* Removed background */
+            border: 1px solid rgba(255, 255, 255, 0.08); /* Only border */
             border-radius: 18px;
             padding: 10px 14px;
         }
@@ -966,7 +825,7 @@
             box-shadow: none !important;
         }
 
-        /* Enhanced Status Bar */
+        /* Enhanced Status Bar - above AI Chat */
         .mobile-status-bar {
             height: 50px;
             background: rgba(255, 255, 255, 0.015);
@@ -1094,6 +953,7 @@
             align-items: center;
         }
 
+        /* Reduced Light Console Buttons */
         .console-btn {
             width: 44px;
             height: 44px;
@@ -1212,33 +1072,22 @@
             opacity: 0.7;
         }
 
-        /* Focus Mode - File Editor View */
-        body.focus-mode .action-buttons-container,
-        body.focus-mode .ai-chat-container,
-        body.focus-mode .mobile-status-bar {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-            transform: translateY(20px);
-        }
-
-        body.focus-mode .content-area {
-            height: calc(100vh - 96px);
-        }
-
-        body.focus-mode .mobile-editor-container {
-            height: 100%;
-        }
-
-        body.focus-mode .mobile-console {
-            bottom: 0;
+        .console-indicator {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: yellow;
+            border-radius: 50%;
+            right: 20px;
+            top: calc(16px + 56px + 16px + 56px + 16px + 56px - 15px);
+            z-index: 1000;
         }
 
         /* Desktop Styles */
         @media (min-width: 768px) {
             .header {
                 height: 64px;
-                padding: 18px 28px;
+                padding: 18px 28px; /* Increased padding */
                 left: calc(16px + 56px + 16px);
                 right: calc(16px + 56px + 16px);
                 border-radius: 0 0 24px 24px;
@@ -1255,7 +1104,7 @@
             }
 
             .main-container {
-                margin-top: 104px;
+                margin-top: 104px; /* Increased from 80px for more padding */
                 flex-direction: row;
             }
 
@@ -1279,14 +1128,7 @@
 
             .mobile-tabs {
                 display: flex;
-                padding: 0 12px;
-            }
-
-            /* Desktop: Multiple tabs allowed */
-            .mobile-tab {
-                min-width: 180px;
-                max-width: 240px;
-                flex-shrink: 1;
+                padding: 0 12px; /* Increased padding for desktop */
             }
 
             .mobile-console {
@@ -1320,19 +1162,28 @@
                 padding: 48px 32px 160px;
             }
 
+            /* Desktop symmetrical positioning */
+            .save-btn-header {
+                top: calc(16px + 56px + 16px);
+            }
+
+            .console-toggle {
+                top: calc(16px + 56px + 16px + 56px + 16px);
+            }
+
             .user-dropdown {
                 top: calc(16px + 56px + 16px);
             }
 
             /* Don't hide buttons on desktop */
-            .action-buttons-container.hidden {
+            .edge-button.hidden {
                 opacity: 1;
                 visibility: visible;
                 pointer-events: auto;
                 transform: none;
             }
 
-            /* AI Chat responsive */
+            /* AI Chat responsive - larger on desktop */
             .ai-chat-container {
                 padding: 20px 30px;
                 gap: 16px;
@@ -1371,27 +1222,6 @@
             .save-btn {
                 padding: 12px 24px;
                 font-size: 15px;
-            }
-        }
-
-        /* Mobile: Single tab only */
-        @media (max-width: 767px) {
-            .mobile-tabs {
-                overflow: hidden;
-            }
-            
-            .tabs-wrapper {
-                width: 100%;
-            }
-            
-            .mobile-tab {
-                flex: 1;
-                min-width: 0;
-                max-width: none;
-            }
-            
-            .mobile-tab:not(.active) {
-                display: none;
             }
         }
 
@@ -1478,407 +1308,7 @@
         ::-webkit-scrollbar-thumb:hover {
             background: rgba(255, 255, 255, 0.15);
         }
-    </style>
-</head>
-<body>
-    <div class="app-container">
-        <!-- Header -->
-        <header class="header glass">
-            <a href="#" class="logo">
-                <div class="logo-icon">C</div>
-                <div class="current-file">
-                    <span class="file-path">main.py</span>
-                </div>
-            </a>
-            <button class="focus-toggle" id="focusToggle">
-                <i data-lucide="maximize"></i>
-            </button>
-        </header>
 
-        <!-- Mobile Menu Button -->
-        <button class="mobile-menu-btn glass-button touch-target" id="mobileMenuBtn">
-            <i data-lucide="menu"></i>
-        </button>
-
-        <!-- User Profile -->
-        <div class="user-profile" id="userProfile">
-            <img src="https://via.placeholder.com/56x56/333/fff?text=U" alt="User Avatar" class="user-avatar">
-        </div>
-
-        <!-- User Dropdown -->
-        <div class="user-dropdown" id="userDropdown">
-            <div class="user-dropdown-header">
-                <img src="https://via.placeholder.com/40x40/333/fff?text=U" alt="User Avatar" class="user-dropdown-avatar">
-                <div class="user-dropdown-info">
-                    <h3>John Doe</h3>
-                    <p>Developer</p>
-                </div>
-            </div>
-            <button class="user-dropdown-item">
-                <i data-lucide="user"></i>
-                Profile
-            </button>
-            <button class="user-dropdown-item">
-                <i data-lucide="settings"></i>
-                Settings
-            </button>
-            <div class="user-dropdown-separator"></div>
-            <button class="user-dropdown-item">
-                <i data-lucide="log-out"></i>
-                Sign Out
-            </button>
-        </div>
-
-        <!-- Action Buttons Container -->
-        <div class="action-buttons-container" id="actionButtonsContainer">
-            <button class="action-buttons-toggle" id="actionButtonsToggle">
-                <i data-lucide="chevron-up"></i>
-            </button>
-            <div class="action-buttons-list" id="actionButtonsList">
-                <button class="edge-button glass-button touch-target" id="saveBtnHeader" disabled>
-                    <i data-lucide="save"></i>
-                </button>
-                <button class="edge-button glass-button touch-target" id="consoleToggle">
-                    <i data-lucide="terminal"></i>
-                    <div class="console-status-dot idle" id="consoleStatusDot"></div>
-                </button>
-            </div>
-        </div>
-
-        <!-- Sidebar Overlay -->
-        <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-title">
-                    <i data-lucide="folder"></i>
-                    Files
-                </div>
-                <div class="sidebar-actions">
-                    <button class="sidebar-btn glass-button">
-                        <i data-lucide="plus"></i>
-                    </button>
-                    <button class="sidebar-btn glass-button">
-                        <i data-lucide="refresh-cw"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="file-tree">
-                <button class="file-item active">
-                    <i data-lucide="file-text" class="file-icon"></i>
-                    main.py
-                </button>
-                <button class="file-item">
-                    <i data-lucide="file-text" class="file-icon"></i>
-                    utils.py
-                </button>
-                <button class="file-item">
-                    <i data-lucide="file-text" class="file-icon"></i>
-                    config.json
-                </button>
-                <button class="file-item">
-                    <i data-lucide="folder" class="file-icon"></i>
-                    components/
-                </button>
-            </div>
-        </aside>
-
-        <!-- Main Container -->
-        <div class="main-container">
-            <!-- Content Area -->
-            <div class="content-area">
-                <!-- Mobile Tabs -->
-                <div class="mobile-tabs" id="mobileTabs">
-                    <div class="tabs-wrapper">
-                        <button class="mobile-tab active">
-                            <i data-lucide="file-text"></i>
-                            main.py
-                            <button class="tab-close">
-                                <i data-lucide="x"></i>
-                            </button>
-                        </button>
-                        <button class="mobile-tab">
-                            <i data-lucide="file-text"></i>
-                            utils.py
-                            <button class="tab-close">
-                                <i data-lucide="x"></i>
-                            </button>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Mobile Editor Container -->
-                <div class="mobile-editor-container">
-                    <!-- Empty State -->
-                    <div class="mobile-empty-state" id="emptyState">
-                        <div class="empty-icon">
-                            <i data-lucide="code"></i>
-                        </div>
-                        <h3>Welcome to Code Editor</h3>
-                        <p>Select a file from the sidebar to start coding, or create a new file to begin your project.</p>
-                    </div>
-
-                    <!-- Editor Wrapper -->
-                    <div class="editor-wrapper" id="editorWrapper" style="display: none;">
-                        <!-- CodeMirror will be initialized here -->
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Mobile Status Bar -->
-        <div class="mobile-status-bar" id="statusBar">
-            <div class="status-left">
-                <button class="save-btn primary" id="saveBtn" disabled>
-                    <i data-lucide="save"></i>
-                    Save
-                </button>
-                <div class="status-indicator online">
-                    <div class="status-dot"></div>
-                    Connected
-                </div>
-            </div>
-            <div>Python • UTF-8 • Ln 1, Col 1</div>
-        </div>
-
-        <!-- AI Chat Interface -->
-        <div class="ai-chat-container" id="aiChatContainer">
-            <div class="ai-suggestions">
-                <button class="suggestion-chip">Fix syntax error</button>
-                <button class="suggestion-chip">Add comments</button>
-                <button class="suggestion-chip">Optimize code</button>
-                <button class="suggestion-chip">Generate tests</button>
-            </div>
-            <div class="ai-input-container">
-                <input type="text" class="ai-input" placeholder="Ask AI to help with your code..." id="aiInput">
-                <button class="ai-send-btn" id="aiSendBtn" disabled>
-                    <i data-lucide="send"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Mobile Console -->
-        <div class="mobile-console" id="mobileConsole">
-            <div class="console-header">
-                <div class="console-title">
-                    <i data-lucide="terminal"></i>
-                    Console
-                </div>
-                <div class="console-actions">
-                    <button class="console-btn" id="runBtn">
-                        <i data-lucide="play"></i>
-                    </button>
-                    <button class="console-btn" id="stopBtn" disabled>
-                        <i data-lucide="square"></i>
-                    </button>
-                    <button class="console-btn" id="clearBtn">
-                        <i data-lucide="trash-2"></i>
-                    </button>
-                    <button class="console-close" id="consoleClose">
-                        <i data-lucide="x"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="console-output" id="consoleOutput">
-                <div class="console-line info">Console ready. Run your code to see output.</div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Initialize Lucide icons
-        lucide.createIcons();
-
-        // Global state
-        let editor = null;
-        let currentFile = null;
-        let consoleOpen = false;
-        let sidebarOpen = false;
-        let userDropdownOpen = false;
-        let actionButtonsCollapsed = false;
-        let focusMode = false;
-
-        // DOM elements
-        const elements = {
-            mobileMenuBtn: document.getElementById('mobileMenuBtn'),
-            sidebar: document.getElementById('sidebar'),
-            sidebarOverlay: document.getElementById('sidebarOverlay'),
-            userProfile: document.getElementById('userProfile'),
-            userDropdown: document.getElementById('userDropdown'),
-            actionButtonsContainer: document.getElementById('actionButtonsContainer'),
-            actionButtonsToggle: document.getElementById('actionButtonsToggle'),
-            actionButtonsList: document.getElementById('actionButtonsList'),
-            consoleToggle: document.getElementById('consoleToggle'),
-            consoleStatusDot: document.getElementById('consoleStatusDot'),
-            mobileConsole: document.getElementById('mobileConsole'),
-            consoleClose: document.getElementById('consoleClose'),
-            focusToggle: document.getElementById('focusToggle'),
-            aiChatContainer: document.getElementById('aiChatContainer'),
-            statusBar: document.getElementById('statusBar'),
-            mobileTabs: document.getElementById('mobileTabs'),
-            emptyState: document.getElementById('emptyState'),
-            editorWrapper: document.getElementById('editorWrapper')
-        };
-
-        // Initialize CodeMirror
-        function initializeEditor() {
-            if (elements.editorWrapper && !editor) {
-                editor = CodeMirror(elements.editorWrapper, {
-                    mode: 'python',
-                    theme: 'material-darker',
-                    lineNumbers: true,
-                    lineWrapping: false,
-                    indentUnit: 4,
-                    tabSize: 4,
-                    indentWithTabs: false,
-                    matchBrackets: true,
-                    autoCloseBrackets: true,
-                    foldGutter: true,
-                    gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
-                    value: '# Welcome to Code Editor\nprint("Hello, World!")\n\n# Start coding here...'
-                });
-
-                // Show editor and hide empty state
-                elements.emptyState.style.display = 'none';
-                elements.editorWrapper.style.display = 'block';
-                elements.mobileTabs.style.display = 'flex';
-            }
-        }
-
-        // Console status management
-        function updateConsoleStatus(status) {
-            if (elements.consoleStatusDot) {
-                elements.consoleStatusDot.className = `console-status-dot ${status}`;
-            }
-        }
-
-        // Mobile menu toggle
-        elements.mobileMenuBtn.addEventListener('click', function() {
-            sidebarOpen = !sidebarOpen;
-            elements.sidebar.classList.toggle('open', sidebarOpen);
-            elements.sidebarOverlay.classList.toggle('active', sidebarOpen);
-            elements.actionButtonsContainer.classList.toggle('hidden', sidebarOpen);
-        });
-
-        // Sidebar overlay click
-        elements.sidebarOverlay.addEventListener('click', function() {
-            sidebarOpen = false;
-            elements.sidebar.classList.remove('open');
-            elements.sidebarOverlay.classList.remove('active');
-            elements.actionButtonsContainer.classList.remove('hidden');
-        });
-
-        // User profile dropdown
-        elements.userProfile.addEventListener('click', function(e) {
-            e.stopPropagation();
-            userDropdownOpen = !userDropdownOpen;
-            elements.userDropdown.classList.toggle('active', userDropdownOpen);
-        });
-
-        // Close user dropdown on outside click
-        document.addEventListener('click', function() {
-            if (userDropdownOpen) {
-                userDropdownOpen = false;
-                elements.userDropdown.classList.remove('active');
-            }
-        });
-
-        // Action buttons toggle
-        elements.actionButtonsToggle.addEventListener('click', function() {
-            actionButtonsCollapsed = !actionButtonsCollapsed;
-            elements.actionButtonsToggle.classList.toggle('collapsed', actionButtonsCollapsed);
-            elements.actionButtonsList.classList.toggle('hidden', actionButtonsCollapsed);
-        });
-
-        // Console toggle
-        elements.consoleToggle.addEventListener('click', function() {
-            consoleOpen = !consoleOpen;
-            elements.mobileConsole.classList.toggle('open', consoleOpen);
-            elements.consoleToggle.classList.toggle('active', consoleOpen);
-        });
-
-        // Console close
-        elements.consoleClose.addEventListener('click', function() {
-            consoleOpen = false;
-            elements.mobileConsole.classList.remove('open');
-            elements.consoleToggle.classList.remove('active');
-        });
-
-        // Focus mode toggle
-        elements.focusToggle.addEventListener('click', function() {
-            focusMode = !focusMode;
-            document.body.classList.toggle('focus-mode', focusMode);
-            elements.focusToggle.classList.toggle('active', focusMode);
-            
-            // Update focus toggle icon
-            const icon = elements.focusToggle.querySelector('i');
-            if (focusMode) {
-                icon.setAttribute('data-lucide', 'minimize');
-            } else {
-                icon.setAttribute('data-lucide', 'maximize');
-            }
-            lucide.createIcons();
-        });
-
-        // File item clicks
-        document.querySelectorAll('.file-item').forEach(item => {
-            item.addEventListener('click', function() {
-                // Remove active class from all items
-                document.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
-                // Add active class to clicked item
-                this.classList.add('active');
-                
-                // Initialize editor if not already done
-                if (!editor) {
-                    initializeEditor();
-                }
-                
-                // Close sidebar on mobile
-                if (window.innerWidth < 768) {
-                    sidebarOpen = false;
-                    elements.sidebar.classList.remove('open');
-                    elements.sidebarOverlay.classList.remove('active');
-                    elements.actionButtonsContainer.classList.remove('hidden');
-                }
-            });
-        });
-
-        // Simulate console status changes
-        setTimeout(() => {
-            updateConsoleStatus('connected');
-        }, 2000);
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            lucide.createIcons();
-            
-            // Show tabs on desktop
-            if (window.innerWidth >= 768) {
-                elements.mobileTabs.style.display = 'flex';
-            }
-        });
-
-        // Handle window resize
-        window.addEventListener('resize', function() {
-            if (window.innerWidth >= 768) {
-                // Desktop: show sidebar, hide mobile menu
-                elements.sidebar.classList.remove('open');
-                elements.sidebarOverlay.classList.remove('active');
-                elements.actionButtonsContainer.classList.remove('hidden');
-                sidebarOpen = false;
-                
-                // Show all tabs on desktop
-                document.querySelectorAll('.mobile-tab').forEach(tab => {
-                    tab.style.display = 'inline-flex';
-                });
-            } else {
-                // Mobile: hide non-active tabs
-                document.querySelectorAll('.mobile-tab:not(.active)').forEach(tab => {
-                    tab.style.display = 'none';
-                });
-            }
-        });
-    </script>
-</body>
-</html>
+        /* Mobile scrollbars */
+        @media (max-width: 767px) {
+            ::-webkit-scrollb
