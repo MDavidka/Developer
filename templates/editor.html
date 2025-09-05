@@ -5,14 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Code Editor - {{ bot.name }}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
-    <!-- Using a dark theme for CodeMirror -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/material-darker.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     
     <style>
-        /* --- Base and General Styles --- */
         * {
             margin: 0;
             padding: 0;
@@ -37,9 +35,9 @@
             touch-action: manipulation;
         }
 
-        /* --- Header --- */
+        /* Header */
         .header {
-            background: #1c1c1c;
+            background: #1a1a1a;
             border-bottom: 1px solid #333;
             padding: 0 16px;
             height: 56px;
@@ -62,84 +60,210 @@
         }
 
         .mobile-menu-btn {
-            background: none;
-            color: #e0e0e0;
+            width: 40px;
+            height: 40px;
             border: none;
+            background: none;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 8px;
             font-size: 18px;
+            flex-shrink: 0;
             transition: background 0.15s ease;
+            color: #e0e0e0;
         }
 
         .mobile-menu-btn:active {
-            background: #333;
+            background: #2a2a2a;
         }
 
         .logo {
-            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            text-decoration: none;
+            color: #e0e0e0;
         }
 
         .logo-icon {
-            background: #fff;
-            color: #101010;
+            width: 28px;
+            height: 28px;
+            background: #007acc;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
         }
 
         .current-file {
-            color: #999;
+            color: #a0a0a0;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 0;
         }
-        
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
         .header-btn {
-            border: 1px solid #333;
-            background: #1c1c1c;
+            width: 40px;
+            height: 40px;
+            border: 1px solid #444;
+            background: #1a1a1a;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.15s ease;
             color: #e0e0e0;
         }
 
         .header-btn:active {
-            background: #333;
+            background: #2a2a2a;
+            transform: scale(0.95);
+        }
+
+        .header-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .header-btn.active {
-            background: #fff;
-            color: #101010;
-            border-color: #fff;
+            background: #007acc;
+            color: #fff;
+            border-color: #007acc;
         }
 
-        /* --- Main Layout & Sidebar --- */
+        /* Main Layout */
+        .app-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
         .main-container {
+            flex: 1;
+            display: flex;
             margin-top: 56px;
+            overflow: hidden;
         }
 
+        /* Sidebar */
         .sidebar {
-            background: #1c1c1c;
+            position: fixed;
+            top: 56px;
+            left: 0;
+            width: 100%;
+            height: calc(100vh - 56px);
+            background: #1a1a1a;
+            z-index: 900;
+            transform: translateX(-100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.open {
+            transform: translateX(0);
         }
 
         .sidebar-overlay {
+            position: fixed;
+            top: 56px;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background: rgba(0, 0, 0, 0.7);
+            z-index: 800;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
         }
 
         .sidebar-header {
+            padding: 20px 16px 16px;
             border-bottom: 1px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .sidebar-title {
-            color: #fff;
+            font-size: 18px;
+            font-weight: 600;
+            color: #e0e0e0;
+        }
+
+        .sidebar-actions {
+            display: flex;
+            gap: 8px;
         }
 
         .sidebar-btn {
-            border: 1px solid #333;
-            background: #1c1c1c;
+            width: 36px;
+            height: 36px;
+            border: 1px solid #444;
+            background: #2a2a2a;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.15s ease;
             color: #e0e0e0;
         }
 
         .sidebar-btn:active {
             background: #333;
+            transform: scale(0.95);
+        }
+
+        .file-tree {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 0;
         }
 
         .file-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            gap: 12px;
+            transition: background 0.15s ease;
+            min-height: 52px;
             color: #e0e0e0;
+        }
+
+        .file-item:hover {
+            background: #2a2a2a;
         }
 
         .file-item:active {
@@ -147,175 +271,548 @@
         }
 
         .file-item.active {
-            background: #fff;
-            color: #101010;
+            background: #007acc;
+            color: #fff;
         }
 
-        /* --- Content Area & Tabs --- */
+        .file-icon {
+            font-size: 20px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .folder-item .file-icon::before {
+            content: "📁";
+        }
+
+        .file-item:not(.folder-item) .file-icon::before {
+            content: "📄";
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        /* Mobile Tabs */
         .mobile-tabs {
-            background: #1c1c1c;
+            background: #1a1a1a;
             border-bottom: 1px solid #333;
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+            display: none;
         }
-        
+
+        .mobile-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tabs-wrapper {
+            display: inline-flex;
+            min-width: 100%;
+        }
+
         .mobile-tab {
-            color: #999;
+            display: inline-flex;
+            align-items: center;
+            padding: 16px 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #a0a0a0;
             border-bottom: 2px solid transparent;
+            transition: all 0.15s ease;
+            gap: 8px;
+            white-space: nowrap;
+            min-width: 120px;
+            justify-content: center;
+            flex-shrink: 0;
         }
-        
+
         .mobile-tab.active {
-            color: #fff;
-            border-bottom-color: #fff;
-        }
-        
-        .mobile-tab:active {
-            background: #333;
-        }
-        
-        .tab-close {
-            background: rgba(255, 255, 255, 0.1);
             color: #e0e0e0;
+            border-bottom-color: #007acc;
+        }
+
+        .mobile-tab:active {
+            background: #2a2a2a;
+        }
+
+        .tab-close {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            margin-left: auto;
+            color: #a0a0a0;
         }
 
         .tab-close:active {
             background: rgba(255, 255, 255, 0.2);
         }
-        
-        /* --- CodeMirror Editor Dark Theme --- */
+
+        /* Mobile Editor */
+        .mobile-editor-container {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .editor-wrapper {
+            height: 100%;
+            width: 100%;
+        }
+
         .CodeMirror {
+            height: 100% !important;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
             background: #101010 !important;
-            color: #e0e0e0;
+            color: #e0e0e0 !important;
         }
 
-        .cm-s-material-darker.CodeMirror {
-            background-color: #101010;
-            color: #eeffff;
-        }
-
-        .cm-s-material-darker .CodeMirror-gutters {
-            background: #101010;
+        .CodeMirror-gutters {
             border-right: 1px solid #333;
+            background: #1a1a1a !important;
         }
 
-        .cm-s-material-darker .CodeMirror-linenumber {
-            color: #545454;
+        .CodeMirror-linenumber {
+            color: #666 !important;
+            padding: 0 6px;
+            font-size: 12px;
         }
 
-        .cm-s-material-darker .CodeMirror-cursor {
-            border-left: 2px solid #fff !important;
+        .CodeMirror-cursor {
+            border-left: 2px solid #007acc !important;
         }
-        
-        /* --- Status Bar --- */
+
+        .CodeMirror-selected {
+            background: #333 !important;
+        }
+
+        .CodeMirror-focused .CodeMirror-selected {
+            background: #444 !important;
+        }
+
+        /* Mobile Status Bar */
         .mobile-status-bar {
-            background: #1c1c1c;
+            height: 48px;
+            background: #1a1a1a;
             border-top: 1px solid #333;
-            color: #999;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            font-size: 12px;
+            color: #a0a0a0;
+        }
+
+        .status-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
         }
 
         .save-btn {
-            border: 1px solid #333;
-            background: #1c1c1c;
+            padding: 8px 16px;
+            border: 1px solid #444;
+            border-radius: 8px;
+            background: #2a2a2a;
             color: #e0e0e0;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
         }
-        
+
+        .save-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         .save-btn:not(:disabled):active {
             background: #333;
+            transform: scale(0.95);
         }
 
         .save-btn.primary {
-            background: #fff;
-            color: #101010;
-            border-color: #fff;
+            background: #007acc;
+            color: #fff;
+            border-color: #007acc;
         }
 
-        /* --- Empty State --- */
+        /* Empty State */
         .mobile-empty-state {
-            background: #101010;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px 20px;
         }
-        
+
         .empty-icon {
-            background: #222;
-            color: #e0e0e0;
+            width: 64px;
+            height: 64px;
+            background: #2a2a2a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 28px;
         }
 
         .mobile-empty-state h3 {
-            color: #fff;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #e0e0e0;
         }
 
         .mobile-empty-state p {
-            color: #999;
+            color: #a0a0a0;
+            font-size: 16px;
+            line-height: 1.5;
         }
 
-        /* --- Console --- */
+        /* Mobile Console */
         .mobile-console {
-            background: #1c1c1c;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 50vh;
+            background: #1a1a1a;
             border-top: 1px solid #333;
+            z-index: 700;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mobile-console.open {
+            transform: translateY(0);
         }
 
         .console-header {
-            background: #151515;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 16px 12px;
             border-bottom: 1px solid #333;
+            background: #2a2a2a;
         }
-        
+
         .console-title {
-            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            color: #e0e0e0;
+        }
+
+        .console-actions {
+            display: flex;
+            gap: 8px;
         }
 
         .console-btn {
-            border: 1px solid #333;
-            background: #2a2a2a;
+            padding: 8px 12px;
+            border: 1px solid #444;
+            border-radius: 6px;
+            background: #333;
             color: #e0e0e0;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
         .console-btn:active {
             background: #444;
+            transform: scale(0.95);
+        }
+
+        .console-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .console-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-size: 18px;
             color: #e0e0e0;
         }
-        
+
         .console-close:active {
             background: #333;
         }
-        
+
         .console-output {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
             background: #101010;
+            -webkit-overflow-scrolling: touch;
             color: #e0e0e0;
         }
-        
-        /* --- Scrollbars --- */
+
+        .console-line {
+            margin-bottom: 4px;
+            word-wrap: break-word;
+        }
+
+        /* Desktop Styles */
+        @media (min-width: 768px) {
+            .header {
+                height: 64px;
+                padding: 0 24px;
+            }
+
+            .main-container {
+                margin-top: 64px;
+                flex-direction: row;
+            }
+
+            .sidebar {
+                position: relative;
+                top: 0;
+                width: 280px;
+                height: 100%;
+                transform: translateX(0);
+                transition: none;
+                border-right: 1px solid #333;
+            }
+
+            .sidebar-overlay {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: none;
+            }
+
+            .mobile-tabs {
+                display: flex;
+            }
+
+            .mobile-console {
+                height: 300px;
+            }
+
+            .header-left {
+                gap: 16px;
+            }
+
+            .current-file {
+                font-size: 16px;
+            }
+
+            .breadcrumb {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                color: #a0a0a0;
+                font-size: 14px;
+            }
+
+            .breadcrumb-separator {
+                color: #666;
+            }
+
+            .file-item:hover {
+                background: #2a2a2a;
+            }
+        }
+
+        /* Large screens */
+        @media (min-width: 1200px) {
+            .sidebar {
+                width: 320px;
+            }
+
+            .mobile-console {
+                height: 350px;
+            }
+        }
+
+        /* Touch optimizations */
+        .touch-target {
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        /* Scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
         ::-webkit-scrollbar-thumb {
-            background: #555;
+            background: #444;
+            border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: #777;
+            background: #555;
         }
 
-        /* --- Breadcrumb for Desktop --- */
-        .breadcrumb {
-            color: #999;
+        /* Mobile scrollbars */
+        @media (max-width: 767px) {
+            ::-webkit-scrollbar {
+                width: 2px;
+                height: 2px;
+            }
         }
-        
-        .breadcrumb-separator {
-            color: #555;
+
+        /* Custom Icons */
+        .icon-menu::before { content: "☰"; }
+        .icon-save::before { content: "💾"; }
+        .icon-terminal::before { content: "⌨"; }
+        .icon-plus::before { content: "+"; }
+        .icon-folder::before { content: "📁"; }
+        .icon-close::before { content: "×"; }
+        .icon-play::before { content: "▶"; }
+        .icon-stop::before { content: "⏹"; }
+        .icon-file::before { content: "📄"; }
+
+        /* Loading states */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #444;
+            border-radius: 50%;
+            border-top-color: #007acc;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Landscape orientation adjustments */
+        @media (orientation: landscape) and (max-height: 500px) {
+            .header {
+                height: 48px;
+            }
+            
+            .main-container {
+                margin-top: 48px;
+            }
+            
+            .sidebar {
+                top: 48px;
+                height: calc(100vh - 48px);
+            }
+            
+            .sidebar-overlay {
+                top: 48px;
+            }
+            
+            .mobile-console {
+                height: 60vh;
+            }
+            
+            .file-item {
+                padding: 12px 20px;
+                min-height: 44px;
+            }
+            
+            .mobile-tab {
+                padding: 12px 16px;
+            }
+        }
+
+        /* iOS safe area support */
+        @supports (padding: max(0px)) {
+            .app-container {
+                padding-bottom: max(0px, env(safe-area-inset-bottom));
+            }
+            
+            .mobile-console {
+                padding-bottom: max(0px, env(safe-area-inset-bottom));
+            }
+        }
+
+        /* Dark theme specific adjustments */
+        .CodeMirror-matchingbracket {
+            background: rgba(0, 122, 204, 0.3) !important;
+            color: inherit !important;
+        }
+
+        .CodeMirror-nonmatchingbracket {
+            background: rgba(255, 0, 0, 0.3) !important;
+            color: inherit !important;
+        }
+
+        /* Selection colors */
+        ::selection {
+            background: #007acc;
+            color: #fff;
+        }
+
+        ::-moz-selection {
+            background: #007acc;
+            color: #fff;
         }
     </style>
 </head>
 <body>
-    <!-- The rest of your HTML body remains exactly the same -->
     <div class="app-container">
         <!-- Header -->
         <header class="header">
             <div class="header-left">
                 <button class="mobile-menu-btn touch-target" id="mobile-menu-btn">
-                    <span class="icon-menu">☰</span>
+                    <span class="icon-menu"></span>
                 </button>
-                <a href="#" class="logo" style="display: flex; align-items: center; gap: 8px; font-weight: 600; text-decoration: none;">
-                    <div class="logo-icon" style="width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700;">E</div>
+                <a href="#" class="logo">
+                    <div class="logo-icon">E</div>
                     <span class="current-file" id="current-file">Select a file</span>
                 </a>
-                <nav class="breadcrumb" style="display: none;">
+                <nav class="breadcrumb">
                     <span>{{ bot.name }}</span>
                     <span class="breadcrumb-separator">/</span>
                     <span id="current-file-breadcrumb">Select a file</span>
@@ -323,10 +820,10 @@
             </div>
             <div class="header-right">
                 <button class="header-btn touch-target" id="save-btn-header" disabled>
-                    <span class="icon-save">💾</span>
+                    <span class="icon-save"></span>
                 </button>
                 <button class="header-btn touch-target" id="console-toggle">
-                    <span class="icon-terminal">⌨</span>
+                    <span class="icon-terminal"></span>
                 </button>
             </div>
         </header>
@@ -342,10 +839,10 @@
                     <span class="sidebar-title">Files</span>
                     <div class="sidebar-actions">
                         <button class="sidebar-btn touch-target" id="new-file-btn" title="New File">
-                            <span class="icon-plus">+</span>
+                            <span class="icon-plus"></span>
                         </button>
                         <button class="sidebar-btn touch-target" id="new-folder-btn" title="New Folder">
-                            <span class="icon-folder">📁</span>
+                            <span class="icon-folder"></span>
                         </button>
                     </div>
                 </div>
@@ -357,7 +854,7 @@
             <!-- Content Area -->
             <main class="content-area">
                 <!-- Mobile Tabs -->
-                <div class="mobile-tabs" id="mobile-tabs" style="display: none;">
+                <div class="mobile-tabs" id="mobile-tabs">
                     <div class="tabs-wrapper" id="tabs-wrapper">
                         <!-- Tabs will be populated here -->
                     </div>
@@ -367,7 +864,7 @@
                 <div class="mobile-editor-container" id="editor-container">
                     <div class="mobile-empty-state" id="empty-state">
                         <div class="empty-icon">
-                            <span class="icon-file">📄</span>
+                            <span class="icon-file"></span>
                         </div>
                         <h3>No file selected</h3>
                         <p>Tap the menu button and select a file to start editing</p>
@@ -391,15 +888,15 @@
                 <span class="console-title">Console</span>
                 <div class="console-actions">
                     <button class="console-btn touch-target" id="start-bot-btn">
-                        <span class="icon-play">▶</span>
+                        <span class="icon-play"></span>
                         Start
                     </button>
                     <button class="console-btn touch-target" id="stop-bot-btn">
-                        <span class="icon-stop">⏹</span>
+                        <span class="icon-stop"></span>
                         Stop
                     </button>
                     <button class="console-close touch-target" id="console-close">
-                        <span class="icon-close">×</span>
+                        <span class="icon-close"></span>
                     </button>
                 </div>
             </div>
@@ -410,11 +907,9 @@
     </div>
 
     <script>
-        // Your original Javascript remains unchanged
         document.addEventListener('DOMContentLoaded', function() {
-            // All your original JavaScript code goes here...
-            const serverIndex = '{{ request.view_args.server_index if request and request.view_args else "0" }}';
-            const botId = '{{ bot._id if bot else "default" }}';
+            const serverIndex = {{ request.view_args.server_index }};
+            const botId = "{{ bot._id }}";
             
             // Elements
             const sidebar = document.getElementById('sidebar');
@@ -440,6 +935,7 @@
             let activeTab = null;
             let editor = null;
 
+            // Mobile menu toggle
             if (mobileMenuBtn) {
                 mobileMenuBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -450,23 +946,36 @@
             sidebarOverlay.addEventListener('click', closeSidebar);
 
             function toggleSidebar() {
-                sidebar.classList.toggle('open');
-                sidebarOverlay.classList.toggle('active');
+                const isOpen = sidebar.classList.contains('open');
+                if (isOpen) {
+                    closeSidebar();
+                } else {
+                    openSidebar();
+                }
             }
-            
+
             function openSidebar() {
                 sidebar.classList.add('open');
                 sidebarOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
             }
 
             function closeSidebar() {
                 sidebar.classList.remove('open');
                 sidebarOverlay.classList.remove('active');
+                document.body.style.overflow = '';
             }
 
+            // Console toggle
             consoleToggle.addEventListener('click', () => {
-                mobileConsole.classList.toggle('open');
-                consoleToggle.classList.toggle('active');
+                const isOpen = mobileConsole.classList.contains('open');
+                if (isOpen) {
+                    mobileConsole.classList.remove('open');
+                    consoleToggle.classList.remove('active');
+                } else {
+                    mobileConsole.classList.add('open');
+                    consoleToggle.classList.add('active');
+                }
             });
 
             consoleClose.addEventListener('click', () => {
@@ -474,17 +983,17 @@
                 consoleToggle.classList.remove('active');
             });
 
+            // Initialize CodeMirror with dark theme
             function initEditor() {
                 if (editor) return;
                 
                 const wrapper = document.createElement('div');
                 wrapper.className = 'editor-wrapper';
-                wrapper.style.height = '100%';
                 editorContainer.appendChild(wrapper);
                 
                 editor = CodeMirror(wrapper, {
                     mode: 'python',
-                    theme: 'material-darker', // Set dark theme for CodeMirror
+                    theme: 'material-darker',
                     lineNumbers: true,
                     autofocus: false,
                     lineWrapping: true,
@@ -498,6 +1007,8 @@
                         "Cmd-S": function() { saveFile(); }
                     }
                 });
+
+                editor.setOption("scrollbarStyle", "null");
                 
                 editor.on('cursorActivity', () => {
                     const cursor = editor.getCursor();
@@ -516,155 +1027,25 @@
                         saveBtn.classList.add('primary');
                     }
                 });
-            }
 
-            async function openFile(path) {
-                // This function fetches file content. No changes needed.
-                try {
-                    if (!openTabs.has(path)) {
-                        // Dummy content for demonstration
-                        const data = { content: `# Welcome to ${path}\n\nprint("Hello, World!")` };
-                        openTabs.set(path, { content: data.content, modified: false, path: path });
-                        createMobileTab(path);
+                // Prevent zoom on focus for iOS
+                editor.on('focus', () => {
+                    const viewport = document.querySelector('meta[name=viewport]');
+                    if (viewport) {
+                        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
                     }
-                    switchToTab(path);
-                    if (window.innerWidth < 768) closeSidebar();
-                } catch (error) {
-                    console.error('Error opening file:', error);
-                }
-            }
-            
-            function createMobileTab(path) {
-                const tab = document.createElement('button');
-                tab.className = 'mobile-tab touch-target';
-                tab.dataset.path = path;
-                
-                const fileName = path.split('/').pop();
-                const label = document.createElement('span');
-                label.textContent = fileName;
-                
-                const closeBtn = document.createElement('button');
-                closeBtn.className = 'tab-close touch-target';
-                closeBtn.innerHTML = '<span class="icon-close">×</span>';
-                closeBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    closeTab(path);
                 });
 
-                tab.appendChild(label);
-                tab.appendChild(closeBtn);
-                tab.addEventListener('click', () => switchToTab(path));
-
-                tabsWrapper.appendChild(tab);
-                
-                if (mobileTabs.style.display === 'none') {
-                    mobileTabs.style.display = 'flex';
-                }
-            }
-
-            function switchToTab(path) {
-                document.querySelectorAll('.mobile-tab').forEach(tab => tab.classList.remove('active'));
-                document.querySelectorAll('.file-item').forEach(item => item.classList.remove('active'));
-                
-                const activeTabElem = document.querySelector(`.mobile-tab[data-path="${path}"]`);
-                if(activeTabElem) activeTabElem.classList.add('active');
-
-                const activeFileItem = document.querySelector(`.file-item[data-path="${path}"]`);
-                if(activeFileItem) activeFileItem.classList.add('active');
-                
-                activeTab = path;
-                const tabData = openTabs.get(path);
-                
-                if (tabData) {
-                    if (!editor) {
-                        emptyState.style.display = 'none';
-                        initEditor();
+                editor.on('blur', () => {
+                    const viewport = document.querySelector('meta[name=viewport]');
+                    if (viewport) {
+                        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=no');
                     }
-                    
-                    editor.setValue(tabData.content);
-                    setTimeout(() => editor.refresh(), 1);
-                    const fileName = path.split('/').pop();
-                    currentFileSpan.textContent = fileName;
-                    if (currentFileBreadcrumb) currentFileBreadcrumb.textContent = fileName;
-                    
-                    const isModified = tabData.modified;
-                    saveBtn.disabled = !isModified;
-                    saveBtnHeader.disabled = !isModified;
-                    saveBtn.classList.toggle('primary', isModified);
-                }
-            }
-            
-            function closeTab(path) {
-                const tabElement = document.querySelector(`.mobile-tab[data-path="${path}"]`);
-                if (tabElement) tabElement.remove();
-
-                openTabs.delete(path);
-
-                if (activeTab === path) {
-                    const remainingTabs = document.querySelectorAll('.mobile-tab');
-                    if (remainingTabs.length > 0) {
-                        switchToTab(remainingTabs[0].dataset.path);
-                    } else {
-                        activeTab = null;
-                        currentFileSpan.textContent = 'Select a file';
-                        if (currentFileBreadcrumb) currentFileBreadcrumb.textContent = 'Select a file';
-                        
-                        if (editor) {
-                            editorContainer.innerHTML = ''; // Clear previous editor
-                            editor = null;
-                            editorContainer.appendChild(emptyState);
-                            emptyState.style.display = 'flex';
-                        }
-                        
-                        saveBtn.disabled = true;
-                        saveBtnHeader.disabled = true;
-                        saveBtn.classList.remove('primary');
-                        mobileTabs.style.display = 'none';
-                    }
-                }
+                });
             }
 
-            function updateTabTitle(path) {
-                const tab = document.querySelector(`.mobile-tab[data-path="${path}"]`);
-                const tabData = openTabs.get(path);
-                if (tab && tabData) {
-                    const label = tab.querySelector('span:not(.icon-close)');
-                    const fileName = path.split('/').pop();
-                    label.textContent = tabData.modified ? `${fileName} ●` : fileName;
-                }
-            }
-
-            async function saveFile() {
-                if (!activeTab || !editor || !openTabs.get(activeTab).modified) return;
-                
-                saveBtn.disabled = true;
-                saveBtnHeader.disabled = true;
-                
-                // Simulate saving
-                console.log(`Saving ${activeTab}...`);
-                
-                setTimeout(() => {
-                    const tabData = openTabs.get(activeTab);
-                    tabData.modified = false;
-                    tabData.content = editor.getValue();
-                    updateTabTitle(activeTab);
-                    saveBtn.classList.remove('primary');
-                    console.log('File saved.');
-                }, 500);
-            }
-
-            saveBtn.addEventListener('click', saveFile);
-            saveBtnHeader.addEventListener('click', saveFile);
-
-            // Dummy file tree for demonstration
-            const files = {
-                'main.py': '',
-                'utils': { 'helpers.py': '' },
-                'README.md': ''
-            };
-            
+            // File tree rendering
             function renderFileTree(tree, container = fileTree, pathPrefix = '') {
-                container.innerHTML = '';
                 Object.entries(tree).forEach(([name, content]) => {
                     const fullPath = pathPrefix ? `${pathPrefix}/${name}` : name;
                     const item = document.createElement('button');
@@ -679,36 +1060,271 @@
 
                     if (typeof content === 'object') {
                         item.classList.add('folder-item');
-                        item.innerHTML = `<span class="file-icon">📁</span><span>${name}</span>`;
-                        // Folder click logic can be added here
+                        item.appendChild(icon);
+                        item.appendChild(label);
                     } else {
-                        item.innerHTML = `<span class="file-icon">📄</span><span>${name}</span>`;
+                        item.appendChild(icon);
+                        item.appendChild(label);
                         item.addEventListener('click', () => openFile(fullPath));
                     }
+
                     container.appendChild(item);
                 });
             }
-            
-            renderFileTree(files);
 
-            // Handle responsiveness
-            function handleResize() {
-                const isDesktop = window.innerWidth >= 768;
-                const breadcrumb = document.querySelector('.breadcrumb');
-                
-                if (isDesktop) {
-                    sidebar.classList.remove('open');
-                    sidebarOverlay.classList.remove('active');
-                    if (breadcrumb) breadcrumb.style.display = 'flex';
-                } else {
-                    if (breadcrumb) breadcrumb.style.display = 'none';
+            // File operations
+            async function openFile(path) {
+                try {
+                    if (!openTabs.has(path)) {
+                        const response = await fetch(`/api/server/${serverIndex}/file?path=${path}`, {
+                            headers: {
+                                'Content-Type': 'application/json',
+                            }
+                        });
+                        const data = await response.json();
+                        
+                        if (response.ok && data.content !== undefined) {
+                            openTabs.set(path, {
+                                content: data.content,
+                                modified: false,
+                                path: path
+                            });
+                            createMobileTab(path);
+                        } else {
+                            console.error('Error opening file:', data.error);
+                            return;
+                        }
+                    }
+                    switchToTab(path);
+                    closeSidebar();
+                } catch (error) {
+                    console.error('Network error:', error);
                 }
             }
 
-            window.addEventListener('resize', handleResize);
-            handleResize(); // Initial call
+            function createMobileTab(path) {
+                const tab = document.createElement('button');
+                tab.className = 'mobile-tab touch-target';
+                tab.dataset.path = path;
+                
+                const fileName = path.split('/').pop();
+                const label = document.createElement('span');
+                label.textContent = fileName;
+                
+                const closeBtn = document.createElement('button');
+                closeBtn.className = 'tab-close touch-target';
+                closeBtn.innerHTML = '<span class="icon-close"></span>';
+                closeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    closeTab(path);
+                });
+
+                tab.appendChild(label);
+                tab.appendChild(closeBtn);
+                tab.addEventListener('click', () => switchToTab(path));
+
+                tabsWrapper.appendChild(tab);
+                
+                // Show tabs container if hidden
+                if (mobileTabs.style.display === 'none') {
+                    mobileTabs.style.display = 'block';
+                }
+            }
+
+            function switchToTab(path) {
+                // Update active tab
+                document.querySelectorAll('.mobile-tab').forEach(tab => {
+                    tab.classList.toggle('active', tab.dataset.path === path);
+                });
+
+                document.querySelectorAll('.file-item').forEach(item => {
+                    item.classList.toggle('active', item.dataset.path === path);
+                });
+
+                activeTab = path;
+                const tabData = openTabs.get(path);
+                
+                if (tabData) {
+                    if (!editor) {
+                        emptyState.style.display = 'none';
+                        initEditor();
+                    }
+                    
+                    editor.setValue(tabData.content);
+                    setTimeout(() => editor.refresh(), 100);
+                    const fileName = path.split('/').pop();
+                    currentFileSpan.textContent = fileName;
+                    if (currentFileBreadcrumb) {
+                        currentFileBreadcrumb.textContent = fileName;
+                    }
+                    saveBtn.disabled = !tabData.modified;
+                    saveBtnHeader.disabled = !tabData.modified;
+                    
+                    if (!tabData.modified) {
+                        saveBtn.classList.remove('primary');
+                    }
+                }
+            }
+
+            function closeTab(path) {
+                const tab = document.querySelector(`.mobile-tab[data-path="${path}"]`);
+                if (tab) tab.remove();
+                
+                openTabs.delete(path);
+                
+                if (activeTab === path) {
+                    const remainingTabs = document.querySelectorAll('.mobile-tab');
+                    if (remainingTabs.length > 0) {
+                        switchToTab(remainingTabs[0].dataset.path);
+                    } else {
+                        activeTab = null;
+                        currentFileSpan.textContent = 'Select a file';
+                        if (currentFileBreadcrumb) {
+                            currentFileBreadcrumb.textContent = 'Select a file';
+                        }
+                        if (editor) {
+                            editorContainer.removeChild(editorContainer.querySelector('.editor-wrapper'));
+                            editor = null;
+                            emptyState.style.display = 'flex';
+                        }
+                        saveBtn.disabled = true;
+                        saveBtnHeader.disabled = true;
+                        saveBtn.classList.remove('primary');
+                        mobileTabs.style.display = 'none';
+                    }
+                }
+            }
+
+            function updateTabTitle(path) {
+                const tab = document.querySelector(`.mobile-tab[data-path="${path}"]`);
+                const tabData = openTabs.get(path);
+                if (tab && tabData) {
+                    const label = tab.querySelector('span');
+                    const fileName = path.split('/').pop();
+                    label.textContent = tabData.modified ? `${fileName} •` : fileName;
+                }
+            }
+
+            // Save file
+            async function saveFile() {
+                if (!activeTab || !editor) return;
+                
+                try {
+                    saveBtn.disabled = true;
+                    saveBtnHeader.disabled = true;
+                    
+                    const response = await fetch(`/api/server/${serverIndex}/file?path=${activeTab}`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ content: editor.getValue() })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok && data.success) {
+                        const tabData = openTabs.get(activeTab);
+                        if (tabData) {
+                            tabData.modified = false;
+                            tabData.content = editor.getValue();
+                            updateTabTitle(activeTab);
+                            saveBtn.classList.remove('primary');
+                        }
+                    } else {
+                        console.error('Error saving file:', data.error);
+                        // Re-enable buttons on error
+                        saveBtn.disabled = false;
+                        saveBtnHeader.disabled = false;
+                    }
+                } catch (error) {
+                    console.error('Network error:', error);
+                    // Re-enable buttons on error
+                    saveBtn.disabled = false;
+                    saveBtnHeader.disabled = false;
+                }
+            }
+
+            saveBtn.addEventListener('click', saveFile);
+            saveBtnHeader.addEventListener('click', saveFile);
+
+            // New file/folder
+            document.getElementById('new-file-btn').addEventListener('click', async () => {
+                const path = prompt("Enter new file path (e.g., main.py):");
+                if (path) {
+                    try {
+                        const response = await fetch(`/api/server/${serverIndex}/files/create`, {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ path: path, type: 'file' })
+                        });
+                        
+                        if (response.ok) {
+                            location.reload();
+                        } else {
+                            const data = await response.json();
+                            alert(`Error: ${data.error}`);
+                        }
+                    } catch (error) {
+                        console.error('Error creating file:', error);
+                        alert('Network error occurred');
+                    }
+                }
+            });
+
+            document.getElementById('new-folder-btn').addEventListener('click', async () => {
+                const path = prompt("Enter new folder path:");
+                if (path) {
+                    try {
+                        const response = await fetch(`/api/server/${serverIndex}/files/create`, {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ path: path, type: 'folder' })
+                        });
+                        
+                        if (response.ok) {
+                            location.reload();
+                        } else {
+                            const data = await response.json();
+                            alert(`Error: ${data.error}`);
+                        }
+                    } catch (error) {
+                        console.error('Error creating folder:', error);
+                        alert('Network error occurred');
+                    }
+                }
+            });
+
+            // Initialize socket connection (placeholder for actual implementation)
+            // const socket = io();
+            // socket.on('console_output', (data) => {
+            //     const line = document.createElement('div');
+            //     line.className = 'console-line';
+            //     line.textContent = data.message;
+            //     consoleOutput.appendChild(line);
+            //     consoleOutput.scrollTop = consoleOutput.scrollHeight;
+            // });
+
+            // Bot control buttons (placeholder for actual implementation)
+            document.getElementById('start-bot-btn').addEventListener('click', () => {
+                // socket.emit('start_bot', { server_index: serverIndex, bot_id: botId });
+                console.log('Start bot clicked');
+            });
+
+            document.getElementById('stop-bot-btn').addEventListener('click', () => {
+                // socket.emit('stop_bot', { server_index: serverIndex, bot_id: botId });
+                console.log('Stop bot clicked');
+            });
+
+            // Load initial file tree (placeholder)
+            const sampleFileTree = {
+                'main.py': 'print("Hello World")',
+                'config.json': '{}',
+                'src': {
+                    'utils.py': '# Utility functions',
+                    'models.py': '# Data models'
+                }
+            };
+            renderFileTree(sampleFileTree);
         });
     </script>
 </body>
 </html>
-
