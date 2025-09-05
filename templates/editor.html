@@ -36,51 +36,57 @@
             touch-action: manipulation;
         }
 
-        /* Glassmorphism Effects */
+        /* Enhanced Glassmorphism Effects */
         .glass {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(30px) saturate(1.3);
+            -webkit-backdrop-filter: blur(30px) saturate(1.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 
+                        0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
         .glass-button {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(25px) saturate(1.2);
+            -webkit-backdrop-filter: blur(25px) saturate(1.2);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03),
+                        0 4px 16px rgba(0, 0, 0, 0.2);
         }
 
         .glass-button:hover {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: rgba(255, 255, 255, 0.25);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 32px rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.12);
+            transform: translateY(-1px);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05),
+                        0 8px 24px rgba(0, 0, 0, 0.25);
         }
 
         .glass-button:active {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.08);
             transform: translateY(0);
-            box-shadow: 0 4px 16px rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04),
+                        0 2px 8px rgba(0, 0, 0, 0.15);
         }
 
         .glass-button:disabled {
-            background: rgba(255, 255, 255, 0.02);
-            border-color: rgba(255, 255, 255, 0.05);
-            opacity: 0.3;
+            background: rgba(255, 255, 255, 0.01);
+            border-color: rgba(255, 255, 255, 0.03);
+            opacity: 0.2;
             cursor: not-allowed;
             transform: none !important;
             box-shadow: none !important;
         }
 
-        /* Symmetrical Header with Rounded Borders */
+        /* Perfect Header Symmetry with Enhanced Glass */
         .header {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 0 0 20px 20px;
+            background: rgba(255, 255, 255, 0.015);
+            backdrop-filter: blur(35px) saturate(1.4);
+            -webkit-backdrop-filter: blur(35px) saturate(1.4);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 0 0 24px 24px;
             padding: 12px 20px;
             height: 48px;
             display: flex;
@@ -88,10 +94,12 @@
             justify-content: center;
             position: fixed;
             top: 0;
-            left: 88px;  /* 16px (margin) + 56px (button width) + 16px (gap) */
-            right: 88px; /* 16px (margin) + 56px (button width) + 16px (gap) */
+            left: calc(16px + 56px + 16px);
+            right: calc(16px + 56px + 16px);
             z-index: 998;
             margin-top: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.02);
         }
 
         .logo {
@@ -107,9 +115,9 @@
         .logo-icon {
             width: 28px;
             height: 28px;
-            background: rgba(255, 255, 255, 0.12);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border-radius: 8px;
             display: flex;
             align-items: center;
@@ -117,7 +125,8 @@
             color: #ffffff;
             font-size: 14px;
             font-weight: 700;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
         }
 
         /* Updated file display */
@@ -141,7 +150,7 @@
             margin: 0 6px;
         }
 
-        /* Symmetrical Edge Buttons */
+        /* Perfect Button Symmetry - Reduced Light */
         .edge-button {
             position: fixed;
             width: 56px;
@@ -152,30 +161,49 @@
             justify-content: center;
             cursor: pointer;
             font-size: 20px;
-            color: #ffffff;
+            color: rgba(255, 255, 255, 0.9);
             border: none;
             z-index: 999;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.025);
+            backdrop-filter: blur(25px) saturate(1.2);
+            -webkit-backdrop-filter: blur(25px) saturate(1.2);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02),
+                        0 4px 16px rgba(0, 0, 0, 0.2);
         }
 
         .edge-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 40px rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04),
+                        0 8px 24px rgba(0, 0, 0, 0.25);
         }
 
         .edge-button:active {
-            transform: translateY(-1px);
+            background: rgba(255, 255, 255, 0.07);
+            transform: translateY(0);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03),
+                        0 2px 8px rgba(0, 0, 0, 0.15);
         }
 
         .edge-button:disabled {
+            background: rgba(255, 255, 255, 0.008);
+            border-color: rgba(255, 255, 255, 0.02);
+            color: rgba(255, 255, 255, 0.3);
             transform: none !important;
             box-shadow: none !important;
+            cursor: not-allowed;
         }
 
         .edge-button.active {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 8px 32px rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05),
+                        0 8px 24px rgba(0, 0, 0, 0.2);
         }
 
         /* Left Side - Menu button only */
@@ -184,7 +212,7 @@
             top: 16px;
         }
 
-        /* Right Side - User Profile and Action Buttons (symmetrical) */
+        /* Right Side - User Profile and Action Buttons (perfectly symmetric) */
         .user-profile {
             position: fixed;
             top: 16px;
@@ -192,29 +220,34 @@
             width: 56px;
             height: 56px;
             border-radius: 18px;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.025);
+            backdrop-filter: blur(25px) saturate(1.2);
+            -webkit-backdrop-filter: blur(25px) saturate(1.2);
+            border: 1px solid rgba(255, 255, 255, 0.06);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             z-index: 999;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             overflow: hidden;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02),
+                        0 4px 16px rgba(0, 0, 0, 0.2);
         }
 
         .user-profile:hover {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
             transform: translateY(-2px);
-            box-shadow: 0 8px 32px rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04),
+                        0 8px 24px rgba(0, 0, 0, 0.25);
         }
 
         .user-profile:active {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.07);
             transform: translateY(0);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03),
+                        0 2px 8px rgba(0, 0, 0, 0.15);
         }
 
         .user-avatar {
@@ -227,16 +260,17 @@
         /* User Profile Dropdown */
         .user-dropdown {
             position: fixed;
-            top: 80px;
+            top: calc(16px + 56px + 16px);
             right: 16px;
             width: 240px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(30px) saturate(1.3);
+            -webkit-backdrop-filter: blur(30px) saturate(1.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             border-radius: 16px;
             padding: 16px 0;
-            box-shadow: 0 16px 64px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 16px 64px rgba(0, 0, 0, 0.4),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.03);
             z-index: 1001;
             opacity: 0;
             visibility: hidden;
@@ -252,7 +286,7 @@
 
         .user-dropdown-header {
             padding: 12px 20px 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
             display: flex;
             align-items: center;
             gap: 12px;
@@ -281,7 +315,7 @@
 
         .user-dropdown-item {
             padding: 12px 20px;
-            color: #ffffff;
+            color: rgba(255, 255, 255, 0.9);
             text-decoration: none;
             display: flex;
             align-items: center;
@@ -297,25 +331,25 @@
         }
 
         .user-dropdown-item:hover {
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.04);
             color: #ffffff;
         }
 
         .user-dropdown-separator {
             height: 1px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.04);
             margin: 8px 0;
         }
 
-        /* Right side action buttons - positioned symmetrically below user profile */
+        /* Consistent 16px gaps between all right-side elements */
         .save-btn-header {
             right: 16px;
-            top: 88px; /* 16px (user profile top) + 56px (user profile height) + 16px (gap) */
+            top: calc(16px + 56px + 16px);
         }
 
         .console-toggle {
             right: 16px;
-            top: 160px; /* 88px (save button top) + 56px (save button height) + 16px (gap) */
+            top: calc(16px + 56px + 16px + 56px + 16px);
         }
 
         /* Main Layout */
@@ -333,21 +367,23 @@
             overflow: hidden;
         }
 
-        /* Sidebar */
+        /* Enhanced Sidebar */
         .sidebar {
             position: fixed;
             top: 64px;
             left: 0;
             width: 100%;
             height: calc(100vh - 64px);
-            background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
+            background: rgba(255, 255, 255, 0.008);
+            backdrop-filter: blur(30px) saturate(1.3);
+            -webkit-backdrop-filter: blur(30px) saturate(1.3);
             z-index: 900;
             transform: translateX(-100%);
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
+            border-right: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.02);
         }
 
         .sidebar.open {
@@ -376,10 +412,13 @@
 
         .sidebar-header {
             padding: 28px 24px 24px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
             display: flex;
             align-items: center;
             justify-content: space-between;
+            background: rgba(255, 255, 255, 0.01);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
 
         .sidebar-title {
@@ -405,7 +444,7 @@
             justify-content: center;
             cursor: pointer;
             font-size: 18px;
-            color: #ffffff;
+            color: rgba(255, 255, 255, 0.9);
             border: none;
         }
 
@@ -428,26 +467,28 @@
             gap: 14px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             min-height: 56px;
-            color: #ffffff;
+            color: rgba(255, 255, 255, 0.9);
             border-radius: 0;
             font-weight: 500;
         }
 
         .file-item:hover {
-            background: rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
+            color: #ffffff;
         }
 
         .file-item:active {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
         }
 
         .file-item.active {
-            background: rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.06);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             border-left: 3px solid #ffffff;
+            color: #ffffff;
         }
 
         .file-icon {
@@ -467,10 +508,10 @@
 
         /* Mobile Tabs */
         .mobile-tabs {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.015);
+            backdrop-filter: blur(25px) saturate(1.2);
+            -webkit-backdrop-filter: blur(25px) saturate(1.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
             overflow-x: auto;
             overflow-y: hidden;
             white-space: nowrap;
@@ -512,16 +553,16 @@
         .mobile-tab.active {
             color: #ffffff;
             border-bottom-color: #ffffff;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.025);
         }
 
         .mobile-tab:hover {
-            background: rgba(255, 255, 255, 0.04);
+            background: rgba(255, 255, 255, 0.02);
             color: #ffffff;
         }
 
         .mobile-tab:active {
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.04);
         }
 
         .tab-close {
@@ -529,7 +570,7 @@
             height: 22px;
             border-radius: 8px;
             border: none;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             cursor: pointer;
@@ -543,13 +584,13 @@
         }
 
         .tab-close:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
             color: #ffffff;
             transform: scale(1.1);
         }
 
         .tab-close:active {
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.12);
             transform: scale(0.95);
         }
 
@@ -575,8 +616,8 @@
         }
 
         .CodeMirror-gutters {
-            border-right: 1px solid rgba(255, 255, 255, 0.08);
-            background: rgba(255, 255, 255, 0.02) !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.04);
+            background: rgba(255, 255, 255, 0.01) !important;
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
         }
@@ -593,11 +634,11 @@
         }
 
         .CodeMirror-selected {
-            background: rgba(255, 255, 255, 0.1) !important;
+            background: rgba(255, 255, 255, 0.08) !important;
         }
 
         .CodeMirror-focused .CodeMirror-selected {
-            background: rgba(255, 255, 255, 0.15) !important;
+            background: rgba(255, 255, 255, 0.12) !important;
         }
 
         /* Empty State - Moved down slightly */
@@ -615,16 +656,17 @@
         .empty-icon {
             width: 96px;
             height: 96px;
-            background: rgba(255, 255, 255, 0.06);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(25px) saturate(1.2);
+            -webkit-backdrop-filter: blur(25px) saturate(1.2);
+            border: 1px solid rgba(255, 255, 255, 0.04);
             border-radius: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 32px;
             color: rgba(255, 255, 255, 0.6);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
         }
 
         .mobile-empty-state h3 {
@@ -641,19 +683,20 @@
             max-width: 320px;
         }
 
-        /* Mobile Status Bar */
+        /* Enhanced Mobile Status Bar */
         .mobile-status-bar {
             height: 60px;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.015);
+            backdrop-filter: blur(25px) saturate(1.2);
+            -webkit-backdrop-filter: blur(25px) saturate(1.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 24px;
             font-size: 13px;
             color: rgba(255, 255, 255, 0.7);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
         }
 
         .status-left {
@@ -665,10 +708,10 @@
         .save-btn {
             padding: 12px 24px;
             border-radius: 16px;
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            color: #ffffff;
+            color: rgba(255, 255, 255, 0.9);
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
@@ -676,57 +719,66 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
         }
 
         .save-btn:disabled {
-            background: rgba(255, 255, 255, 0.02);
-            border-color: rgba(255, 255, 255, 0.04);
-            opacity: 0.3;
+            background: rgba(255, 255, 255, 0.008);
+            border-color: rgba(255, 255, 255, 0.02);
+            opacity: 0.2;
             cursor: not-allowed;
             transform: none;
         }
 
         .save-btn:not(:disabled):hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.25);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 32px rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04),
+                        0 4px 16px rgba(0, 0, 0, 0.15);
         }
 
         .save-btn:not(:disabled):active {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.08);
             transform: translateY(0);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
         }
 
         .save-btn.primary {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.25);
-            box-shadow: 0 4px 16px rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04),
+                        0 4px 16px rgba(0, 0, 0, 0.1);
         }
 
         .save-btn.primary:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-3px);
-            box-shadow: 0 12px 40px rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05),
+                        0 8px 24px rgba(0, 0, 0, 0.15);
         }
 
-        /* Mobile Console */
+        /* Enhanced Mobile Console */
         .mobile-console {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
             height: 55vh;
-            background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.008);
+            backdrop-filter: blur(35px) saturate(1.4);
+            -webkit-backdrop-filter: blur(35px) saturate(1.4);
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
             z-index: 700;
             transform: translateY(100%);
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
+            box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.2),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.02);
         }
 
         .mobile-console.open {
@@ -738,10 +790,10 @@
             align-items: center;
             justify-content: space-between;
             padding: 20px 24px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            background: rgba(255, 255, 255, 0.015);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
 
         .console-title {
@@ -759,56 +811,62 @@
             align-items: center;
         }
 
-        /* Simplified Console Buttons - Only Icons */
+        /* Reduced Light Console Buttons */
         .console-btn {
             width: 44px;
             height: 44px;
             border-radius: 14px;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            color: #ffffff;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            color: rgba(255, 255, 255, 0.85);
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.06);
             font-size: 16px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
         }
 
         .console-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.25);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03),
+                        0 4px 16px rgba(0, 0, 0, 0.15);
         }
 
         .console-btn:active {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.06);
             transform: translateY(0);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
         }
 
         .console-btn:disabled {
-            background: rgba(255, 255, 255, 0.02);
-            border-color: rgba(255, 255, 255, 0.04);
-            opacity: 0.3;
+            background: rgba(255, 255, 255, 0.005);
+            border-color: rgba(255, 255, 255, 0.02);
+            color: rgba(255, 255, 255, 0.2);
             cursor: not-allowed;
             transform: none !important;
             box-shadow: none !important;
         }
 
         .console-btn.running {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 4px 16px rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04),
+                        0 4px 16px rgba(0, 0, 0, 0.1);
         }
 
         .console-close {
             width: 40px;
             height: 40px;
             border-radius: 12px;
-            background: rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             cursor: pointer;
@@ -816,18 +874,19 @@
             align-items: center;
             justify-content: center;
             font-size: 18px;
-            color: #ffffff;
+            color: rgba(255, 255, 255, 0.85);
             transition: all 0.2s ease;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.06);
         }
 
         .console-close:hover {
-            background: rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.06);
+            color: #ffffff;
             transform: scale(1.05);
         }
 
         .console-close:active {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.08);
             transform: scale(0.95);
         }
 
@@ -874,8 +933,8 @@
             .header {
                 height: 56px;
                 padding: 16px 24px;
-                left: 88px;
-                right: 88px;
+                left: calc(16px + 56px + 16px);
+                right: calc(16px + 56px + 16px);
             }
 
             .main-container {
@@ -890,7 +949,7 @@
                 height: 100%;
                 transform: translateX(0);
                 transition: none;
-                border-right: 1px solid rgba(255, 255, 255, 0.08);
+                border-right: 1px solid rgba(255, 255, 255, 0.04);
             }
 
             .sidebar-overlay {
@@ -942,15 +1001,15 @@
 
             /* Desktop symmetrical positioning */
             .save-btn-header {
-                top: 96px;
+                top: calc(16px + 56px + 16px);
             }
 
             .console-toggle {
-                top: 168px;
+                top: calc(16px + 56px + 16px + 56px + 16px);
             }
 
             .user-dropdown {
-                top: 88px;
+                top: calc(16px + 56px + 16px);
             }
         }
 
@@ -976,26 +1035,26 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            background: rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.025);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .status-indicator.online {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.08);
         }
 
         .status-indicator.offline {
-            background: rgba(255, 255, 255, 0.04);
-            border-color: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.015);
+            border-color: rgba(255, 255, 255, 0.03);
             opacity: 0.6;
         }
 
         .status-indicator.running {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
         }
 
         .status-dot {
@@ -1017,25 +1076,25 @@
             min-width: 44px;
         }
 
-        /* Scrollbars */
+        /* Enhanced Scrollbars */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
         }
 
         ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.02);
+            background: rgba(255, 255, 255, 0.005);
         }
 
         ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.08);
             border-radius: 4px;
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.12);
         }
 
         /* Mobile scrollbars */
@@ -1046,23 +1105,24 @@
             }
         }
 
-        /* Context Menu */
+        /* Enhanced Context Menu */
         .context-menu {
             position: absolute;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(30px) saturate(1.3);
+            -webkit-backdrop-filter: blur(30px) saturate(1.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             border-radius: 16px;
             padding: 12px 0;
-            box-shadow: 0 16px 64px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 16px 64px rgba(0, 0, 0, 0.4),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.03);
             z-index: 1000;
             min-width: 200px;
         }
 
         .context-menu-item {
             padding: 16px 24px;
-            color: #ffffff;
+            color: rgba(255, 255, 255, 0.9);
             cursor: pointer;
             font-size: 15px;
             border: none;
@@ -1077,18 +1137,18 @@
         }
 
         .context-menu-item:hover {
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.04);
             color: #ffffff;
         }
 
         .context-menu-item:disabled {
-            color: rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.2);
             cursor: not-allowed;
         }
 
         .context-menu-separator {
             height: 1px;
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.04);
             margin: 12px 0;
         }
 
@@ -1101,14 +1161,14 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Selection colors */
+        /* Enhanced Selection colors */
         ::selection {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.15);
             color: #ffffff;
         }
 
         ::-moz-selection {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.15);
             color: #ffffff;
         }
 
@@ -1155,15 +1215,15 @@
             }
 
             .save-btn-header {
-                top: 80px;
+                top: calc(16px + 56px + 12px);
             }
 
             .console-toggle {
-                top: 136px;
+                top: calc(16px + 56px + 12px + 56px + 12px);
             }
 
             .user-dropdown {
-                top: 72px;
+                top: calc(16px + 56px + 12px);
             }
         }
 
@@ -1181,7 +1241,7 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Symmetrical Header with Rounded Borders -->
+        <!-- Symmetrical Header with Enhanced Glass -->
         <header class="header">
             <a href="#" class="logo">
                 <div class="logo-icon">E</div>
@@ -1227,7 +1287,7 @@
             </a>
         </div>
         
-        <!-- Right Side Action Buttons - Below User Profile -->
+        <!-- Right Side Action Buttons - Perfect Symmetry -->
         <button class="edge-button glass-button save-btn-header touch-target" id="save-btn-header" disabled title="Save File">
             <i data-lucide="save"></i>
         </button>
@@ -1241,7 +1301,7 @@
 
         <!-- Main Container -->
         <div class="main-container">
-            <!-- Sidebar -->
+            <!-- Enhanced Sidebar -->
             <aside class="sidebar" id="sidebar">
                 <div class="sidebar-header">
                     <div class="sidebar-title">
@@ -1282,7 +1342,7 @@
                     </div>
                 </div>
 
-                <!-- Mobile Status Bar -->
+                <!-- Enhanced Mobile Status Bar -->
                 <div class="mobile-status-bar">
                     <div class="status-left">
                         <span id="cursor-position">Ln 1, Col 1</span>
@@ -1299,7 +1359,7 @@
             </main>
         </div>
 
-        <!-- Mobile Console -->
+        <!-- Enhanced Mobile Console -->
         <div class="mobile-console" id="mobile-console">
             <div class="console-header">
                 <div class="console-title">
@@ -1307,7 +1367,7 @@
                     Console
                 </div>
                 <div class="console-actions">
-                    <!-- Only show start OR stop button based on state -->
+                    <!-- Reduced Light Console Buttons -->
                     <button class="console-btn touch-target" id="start-bot-btn" title="Start Bot">
                         <i data-lucide="play" size="18"></i>
                     </button>
@@ -1330,762 +1390,11 @@
                 <div class="console-line">Bot status: <span id="console-bot-status">Stopped</span></div>
             </div>
         </div>
-
-        <!-- Context Menu -->
-        <div class="context-menu" id="context-menu" style="display: none;">
-            <button class="context-menu-item" id="rename-file">
-                <i data-lucide="edit-3" size="16"></i>
-                Rename
-            </button>
-            <button class="context-menu-item" id="delete-file">
-                <i data-lucide="trash-2" size="16"></i>
-                Delete
-            </button>
-            <div class="context-menu-separator"></div>
-            <button class="context-menu-item" id="download-file">
-                <i data-lucide="download" size="16"></i>
-                Download
-            </button>
-        </div>
     </div>
 
+    <!-- Initialize Lucide Icons -->
     <script>
-        // [Previous JavaScript code remains exactly the same - no changes needed]
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize Lucide icons
-            lucide.createIcons();
-
-            const serverIndex = {{ request.view_args.server_index }};
-            const botId = "{{ bot._id }}";
-            
-            // Elements
-            const sidebar = document.getElementById('sidebar');
-            const sidebarOverlay = document.getElementById('sidebar-overlay');
-            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-            const fileTree = document.getElementById('file-tree');
-            const mobileTabs = document.getElementById('mobile-tabs');
-            const tabsWrapper = document.getElementById('tabs-wrapper');
-            const editorContainer = document.getElementById('editor-container');
-            const emptyState = document.getElementById('empty-state');
-            const mobileConsole = document.getElementById('mobile-console');
-            const consoleToggle = document.getElementById('console-toggle');
-            const consoleClose = document.getElementById('console-close');
-            const consoleOutput = document.getElementById('console-output');
-            const currentFileName = document.getElementById('current-file-name');
-            const saveBtn = document.getElementById('save-btn');
-            const saveBtnHeader = document.getElementById('save-btn-header');
-            const cursorPosition = document.getElementById('cursor-position');
-            const botStatus = document.getElementById('bot-status');
-            const consoleBotStatus = document.getElementById('console-bot-status');
-            const contextMenu = document.getElementById('context-menu');
-            const userProfile = document.getElementById('user-profile');
-            const userDropdown = document.getElementById('user-dropdown');
-            
-            // Bot control elements
-            const startBotBtn = document.getElementById('start-bot-btn');
-            const stopBotBtn = document.getElementById('stop-bot-btn');
-            const restartBotBtn = document.getElementById('restart-bot-btn');
-            const clearConsoleBtn = document.getElementById('clear-console-btn');
-
-            let openTabs = new Map();
-            let activeTab = null;
-            let editor = null;
-            let socket = null;
-            let botRunning = false;
-            let selectedFile = null;
-
-            // User profile dropdown toggle
-            userProfile.addEventListener('click', (e) => {
-                e.stopPropagation();
-                userDropdown.classList.toggle('active');
-            });
-
-            // Close user dropdown when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!userProfile.contains(e.target) && !userDropdown.contains(e.target)) {
-                    userDropdown.classList.remove('active');
-                }
-            });
-
-            // Initialize Socket.IO connection
-            function initSocket() {
-                socket = io();
-                
-                socket.on('connect', function() {
-                    addConsoleMessage('Connected to server', 'success');
-                    updateBotStatus('online', 'Connected');
-                });
-
-                socket.on('disconnect', function() {
-                    addConsoleMessage('Disconnected from server', 'error');
-                    updateBotStatus('offline', 'Offline');
-                });
-
-                socket.on('bot_output', function(data) {
-                    addConsoleMessage(data.message, data.type || 'info');
-                });
-
-                socket.on('bot_status', function(data) {
-                    botRunning = data.running;
-                    updateBotControlButtons();
-                    updateBotStatus(data.running ? 'running' : 'offline', data.status);
-                    consoleBotStatus.textContent = data.status;
-                });
-
-                socket.on('file_changed', function(data) {
-                    if (openTabs.has(data.path)) {
-                        addConsoleMessage(`File ${data.path} was modified externally`, 'warning');
-                    }
-                });
-
-                socket.on('error', function(data) {
-                    addConsoleMessage(`Error: ${data.message}`, 'error');
-                });
-            }
-
-            // Console functions
-            function addConsoleMessage(message, type = 'info') {
-                const line = document.createElement('div');
-                line.className = `console-line ${type}`;
-                line.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-                consoleOutput.appendChild(line);
-                consoleOutput.scrollTop = consoleOutput.scrollHeight;
-            }
-
-            function clearConsole() {
-                consoleOutput.innerHTML = '';
-                addConsoleMessage('Console cleared', 'info');
-            }
-
-            function updateBotStatus(status, message) {
-                botStatus.className = `status-indicator ${status}`;
-                botStatus.querySelector('span').textContent = message || status;
-            }
-
-            function updateBotControlButtons() {
-                if (botRunning) {
-                    startBotBtn.style.display = 'none';
-                    stopBotBtn.style.display = 'flex';
-                    restartBotBtn.style.display = 'flex';
-                    stopBotBtn.disabled = false;
-                    restartBotBtn.disabled = false;
-                    stopBotBtn.classList.add('running');
-                    restartBotBtn.classList.add('running');
-                } else {
-                    startBotBtn.style.display = 'flex';
-                    stopBotBtn.style.display = 'none';
-                    restartBotBtn.style.display = 'none';
-                    startBotBtn.disabled = false;
-                    startBotBtn.classList.remove('running');
-                }
-                lucide.createIcons();
-            }
-
-            // Bot control functions
-            startBotBtn.addEventListener('click', function() {
-                socket.emit('start_bot', { server_index: serverIndex, bot_id: botId });
-                addConsoleMessage('Starting bot...', 'info');
-                startBotBtn.disabled = true;
-            });
-
-            stopBotBtn.addEventListener('click', function() {
-                socket.emit('stop_bot', { server_index: serverIndex, bot_id: botId });
-                addConsoleMessage('Stopping bot...', 'info');
-                stopBotBtn.disabled = true;
-            });
-
-            restartBotBtn.addEventListener('click', function() {
-                socket.emit('restart_bot', { server_index: serverIndex, bot_id: botId });
-                addConsoleMessage('Restarting bot...', 'info');
-                restartBotBtn.disabled = true;
-            });
-
-            clearConsoleBtn.addEventListener('click', clearConsole);
-
-            // Mobile menu toggle
-            if (mobileMenuBtn) {
-                mobileMenuBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    toggleSidebar();
-                });
-            }
-
-            sidebarOverlay.addEventListener('click', closeSidebar);
-
-            function toggleSidebar() {
-                const isOpen = sidebar.classList.contains('open');
-                if (isOpen) {
-                    closeSidebar();
-                } else {
-                    openSidebar();
-                }
-            }
-
-            function openSidebar() {
-                sidebar.classList.add('open');
-                sidebarOverlay.classList.add('active');
-                document.body.style.overflow = 'hidden';
-            }
-
-            function closeSidebar() {
-                sidebar.classList.remove('open');
-                sidebarOverlay.classList.remove('active');
-                document.body.style.overflow = '';
-            }
-
-            // Console toggle
-            consoleToggle.addEventListener('click', () => {
-                const isOpen = mobileConsole.classList.contains('open');
-                if (isOpen) {
-                    mobileConsole.classList.remove('open');
-                    consoleToggle.classList.remove('active');
-                } else {
-                    mobileConsole.classList.add('open');
-                    consoleToggle.classList.add('active');
-                }
-            });
-
-            consoleClose.addEventListener('click', () => {
-                mobileConsole.classList.remove('open');
-                consoleToggle.classList.remove('active');
-            });
-
-            // Context menu
-            function showContextMenu(e, filePath) {
-                e.preventDefault();
-                selectedFile = filePath;
-                contextMenu.style.display = 'block';
-                contextMenu.style.left = `${e.pageX}px`;
-                contextMenu.style.top = `${e.pageY}px`;
-            }
-
-            function hideContextMenu() {
-                contextMenu.style.display = 'none';
-                selectedFile = null;
-            }
-
-            document.addEventListener('click', hideContextMenu);
-
-            // Context menu actions
-            document.getElementById('rename-file').addEventListener('click', async () => {
-                if (!selectedFile) return;
-                const newName = prompt('Enter new name:', selectedFile.split('/').pop());
-                if (newName) {
-                    try {
-                        const response = await fetch(`/api/server/${serverIndex}/files/rename`, {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify({ 
-                                old_path: selectedFile, 
-                                new_name: newName 
-                            })
-                        });
-                        if (response.ok) {
-                            location.reload();
-                        } else {
-                            const data = await response.json();
-                            alert(`Error: ${data.error}`);
-                        }
-                    } catch (error) {
-                        alert('Network error occurred');
-                    }
-                }
-                hideContextMenu();
-            });
-
-            document.getElementById('delete-file').addEventListener('click', async () => {
-                if (!selectedFile) return;
-                if (confirm(`Are you sure you want to delete ${selectedFile}?`)) {
-                    try {
-                        const response = await fetch(`/api/server/${serverIndex}/files/delete`, {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify({ path: selectedFile })
-                        });
-                        if (response.ok) {
-                            location.reload();
-                        } else {
-                            const data = await response.json();
-                            alert(`Error: ${data.error}`);
-                        }
-                    } catch (error) {
-                        alert('Network error occurred');
-                    }
-                }
-                hideContextMenu();
-            });
-
-            document.getElementById('download-file').addEventListener('click', () => {
-                if (!selectedFile) return;
-                const link = document.createElement('a');
-                link.href = `/api/server/${serverIndex}/file/download?path=${selectedFile}`;
-                link.download = selectedFile.split('/').pop();
-                link.click();
-                hideContextMenu();
-            });
-
-            // Initialize CodeMirror with dark theme
-            function initEditor() {
-                if (editor) return;
-                
-                const wrapper = document.createElement('div');
-                wrapper.className = 'editor-wrapper';
-                editorContainer.appendChild(wrapper);
-                
-                editor = CodeMirror(wrapper, {
-                    mode: 'python',
-                    theme: 'material-darker',
-                    lineNumbers: true,
-                    autofocus: false,
-                    lineWrapping: true,
-                    indentUnit: 4,
-                    smartIndent: true,
-                    matchBrackets: true,
-                    autoCloseBrackets: true,
-                    viewportMargin: Infinity,
-                    extraKeys: {
-                        "Ctrl-S": function() { saveFile(); },
-                        "Cmd-S": function() { saveFile(); },
-                        "Ctrl-/": function() { editor.toggleComment(); },
-                        "Cmd-/": function() { editor.toggleComment(); }
-                    }
-                });
-
-                editor.setOption("scrollbarStyle", "null");
-                
-                editor.on('cursorActivity', () => {
-                    const cursor = editor.getCursor();
-                    cursorPosition.textContent = `Ln ${cursor.line + 1}, Col ${cursor.ch + 1}`;
-                });
-
-                editor.on('change', () => {
-                    if (activeTab) {
-                        const tab = openTabs.get(activeTab);
-                        if (tab && !tab.modified) {
-                            tab.modified = true;
-                            updateTabTitle(activeTab);
-                        }
-                        saveBtn.disabled = false;
-                        saveBtnHeader.disabled = false;
-                        saveBtn.classList.add('primary');
-                    }
-                });
-
-                // Auto-save functionality
-                let saveTimeout;
-                editor.on('change', () => {
-                    if (activeTab) {
-                        clearTimeout(saveTimeout);
-                        saveTimeout = setTimeout(autoSave, 3000);
-                    }
-                });
-
-                // Prevent zoom on focus for iOS
-                editor.on('focus', () => {
-                    const viewport = document.querySelector('meta[name=viewport]');
-                    if (viewport) {
-                        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
-                    }
-                });
-
-                editor.on('blur', () => {
-                    const viewport = document.querySelector('meta[name=viewport]');
-                    if (viewport) {
-                        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=no');
-                    }
-                });
-            }
-
-            // Auto-save function
-            async function autoSave() {
-                if (activeTab && editor) {
-                    const tab = openTabs.get(activeTab);
-                    if (tab && tab.modified) {
-                        try {
-                            const response = await fetch(`/api/server/${serverIndex}/file?path=${activeTab}`, {
-                                method: 'POST',
-                                headers: {'Content-Type': 'application/json'},
-                                body: JSON.stringify({ content: editor.getValue() })
-                            });
-                            
-                            if (response.ok) {
-                                tab.modified = false;
-                                tab.content = editor.getValue();
-                                updateTabTitle(activeTab);
-                                saveBtn.disabled = true;
-                                saveBtnHeader.disabled = true;
-                                saveBtn.classList.remove('primary');
-                                addConsoleMessage(`Auto-saved: ${activeTab}`, 'success');
-                            }
-                        } catch (error) {
-                            console.error('Auto-save error:', error);
-                        }
-                    }
-                }
-            }
-
-            // File tree rendering with Lucide icons
-            function renderFileTree(tree, container = fileTree, pathPrefix = '') {
-                Object.entries(tree).forEach(([name, content]) => {
-                    const fullPath = pathPrefix ? `${pathPrefix}/${name}` : name;
-                    const item = document.createElement('button');
-                    item.className = 'file-item touch-target';
-                    item.dataset.path = fullPath;
-
-                    const icon = document.createElement('i');
-                    icon.className = 'file-icon';
-                    const label = document.createElement('span');
-                    label.textContent = name;
-
-                    if (typeof content === 'object') {
-                        // Folder
-                        item.classList.add('folder-item');
-                        icon.setAttribute('data-lucide', 'folder');
-                        item.appendChild(icon);
-                        item.appendChild(label);
-                    } else {
-                        // File
-                        const ext = name.split('.').pop().toLowerCase();
-                        switch(ext) {
-                            case 'py':
-                                icon.setAttribute('data-lucide', 'file-code');
-                                break;
-                            case 'json':
-                                icon.setAttribute('data-lucide', 'braces');
-                                break;
-                            case 'txt':
-                            case 'md':
-                                icon.setAttribute('data-lucide', 'file-text');
-                                break;
-                            case 'js':
-                                icon.setAttribute('data-lucide', 'file-code');
-                                break;
-                            case 'css':
-                                icon.setAttribute('data-lucide', 'palette');
-                                break;
-                            case 'html':
-                                icon.setAttribute('data-lucide', 'globe');
-                                break;
-                            case 'yml':
-                            case 'yaml':
-                                icon.setAttribute('data-lucide', 'settings');
-                                break;
-                            default:
-                                icon.setAttribute('data-lucide', 'file');
-                        }
-                        item.appendChild(icon);
-                        item.appendChild(label);
-                        item.addEventListener('click', () => openFile(fullPath));
-                        item.addEventListener('contextmenu', (e) => showContextMenu(e, fullPath));
-                    }
-
-                    container.appendChild(item);
-                });
-                lucide.createIcons();
-            }
-
-            // File operations
-            async function openFile(path) {
-                try {
-                    if (!openTabs.has(path)) {
-                        const response = await fetch(`/api/server/${serverIndex}/file?path=${path}`, {
-                            headers: {
-                                'Content-Type': 'application/json',
-                            }
-                        });
-                        const data = await response.json();
-                        
-                        if (response.ok && data.content !== undefined) {
-                            openTabs.set(path, {
-                                content: data.content,
-                                modified: false,
-                                path: path
-                            });
-                            createMobileTab(path);
-                            addConsoleMessage(`Opened: ${path}`, 'info');
-                        } else {
-                            console.error('Error opening file:', data.error);
-                            addConsoleMessage(`Error opening file: ${data.error}`, 'error');
-                            return;
-                        }
-                    }
-                    switchToTab(path);
-                    closeSidebar();
-                } catch (error) {
-                    console.error('Network error:', error);
-                    addConsoleMessage('Network error occurred', 'error');
-                }
-            }
-
-            function createMobileTab(path) {
-                const tab = document.createElement('button');
-                tab.className = 'mobile-tab touch-target';
-                tab.dataset.path = path;
-                
-                const fileName = path.split('/').pop();
-                const label = document.createElement('span');
-                label.textContent = fileName;
-                
-                const closeBtn = document.createElement('button');
-                closeBtn.className = 'tab-close touch-target';
-                const closeIcon = document.createElement('i');
-                closeIcon.setAttribute('data-lucide', 'x');
-                closeIcon.setAttribute('size', '14');
-                closeBtn.appendChild(closeIcon);
-                closeBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    closeTab(path);
-                });
-
-                tab.appendChild(label);
-                tab.appendChild(closeBtn);
-                tab.addEventListener('click', () => switchToTab(path));
-
-                tabsWrapper.appendChild(tab);
-                lucide.createIcons();
-                
-                if (mobileTabs.style.display === 'none') {
-                    mobileTabs.style.display = 'flex';
-                }
-            }
-
-            function switchToTab(path) {
-                document.querySelectorAll('.mobile-tab').forEach(tab => {
-                    tab.classList.toggle('active', tab.dataset.path === path);
-                });
-
-                document.querySelectorAll('.file-item').forEach(item => {
-                    item.classList.toggle('active', item.dataset.path === path);
-                });
-
-                activeTab = path;
-                const tabData = openTabs.get(path);
-                
-                if (tabData) {
-                    if (!editor) {
-                        emptyState.style.display = 'none';
-                        initEditor();
-                    }
-                    
-                    editor.setValue(tabData.content);
-                    setTimeout(() => editor.refresh(), 100);
-                    const fileName = path.split('/').pop();
-                    currentFileName.textContent = fileName;
-                    
-                    saveBtn.disabled = !tabData.modified;
-                    saveBtnHeader.disabled = !tabData.modified;
-                    
-                    if (!tabData.modified) {
-                        saveBtn.classList.remove('primary');
-                    }
-                }
-            }
-
-            function closeTab(path) {
-                const tab = document.querySelector(`.mobile-tab[data-path="${path}"]`);
-                if (tab) tab.remove();
-                
-                openTabs.delete(path);
-                addConsoleMessage(`Closed: ${path}`, 'info');
-                
-                if (activeTab === path) {
-                    const remainingTabs = document.querySelectorAll('.mobile-tab');
-                    if (remainingTabs.length > 0) {
-                        switchToTab(remainingTabs[0].dataset.path);
-                    } else {
-                        activeTab = null;
-                        currentFileName.textContent = 'Select a file';
-                        if (editor) {
-                            editorContainer.removeChild(editorContainer.querySelector('.editor-wrapper'));
-                            editor = null;
-                            emptyState.style.display = 'flex';
-                        }
-                        saveBtn.disabled = true;
-                        saveBtnHeader.disabled = true;
-                        saveBtn.classList.remove('primary');
-                        mobileTabs.style.display = 'none';
-                    }
-                }
-            }
-
-            function updateTabTitle(path) {
-                const tab = document.querySelector(`.mobile-tab[data-path="${path}"]`);
-                const tabData = openTabs.get(path);
-                if (tab && tabData) {
-                    const label = tab.querySelector('span');
-                    const fileName = path.split('/').pop();
-                    label.textContent = tabData.modified ? `${fileName} •` : fileName;
-                }
-            }
-
-            // Save file
-            async function saveFile() {
-                if (!activeTab || !editor) return;
-                
-                try {
-                    saveBtn.disabled = true;
-                    saveBtnHeader.disabled = true;
-                    
-                    // Show loading state
-                    const saveIcon = saveBtn.querySelector('i');
-                    const originalIcon = saveIcon.getAttribute('data-lucide');
-                    saveIcon.setAttribute('data-lucide', 'loader-2');
-                    saveIcon.classList.add('spinner');
-                    lucide.createIcons();
-                    
-                    const response = await fetch(`/api/server/${serverIndex}/file?path=${activeTab}`, {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ content: editor.getValue() })
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (response.ok && data.success) {
-                        const tabData = openTabs.get(activeTab);
-                        if (tabData) {
-                            tabData.modified = false;
-                            tabData.content = editor.getValue();
-                            updateTabTitle(activeTab);
-                            saveBtn.classList.remove('primary');
-                            addConsoleMessage(`Saved: ${activeTab}`, 'success');
-                        }
-                    } else {
-                        console.error('Error saving file:', data.error);
-                        addConsoleMessage(`Error saving file: ${data.error}`, 'error');
-                        saveBtn.disabled = false;
-                        saveBtnHeader.disabled = false;
-                    }
-                    
-                    // Restore save icon
-                    saveIcon.setAttribute('data-lucide', originalIcon);
-                    saveIcon.classList.remove('spinner');
-                    lucide.createIcons();
-                } catch (error) {
-                    console.error('Network error:', error);
-                    addConsoleMessage('Network error occurred', 'error');
-                    saveBtn.disabled = false;
-                    saveBtnHeader.disabled = false;
-                }
-            }
-
-            saveBtn.addEventListener('click', saveFile);
-            saveBtnHeader.addEventListener('click', saveFile);
-
-            // New file/folder
-            document.getElementById('new-file-btn').addEventListener('click', async () => {
-                const path = prompt("Enter new file path (e.g., main.py):");
-                if (path) {
-                    try {
-                        const response = await fetch(`/api/server/${serverIndex}/files/create`, {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify({ path: path, type: 'file' })
-                        });
-                        
-                        if (response.ok) {
-                            addConsoleMessage(`Created file: ${path}`, 'success');
-                            location.reload();
-                        } else {
-                            const data = await response.json();
-                            alert(`Error: ${data.error}`);
-                            addConsoleMessage(`Error creating file: ${data.error}`, 'error');
-                        }
-                    } catch (error) {
-                        console.error('Error creating file:', error);
-                        alert('Network error occurred');
-                        addConsoleMessage('Network error occurred', 'error');
-                    }
-                }
-            });
-
-            document.getElementById('new-folder-btn').addEventListener('click', async () => {
-                const path = prompt("Enter new folder path:");
-                if (path) {
-                    try {
-                        const response = await fetch(`/api/server/${serverIndex}/files/create`, {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify({ path: path, type: 'folder' })
-                        });
-                        
-                        if (response.ok) {
-                            addConsoleMessage(`Created folder: ${path}`, 'success');
-                            location.reload();
-                        } else {
-                            const data = await response.json();
-                            alert(`Error: ${data.error}`);
-                            addConsoleMessage(`Error creating folder: ${data.error}`, 'error');
-                        }
-                    } catch (error) {
-                        console.error('Error creating folder:', error);
-                        alert('Network error occurred');
-                        addConsoleMessage('Network error occurred', 'error');
-                    }
-                }
-            });
-
-            // Load file tree from server
-            async function loadFileTree() {
-                try {
-                    const response = await fetch(`/api/server/${serverIndex}/files`);
-                    const data = await response.json();
-                    
-                    if (response.ok) {
-                        renderFileTree(data.files);
-                        addConsoleMessage('File tree loaded', 'success');
-                    } else {
-                        console.error('Error loading file tree:', data.error);
-                        addConsoleMessage(`Error loading file tree: ${data.error}`, 'error');
-                    }
-                } catch (error) {
-                    console.error('Network error:', error);
-                    addConsoleMessage('Network error loading file tree', 'error');
-                    
-                    // Fallback to sample data
-                    const sampleFileTree = {
-                        'main.py': 'print("Hello World")',
-                        'config.json': '{}',
-                        'requirements.txt': 'flask\nsocket.io',
-                        'README.md': '# Bot Project',
-                        'src': {
-                            'utils.py': '# Utility functions',
-                            'models.py': '# Data models'
-                        }
-                    };
-                    renderFileTree(sampleFileTree);
-                }
-            }
-
-            // Keyboard shortcuts
-            document.addEventListener('keydown', (e) => {
-                if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-                    e.preventDefault();
-                    if (!saveBtn.disabled) {
-                        saveFile();
-                    }
-                }
-                
-                if ((e.ctrlKey || e.metaKey) && e.key === '`') {
-                    e.preventDefault();
-                    consoleToggle.click();
-                }
-                
-                if ((e.ctrlKey || e.metaKey) && e.key === 'w' && activeTab) {
-                    e.preventDefault();
-                    closeTab(activeTab);
-                }
-            });
-
-            // Initialize everything
-            initSocket();
-            loadFileTree();
-            updateBotControlButtons();
-
-            if (socket) {
-                socket.emit('get_bot_status', { server_index: serverIndex, bot_id: botId });
-            }
-        });
+        lucide.createIcons();
     </script>
 </body>
 </html>
