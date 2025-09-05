@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Code Editor - {{ bot.name }}</title>
+    <title>Code Editor</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/github.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
@@ -765,7 +765,7 @@
                     <span class="current-file" id="current-file">Select a file</span>
                 </a>
                 <nav class="breadcrumb">
-                    <span>{{ bot.name }}</span>
+                    <span>Bot Editor</span>
                     <span class="breadcrumb-separator">/</span>
                     <span id="current-file-breadcrumb">Select a file</span>
                 </nav>
@@ -799,7 +799,19 @@
                     </div>
                 </div>
                 <div class="file-tree" id="file-tree">
-                    <!-- Files will be populated here -->
+                    <!-- Sample files for demonstration -->
+                    <button class="file-item touch-target" data-path="main.py">
+                        <span class="file-icon"></span>
+                        <span>main.py</span>
+                    </button>
+                    <button class="file-item touch-target" data-path="config.json">
+                        <span class="file-icon"></span>
+                        <span>config.json</span>
+                    </button>
+                    <button class="file-item touch-target folder-item" data-path="utils">
+                        <span class="file-icon"></span>
+                        <span>utils</span>
+                    </button>
                 </div>
             </aside>
 
@@ -827,7 +839,7 @@
                 <div class="mobile-status-bar">
                     <div class="status-left">
                         <span id="cursor-position">Ln 1, Col 1</span>
-                        <span id="bot-status">Status: {{ bot.status }}</span>
+                        <span id="bot-status">Status: Ready</span>
                     </div>
                     <button class="save-btn touch-target" id="save-btn" disabled>Save</button>
                 </div>
@@ -860,8 +872,8 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const serverIndex = {{ request.view_args.server_index }};
-            const botId = "{{ bot._id }}";
+            const serverIndex = 0; // Default server index
+            const botId = "bot-001"; // Default bot ID
             
             // Elements
             const sidebar = document.getElementById('sidebar');
@@ -1028,24 +1040,24 @@
             async function openFile(path) {
                 try {
                     if (!openTabs.has(path)) {
-                        const response = await fetch(`/api/server/${serverIndex}/file?path=${path}`, {
-                            headers: {
-                                'Content-Type': 'application/json',
-                            }
-                        });
-                        const data = await response.json();
+                        // Simulate API call - replace with actual endpoint
+                        const sampleContent = `# Sample content for ${path}
+print("Hello, World!")
+
+def main():
+    print("This is a sample Python file")
+    return True
+
+if __name__ == "__main__":
+    main()
+`;
                         
-                        if (response.ok && data.content !== undefined) {
-                            openTabs.set(path, {
-                                content: data.content,
-                                modified: false,
-                                path: path
-                            });
-                            createMobileTab(path);
-                        } else {
-                            console.error('Error opening file:', data.error);
-                            return;
-                        }
+                        openTabs.set(path, {
+                            content: sampleContent,
+                            modified: false,
+                            path: path
+                        });
+                        createMobileTab(path);
                     }
                     switchToTab(path);
                     closeSidebar();
@@ -1165,27 +1177,16 @@
                     saveBtn.disabled = true;
                     saveBtnHeader.disabled = true;
                     
-                    const response = await fetch(`/api/server/${serverIndex}/file?path=${activeTab}`, {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ content: editor.getValue() })
-                    });
+                    // Simulate API call - replace with actual endpoint
+                    console.log('Saving file:', activeTab, 'Content:', editor.getValue());
                     
-                    const data = await response.json();
-                    
-                    if (response.ok && data.success) {
-                        const tabData = openTabs.get(activeTab);
-                        if (tabData) {
-                            tabData.modified = false;
-                            tabData.content = editor.getValue();
-                            updateTabTitle(activeTab);
-                            saveBtn.classList.remove('primary');
-                        }
-                    } else {
-                        console.error('Error saving file:', data.error);
-                        // Re-enable buttons on error
-                        saveBtn.disabled = false;
-                        saveBtnHeader.disabled = false;
+                    // Simulate successful save
+                    const tabData = openTabs.get(activeTab);
+                    if (tabData) {
+                        tabData.modified = false;
+                        tabData.content = editor.getValue();
+                        updateTabTitle(activeTab);
+                        saveBtn.classList.remove('primary');
                     }
                 } catch (error) {
                     console.error('Network error:', error);
@@ -1203,18 +1204,9 @@
                 const path = prompt("Enter new file path (e.g., main.py):");
                 if (path) {
                     try {
-                        const response = await fetch(`/api/server/${serverIndex}/files/create`, {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify({ path: path, type: 'file' })
-                        });
-                        
-                        if (response.ok) {
-                            location.reload();
-                        } else {
-                            const data = await response.json();
-                            alert(`Error: ${data.error}`);
-                        }
+                        // Simulate API call - replace with actual endpoint
+                        console.log('Creating new file:', path);
+                        location.reload();
                     } catch (error) {
                         console.error('Error creating file:', error);
                         alert('Network error occurred');
@@ -1226,18 +1218,9 @@
                 const path = prompt("Enter new folder path:");
                 if (path) {
                     try {
-                        const response = await fetch(`/api/server/${serverIndex}/files/create`, {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify({ path: path, type: 'folder' })
-                        });
-                        
-                        if (response.ok) {
-                            location.reload();
-                        } else {
-                            const data = await response.json();
-                            alert(`Error: ${data.error}`);
-                        }
+                        // Simulate API call - replace with actual endpoint
+                        console.log('Creating new folder:', path);
+                        location.reload();
                     } catch (error) {
                         console.error('Error creating folder:', error);
                         alert('Network error occurred');
@@ -1245,183 +1228,38 @@
                 }
             });
 
-            // Bot controls - JAVÍTOTT VERZIÓ
-            document.getElementById('start-bot-btn').addEventListener('click', async () => {
-                // Automatically open the console
-                mobileConsole.classList.add('open');
-                consoleToggle.classList.add('active');
-
-                try {
-                    const startBtn = document.getElementById('start-bot-btn');
-                    startBtn.disabled = true;
-                    startBtn.innerHTML = '<div class="spinner"></div> Starting...';
-                    
-                    const response = await fetch(`/api/server/${serverIndex}/start`, { 
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        }
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (response.ok && data.success) {
-                        botStatus.textContent = 'Status: online';
-                        // Add success message to console
-                        addConsoleMessage('✅ Bot started successfully', 'success');
-                    } else {
-                        console.error('Error starting bot:', data.error);
-                        addConsoleMessage(`❌ Failed to start bot: ${data.error}`, 'error');
-                        alert(`Failed to start bot: ${data.error}`);
+            // Add event listeners to existing file items
+            document.querySelectorAll('.file-item:not(.folder-item)').forEach(item => {
+                item.addEventListener('click', () => {
+                    const path = item.dataset.path;
+                    if (path) {
+                        openFile(path);
                     }
-                } catch (error) {
-                    console.error('Network error:', error);
-                    addConsoleMessage(`💥 Network error: ${error.message}`, 'error');
-                    alert(`Network error: ${error.message}`);
-                } finally {
-                    const startBtn = document.getElementById('start-bot-btn');
-                    startBtn.disabled = false;
-                    startBtn.innerHTML = '<span class="icon-play"></span> Start';
-                }
+                });
             });
 
-            document.getElementById('stop-bot-btn').addEventListener('click', async () => {
-                try {
-                    const stopBtn = document.getElementById('stop-bot-btn');
-                    stopBtn.disabled = true;
-                    stopBtn.innerHTML = '<div class="spinner"></div> Stopping...';
-                    
-                    const response = await fetch(`/api/server/${serverIndex}/stop`, { 
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        }
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (response.ok && data.success) {
-                        botStatus.textContent = 'Status: offline';
-                        addConsoleMessage('⏹ Bot stopped successfully', 'success');
-                    } else {
-                        console.error('Error stopping bot:', data.error);
-                        addConsoleMessage(`❌ Failed to stop bot: ${data.error}`, 'error');
-                        alert(`Failed to stop bot: ${data.error}`);
-                    }
-                } catch (error) {
-                    console.error('Network error:', error);
-                    addConsoleMessage(`💥 Network error: ${error.message}`, 'error');
-                    alert(`Network error: ${error.message}`);
-                } finally {
-                    const stopBtn = document.getElementById('stop-bot-btn');
-                    stopBtn.disabled = false;
-                    stopBtn.innerHTML = '<span class="icon-stop"></span> Stop';
-                }
-            });
-
-            // Helper function to add console messages
-            function addConsoleMessage(message, type = 'info') {
+            // Bot control buttons
+            document.getElementById('start-bot-btn').addEventListener('click', () => {
+                console.log('Starting bot...');
+                botStatus.textContent = 'Status: Running';
+                const output = document.getElementById('console-output');
                 const line = document.createElement('div');
                 line.className = 'console-line';
-                const timestamp = new Date().toLocaleTimeString();
-                line.textContent = `[${timestamp}] ${message}`;
-                
-                if (type === 'error') {
-                    line.style.color = '#ff4444';
-                } else if (type === 'success') {
-                    line.style.color = '#00aa00';
-                }
-                
-                consoleOutput.appendChild(line);
-                consoleOutput.scrollTop = consoleOutput.scrollHeight;
-            }
-
-            // Socket.IO for console
-            const socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + '/editor');
-
-            socket.on('connect', () => {
-                console.log('Socket.IO connected');
-                socket.emit('join', { bot_id: botId });
+                line.textContent = 'Bot started...';
+                output.appendChild(line);
+                output.scrollTop = output.scrollHeight;
             });
 
-            socket.on('disconnect', () => {
-                console.log('Socket.IO disconnected');
-                addConsoleMessage('🔌 Connection lost', 'error');
-            });
-
-            socket.on('log', (msg) => {
+            document.getElementById('stop-bot-btn').addEventListener('click', () => {
+                console.log('Stopping bot...');
+                botStatus.textContent = 'Status: Stopped';
+                const output = document.getElementById('console-output');
                 const line = document.createElement('div');
                 line.className = 'console-line';
-                line.textContent = msg.data;
-                consoleOutput.appendChild(line);
-                consoleOutput.scrollTop = consoleOutput.scrollHeight;
+                line.textContent = 'Bot stopped...';
+                output.appendChild(line);
+                output.scrollTop = output.scrollHeight;
             });
-
-            // Touch gestures
-            let touchStartX = 0;
-            let touchStartY = 0;
-
-            document.addEventListener('touchstart', (e) => {
-                touchStartX = e.touches[0].clientX;
-                touchStartY = e.touches[0].clientY;
-            });
-
-            document.addEventListener('touchmove', (e) => {
-                if (!touchStartX || !touchStartY) return;
-
-                const touchEndX = e.touches[0].clientX;
-                const touchEndY = e.touches[0].clientY;
-                const deltaX = touchStartX - touchEndX;
-                const deltaY = touchStartY - touchEndY;
-
-                // Swipe right to open sidebar (from left edge)
-                if (touchStartX < 20 && deltaX < -100 && Math.abs(deltaY) < 50) {
-                    openSidebar();
-                }
-                
-                // Swipe left to close sidebar
-                if (sidebar.classList.contains('open') && deltaX > 100 && Math.abs(deltaY) < 50) {
-                    closeSidebar();
-                }
-            });
-
-            // Prevent iOS bounce scroll
-            document.addEventListener('touchmove', (e) => {
-                if (e.target.closest('.console-output') || 
-                    e.target.closest('.file-tree') || 
-                    e.target.closest('.CodeMirror-scroll') ||
-                    e.target.closest('.mobile-tabs')) {
-                    return;
-                }
-                e.preventDefault();
-            }, { passive: false });
-
-            // Keyboard shortcuts
-            document.addEventListener('keydown', (e) => {
-                if (e.ctrlKey || e.metaKey) {
-                    if (e.key === 's') {
-                        e.preventDefault();
-                        if (!saveBtn.disabled) saveFile();
-                    }
-                    if (e.key === '`') {
-                        e.preventDefault();
-                        consoleToggle.click();
-                    }
-                }
-            });
-
-            // Initialize
-            renderFileTree({{ bot.files_tree | tojson }});
-            
-            // Check initial bot status
-            fetch(`/api/server/${serverIndex}/status`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status) {
-                        botStatus.textContent = `Status: ${data.status}`;
-                    }
-                })
-                .catch(console.error);
         });
     </script>
 </body>
