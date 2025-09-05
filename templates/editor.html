@@ -1768,14 +1768,83 @@
         // Save buttons
         const saveBtn = document.getElementById('save-btn');
 
-        // File operations placeholder
-        const newFileBtn = document.getElementById('new-file-btn');
-        const newFolderBtn = document.getElementById('new-folder-btn');
-
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             console.log('Code Editor initialized');
             aiSendBtn.disabled = true; // Start with disabled send button
+
+            const startBotBtn = document.getElementById('start-bot-btn');
+            const newFileBtn = document.getElementById('new-file-btn');
+            const newFolderBtn = document.getElementById('new-folder-btn');
+            const serverIndex = {{ bot.server_index }};
+
+            startBotBtn.addEventListener('click', () => {
+                fetch(`/api/server/${serverIndex}/start`, {
+                    method: 'POST',
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Bot started successfully!');
+                    } else {
+                        alert(`Error starting bot: ${data.error}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error starting bot:', error);
+                    alert('An error occurred while starting the bot.');
+                });
+            });
+
+            newFileBtn.addEventListener('click', () => {
+                const path = prompt('Enter the path for the new file:');
+                if (path) {
+                    fetch(`/api/server/${serverIndex}/files/create`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ path: path, type: 'file' }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert(`Error creating file: ${data.error}`);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error creating file:', error);
+                        alert('An error occurred while creating the file.');
+                    });
+                }
+            });
+
+            newFolderBtn.addEventListener('click', () => {
+                const path = prompt('Enter the path for the new folder:');
+                if (path) {
+                    fetch(`/api/server/${serverIndex}/files/create`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ path: path, type: 'folder' }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert(`Error creating folder: ${data.error}`);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error creating folder:', error);
+                        alert('An error occurred while creating the folder.');
+                    });
+                }
+            });
         });
     </script>
 </body>
