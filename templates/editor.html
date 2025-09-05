@@ -87,7 +87,7 @@
             -webkit-backdrop-filter: blur(35px) saturate(1.4);
             border: 1px solid rgba(255, 255, 255, 0.04);
             border-radius: 0 0 20px 20px;
-            padding: 14px 24px; /* Increased padding */
+            padding: 14px 24px;
             height: 56px;
             display: flex;
             align-items: center;
@@ -206,7 +206,7 @@
                         0 8px 24px rgba(0, 0, 0, 0.2);
         }
 
-        /* Hide buttons when sidebar is open */
+        /* Hide buttons when sidebar is open or in editor mode */
         .edge-button.hidden {
             opacity: 0;
             visibility: hidden;
@@ -349,15 +349,147 @@
             margin: 8px 0;
         }
 
-        /* Right side action buttons - positioned symmetrically */
-        .save-btn-header {
+        /* Action Buttons Container */
+        .action-buttons-container {
+            position: fixed;
             right: 16px;
             top: calc(16px + 56px + 16px);
+            z-index: 999;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        .action-buttons-container.collapsed {
+            height: 56px;
+            overflow: hidden;
+        }
+
+        .collapse-toggle {
+            width: 100%;
+            height: 56px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.025);
+            backdrop-filter: blur(25px) saturate(1.2);
+            -webkit-backdrop-filter: blur(25px) saturate(1.2);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.9);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02),
+                        0 4px 16px rgba(0, 0, 0, 0.2);
+            margin-bottom: 16px;
+        }
+
+        .collapse-toggle:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04),
+                        0 8px 24px rgba(0, 0, 0, 0.25);
+        }
+
+        .collapse-toggle:active {
+            background: rgba(255, 255, 255, 0.07);
+            transform: translateY(0);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03),
+                        0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Individual action buttons */
+        .save-btn-header,
         .console-toggle {
-            right: 16px;
-            top: calc(16px + 56px + 16px + 56px + 16px);
+            position: static;
+            width: 56px;
+            height: 56px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.9);
+            border: none;
+            z-index: 999;
+            background: rgba(255, 255, 255, 0.025);
+            backdrop-filter: blur(25px) saturate(1.2);
+            -webkit-backdrop-filter: blur(25px) saturate(1.2);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02),
+                        0 4px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .save-btn-header:hover,
+        .console-toggle:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04),
+                        0 8px 24px rgba(0, 0, 0, 0.25);
+        }
+
+        .save-btn-header:active,
+        .console-toggle:active {
+            background: rgba(255, 255, 255, 0.07);
+            transform: translateY(0);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03),
+                        0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .save-btn-header:disabled,
+        .console-toggle:disabled {
+            background: rgba(255, 255, 255, 0.008);
+            border-color: rgba(255, 255, 255, 0.02);
+            color: rgba(255, 255, 255, 0.3);
+            transform: none !important;
+            box-shadow: none !important;
+            cursor: not-allowed;
+        }
+
+        /* Console status indicator */
+        .console-toggle {
+            position: relative;
+        }
+
+        .console-status-dot {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ff8800;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 8px rgba(255, 136, 0, 0.6);
+            transition: all 0.3s ease;
+        }
+
+        .console-status-dot.running {
+            background: #00ff00;
+            box-shadow: 0 0 8px rgba(0, 255, 0, 0.6);
+        }
+
+        .console-status-dot.offline {
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: none;
+        }
+
+        /* Editor Mode */
+        body.editor-mode .action-buttons-container,
+        body.editor-mode .ai-chat-container,
+        body.editor-mode .mobile-status-bar {
+            display: none;
         }
 
         /* Main Layout */
@@ -371,17 +503,17 @@
         .main-container {
             flex: 1;
             display: flex;
-            margin-top: 96px; /* Increased from 72px to add more padding */
+            margin-top: 96px;
             overflow: hidden;
         }
 
         /* Enhanced Sidebar */
         .sidebar {
             position: fixed;
-            top: 96px; /* Adjusted to match main-container */
+            top: 96px;
             left: 0;
             width: 100%;
-            height: calc(100vh - 96px); /* Adjusted height */
+            height: calc(100vh - 96px);
             background: rgba(255, 255, 255, 0.008);
             backdrop-filter: blur(30px) saturate(1.3);
             -webkit-backdrop-filter: blur(30px) saturate(1.3);
@@ -400,7 +532,7 @@
 
         .sidebar-overlay {
             position: fixed;
-            top: 96px; /* Adjusted to match sidebar */
+            top: 96px;
             left: 0;
             right: 0;
             bottom: 0;
@@ -419,7 +551,7 @@
         }
 
         .sidebar-header {
-            padding: 32px 28px 28px; /* Increased padding */
+            padding: 32px 28px 28px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.04);
             background: rgba(255, 255, 255, 0.01);
             backdrop-filter: blur(20px);
@@ -459,13 +591,13 @@
         .file-tree {
             flex: 1;
             overflow-y: auto;
-            padding: 20px 0; /* Increased padding */
+            padding: 20px 0;
         }
 
         .file-item {
             display: flex;
             align-items: center;
-            padding: 20px 28px; /* Increased padding */
+            padding: 20px 28px;
             cursor: pointer;
             font-size: 16px;
             border: none;
@@ -528,7 +660,7 @@
             -webkit-overflow-scrolling: touch;
             display: none;
             height: 52px;
-            padding: 0 8px; /* Added padding */
+            padding: 0 8px;
         }
 
         .mobile-tabs::-webkit-scrollbar {
@@ -544,7 +676,7 @@
         .mobile-tab {
             display: inline-flex;
             align-items: center;
-            padding: 16px 32px; /* Increased padding */
+            padding: 16px 32px;
             border: none;
             background: none;
             cursor: pointer;
@@ -662,7 +794,7 @@
             text-align: center;
             padding: 48px 32px 120px;
             min-height: 0;
-            transform: translateY(26%); /* Increased from 20% to 26% */
+            transform: translateY(26%);
         }
 
         .empty-icon {
@@ -765,8 +897,8 @@
             display: flex;
             gap: 12px;
             align-items: center;
-            background: transparent; /* Removed background */
-            border: 1px solid rgba(255, 255, 255, 0.08); /* Only border */
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 18px;
             padding: 10px 14px;
         }
@@ -1072,22 +1204,11 @@
             opacity: 0.7;
         }
 
-        .console-indicator {
-            position: fixed;
-            width: 10px;
-            height: 10px;
-            background-color: yellow;
-            border-radius: 50%;
-            right: 20px;
-            top: calc(16px + 56px + 16px + 56px + 16px + 56px - 15px);
-            z-index: 1000;
-        }
-
         /* Desktop Styles */
         @media (min-width: 768px) {
             .header {
                 height: 64px;
-                padding: 18px 28px; /* Increased padding */
+                padding: 18px 28px;
                 left: calc(16px + 56px + 16px);
                 right: calc(16px + 56px + 16px);
                 border-radius: 0 0 24px 24px;
@@ -1104,7 +1225,7 @@
             }
 
             .main-container {
-                margin-top: 104px; /* Increased from 80px for more padding */
+                margin-top: 104px;
                 flex-direction: row;
             }
 
@@ -1128,7 +1249,12 @@
 
             .mobile-tabs {
                 display: flex;
-                padding: 0 12px; /* Increased padding for desktop */
+                padding: 0 12px;
+            }
+
+            /* Multiple tabs on desktop */
+            .mobile-tab {
+                min-width: 180px;
             }
 
             .mobile-console {
@@ -1160,15 +1286,6 @@
 
             .mobile-empty-state {
                 padding: 48px 32px 160px;
-            }
-
-            /* Desktop symmetrical positioning */
-            .save-btn-header {
-                top: calc(16px + 56px + 16px);
-            }
-
-            .console-toggle {
-                top: calc(16px + 56px + 16px + 56px + 16px);
             }
 
             .user-dropdown {
@@ -1233,6 +1350,20 @@
 
             .mobile-console {
                 height: 420px;
+            }
+        }
+
+        /* Single tab on mobile */
+        @media (max-width: 767px) {
+            .mobile-tab {
+                min-width: 100%;
+                justify-content: flex-start;
+                padding-left: 20px;
+            }
+
+            .tab-close {
+                position: absolute;
+                right: 20px;
             }
         }
 
@@ -1312,326 +1443,216 @@
         /* Mobile scrollbars */
         @media (max-width: 767px) {
             ::-webkit-scrollbar {
-                width: 3px;
-                height: 3px;
-            }
-        }
-
-        /* Context Menu */
-        .context-menu {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(30px) saturate(1.3);
-            -webkit-backdrop-filter: blur(30px) saturate(1.3);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            padding: 12px 0;
-            box-shadow: 0 16px 64px rgba(0, 0, 0, 0.4),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.03);
-            z-index: 1000;
-            min-width: 200px;
-        }
-
-        .context-menu-item {
-            padding: 16px 24px;
-            color: rgba(255, 255, 255, 0.9);
-            cursor: pointer;
-            font-size: 15px;
-            border: none;
-            background: none;
-            width: 100%;
-            text-align: left;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-
-        .context-menu-item:hover {
-            background: rgba(255, 255, 255, 0.04);
-            color: #ffffff;
-        }
-
-        .context-menu-item:disabled {
-            color: rgba(255, 255, 255, 0.25);
-            cursor: not-allowed;
-        }
-
-        .context-menu-separator {
-            height: 1px;
-            background: rgba(255, 255, 255, 0.04);
-            margin: 12px 0;
-        }
-
-        /* Spinner animation */
-        .spinner {
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Enhanced Selection colors */
-        ::selection {
-            background: rgba(255, 255, 255, 0.15);
-            color: #ffffff;
-        }
-
-        ::-moz-selection {
-            background: rgba(255, 255, 255, 0.15);
-            color: #ffffff;
-        }
-
-        /* Landscape orientation adjustments */
-        @media (orientation: landscape) and (max-height: 500px) {
-            .header {
-                height: 48px;
-                margin-top: 4px;
-                padding: 12px 20px;
-            }
-            
-            .main-container {
-                margin-top: 84px; /* Adjusted for increased padding */
-            }
-            
-            .sidebar {
-                top: 84px;
-                height: calc(100vh - 84px);
-            }
-            
-            .sidebar-overlay {
-                top: 84px;
-            }
-            
-            .mobile-console {
-                height: 65vh;
-            }
-            
-            .file-item {
-                padding: 12px 24px;
-                min-height: 44px;
-            }
-            
-            .mobile-tab {
-                padding: 12px 20px;
-            }
-
-            .console-actions {
-                gap: 8px;
-            }
-
-            .console-btn {
-                width: 40px;
-                height: 40px;
-            }
-
-            .save-btn-header {
-                top: calc(16px + 56px + 8px);
-            }
-
-            .console-toggle {
-                top: calc(16px + 56px + 8px + 56px + 8px);
-            }
-
-            .user-dropdown {
-                top: calc(16px + 56px + 8px);
-            }
-
-            .ai-chat-container {
-                padding: 12px 16px;
-                gap: 8px;
-            }
-        }
-
-        /* iOS safe area support */
-        @supports (padding: max(0px)) {
-            .app-container {
-                padding-bottom: max(0px, env(safe-area-inset-bottom));
-            }
-            
-            .ai-chat-container {
-                padding-bottom: max(16px, calc(16px + env(safe-area-inset-bottom)));
-            }
-
-            .mobile-console {
-                padding-bottom: max(0px, env(safe-area-inset-bottom));
+                width: 4px;
+                height: 4px;
             }
         }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <!-- Normalized Header -->
+        <!-- Enhanced Mobile Header -->
         <header class="header">
             <a href="#" class="logo">
-                <div class="logo-icon">E</div>
-                <span class="current-file" id="current-file">
-                    <span class="file-path">Editor</span>
+                <div class="logo-icon">
+                    <i data-lucide="code"></i>
+                </div>
+                <div class="current-file">
+                    <span class="file-path">main.py</span>
                     <span class="file-separator">/</span>
-                    <span id="current-file-name">Select a file</span>
-                </span>
+                    <span>Project Name</span>
+                </div>
             </a>
         </header>
 
-        <!-- Left Side: Menu Button -->
-        <button class="edge-button glass-button mobile-menu-btn touch-target" id="mobile-menu-btn" title="Menu">
+        <!-- Mobile Menu Button -->
+        <button class="edge-button mobile-menu-btn" onclick="toggleSidebar()">
             <i data-lucide="menu"></i>
         </button>
-        
-        <!-- Right Side: User Profile -->
-        <div class="user-profile touch-target" id="user-profile" title="User Profile">
-            <img src="{{ user.avatar_url or url_for('static', filename='img/default_avatar.png') }}" alt="User Avatar" class="user-avatar">
+
+        <!-- User Profile -->
+        <div class="user-profile" onclick="toggleUserDropdown()">
+            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face" alt="User Avatar" class="user-avatar">
         </div>
 
-        <!-- User Dropdown -->
-        <div class="user-dropdown" id="user-dropdown">
+        <!-- User Profile Dropdown -->
+        <div class="user-dropdown" id="userDropdown">
             <div class="user-dropdown-header">
-                <img src="{{ user.avatar_url or url_for('static', filename='img/default_avatar.png') }}" alt="User Avatar" class="user-dropdown-avatar">
+                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face" alt="User Avatar" class="user-dropdown-avatar">
                 <div class="user-dropdown-info">
-                    <h3>{{ user.username or 'User' }}</h3>
+                    <h3>John Doe</h3>
                     <p>Developer</p>
                 </div>
             </div>
-            <a href="{{ url_for('dashboard') if url_for else '#' }}" class="user-dropdown-item">
-                <i data-lucide="layout-dashboard" size="16"></i>
-                Dashboard
+            <a href="#" class="user-dropdown-item">
+                <i data-lucide="settings"></i>
+                Settings
             </a>
-            <a href="https://sycord.com" class="user-dropdown-item">
-                <i data-lucide="external-link" size="16"></i>
-                Sycord.com
+            <a href="#" class="user-dropdown-item">
+                <i data-lucide="help-circle"></i>
+                Help
             </a>
             <div class="user-dropdown-separator"></div>
-            <a href="{{ url_for('logout') if url_for else '#' }}" class="user-dropdown-item">
-                <i data-lucide="log-out" size="16"></i>
+            <button class="user-dropdown-item">
+                <i data-lucide="log-out"></i>
                 Logout
-            </a>
-        </div>
-        
-        <!-- Right Side Action Buttons - Below User Profile -->
-        <button class="edge-button glass-button save-btn-header touch-target" id="save-btn-header" disabled title="Save File">
-            <i data-lucide="save"></i>
-        </button>
-        
-        <button class="edge-button glass-button console-toggle touch-target" id="console-toggle" title="Toggle Console">
-            <i data-lucide="terminal"></i>
-        </button>
-        <div class="console-indicator"></div>
-
-        <!-- Sidebar Overlay -->
-        <div class="sidebar-overlay" id="sidebar-overlay"></div>
-
-        <!-- Main Container -->
-        <div class="main-container">
-            <!-- Sidebar -->
-            <aside class="sidebar" id="sidebar">
-                <div class="sidebar-header">
-                    <div class="sidebar-title">
-                        <i data-lucide="folder-open"></i>
-                        Files
-                    </div>
-                    <div class="sidebar-actions">
-                        <button class="sidebar-btn glass-button touch-target" id="new-file-btn" title="New File">
-                            <i data-lucide="file-plus"></i>
-                        </button>
-                        <button class="sidebar-btn glass-button touch-target" id="new-folder-btn" title="New Folder">
-                            <i data-lucide="folder-plus"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="file-tree" id="file-tree">
-                    <!-- Files will be populated here -->
-                </div>
-            </aside>
-
-            <!-- Content Area -->
-            <main class="content-area">
-                <!-- Mobile Tabs -->
-                <div class="mobile-tabs" id="mobile-tabs">
-                    <div class="tabs-wrapper" id="tabs-wrapper">
-                        <!-- Tabs will be populated here -->
-                    </div>
-                </div>
-
-                <!-- Editor -->
-                <div class="mobile-editor-container" id="editor-container">
-                    <div class="mobile-empty-state" id="empty-state">
-                        <div class="empty-icon">
-                            <i data-lucide="file-text" size="28"></i>
-                        </div>
-                        <h3>Select a file to edit</h3>
-                        <p>Choose a file from the sidebar to start editing your code</p>
-                    </div>
-                </div>
-
-                <!-- Mobile Status Bar -->
-                <div class="mobile-status-bar">
-                    <div class="status-left">
-                        <span id="cursor-position">Ln 1, Col 1</span>
-                        <div class="status-indicator {{ 'online' if bot.status == 'online' else 'offline' }}" id="bot-status">
-                            <div class="status-dot"></div>
-                            <span>{{ 'Online' if bot.status == 'online' else 'Offline' }}</span>
-                        </div>
-                    </div>
-                    <button class="save-btn glass-button touch-target" id="save-btn" disabled>
-                        <i data-lucide="save" size="16"></i>
-                        Save
-                    </button>
-                </div>
-            </main>
+            </button>
         </div>
 
-        <!-- AI Chat Interface at Bottom - Transparent Input -->
-        <div class="ai-chat-container" id="ai-chat-container">
-            <!-- AI Suggestions -->
-            <div class="ai-suggestions">
-                <button class="suggestion-chip" data-suggestion="fix code">fix code</button>
-                <button class="suggestion-chip" data-suggestion="add a function">add a function</button>
-                <button class="suggestion-chip" data-suggestion="clear up">clear up</button>
-            </div>
-            
-            <!-- AI Input -->
-            <div class="ai-input-container">
-                <input type="text" class="ai-input" id="ai-input" placeholder="Ask AI to help with your code...">
-                <button class="ai-send-btn" id="ai-send-btn" title="Send">
-                    <i data-lucide="send" size="14"></i>
+        <!-- Action Buttons Container -->
+        <div class="action-buttons-container" id="actionButtonsContainer">
+            <button class="collapse-toggle" onclick="toggleActionButtons()">
+                <i data-lucide="chevron-up" id="collapseIcon"></i>
+            </button>
+            <div class="action-buttons" id="actionButtons">
+                <button class="save-btn-header" onclick="saveFile()">
+                    <i data-lucide="save"></i>
+                </button>
+                <button class="console-toggle" onclick="toggleConsole()">
+                    <i data-lucide="terminal"></i>
+                    <div class="console-status-dot" id="consoleStatusDot"></div>
                 </button>
             </div>
         </div>
 
-        <!-- Mobile Console -->
-        <div class="mobile-console" id="mobile-console">
-            <div class="console-header">
-                <div class="console-title">
-                    <i data-lucide="terminal" size="20"></i>
-                    Console
-                </div>
-                <div class="console-actions">
-                    <!-- Only show start OR stop button based on state -->
-                    {% if bot.status == 'online' %}
-                    <button class="console-btn touch-target" id="stop-bot-btn" title="Stop Bot">
-                        <i data-lucide="square" size="16"></i>
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+        <!-- Enhanced Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">
+                    <i data-lucide="folder"></i>
+                    Files
+                </h2>
+                <div class="sidebar-actions">
+                    <button class="sidebar-btn glass-button" onclick="newFile()">
+                        <i data-lucide="plus"></i>
                     </button>
-                    {% else %}
-                    <button class="console-btn touch-target" id="start-bot-btn" title="Start Bot">
-                        <i data-lucide="play" size="18"></i>
-                    </button>
-                    {% endif %}
-                    <button class="console-btn touch-target" id="restart-bot-btn" disabled style="display: none;" title="Restart Bot">
-                        <i data-lucide="rotate-cw" size="16"></i>
-                    </button>
-                    <button class="console-btn touch-target" id="clear-console-btn" title="Clear Console">
-                        <i data-lucide="trash-2" size="16"></i>
-                    </button>
-                    <button class="console-close touch-target" id="console-close">
-                        <i data-lucide="x" size="20"></i>
+                    <button class="sidebar-btn glass-button" onclick="toggleEditorMode()">
+                        <i data-lucide="maximize-2"></i>
                     </button>
                 </div>
             </div>
-            <div class="console-output" id="console-output">
-                <div class="console-line">Welcome to the console...</div>
-                <div class="console-line">Bot status: <span id="console-bot-status">Stopped</span></div>
+            <div class="file-tree">
+                <button class="file-item active" onclick="openFile('main.py')">
+                    <i data-lucide="file-text" class="file-icon"></i>
+                    main.py
+                </button>
+                <button class="file-item" onclick="openFile('utils.py')">
+                    <i data-lucide="file-text" class="file-icon"></i>
+                    utils.py
+                </button>
+                <button class="file-item" onclick="openFile('config.json')">
+                    <i data-lucide="settings" class="file-icon"></i>
+                    config.json
+                </button>
+                <button class="file-item" onclick="openFile('README.md')">
+                    <i data-lucide="book-open" class="file-icon"></i>
+                    README.md
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Container -->
+        <div class="main-container">
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Mobile Tabs -->
+                <div class="mobile-tabs">
+                    <div class="tabs-wrapper">
+                        <div class="mobile-tab active">
+                            <i data-lucide="file-text"></i>
+                            main.py
+                            <button class="tab-close" onclick="closeTab('main.py')">
+                                <i data-lucide="x"></i>
+                            </button>
+                        </div>
+                        <div class="mobile-tab">
+                            <i data-lucide="file-text"></i>
+                            utils.py
+                            <button class="tab-close" onclick="closeTab('utils.py')">
+                                <i data-lucide="x"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile Editor Container -->
+                <div class="mobile-editor-container">
+                    <!-- Empty State -->
+                    <div class="mobile-empty-state">
+                        <div class="empty-icon">
+                            <i data-lucide="code"></i>
+                        </div>
+                        <h3>No File Selected</h3>
+                        <p>Choose a file from the sidebar or create a new one to start coding</p>
+                    </div>
+
+                    <!-- Editor will be inserted here -->
+                    <div class="editor-wrapper" style="display: none;">
+                        <textarea id="code-editor"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Status Bar -->
+        <div class="mobile-status-bar">
+            <div class="status-left">
+                <button class="save-btn primary" onclick="saveFile()">
+                    <i data-lucide="save"></i>
+                    Save
+                </button>
+                <div class="status-indicator online">
+                    <div class="status-dot"></div>
+                    Online
+                </div>
+            </div>
+            <div>Python | UTF-8 | Ln 42, Col 16</div>
+        </div>
+
+        <!-- AI Chat Interface -->
+        <div class="ai-chat-container" id="aiChatContainer">
+            <div class="ai-suggestions">
+                <div class="suggestion-chip" onclick="selectSuggestion('Debug this code')">Debug this code</div>
+                <div class="suggestion-chip" onclick="selectSuggestion('Add comments')">Add comments</div>
+                <div class="suggestion-chip" onclick="selectSuggestion('Optimize performance')">Optimize</div>
+                <div class="suggestion-chip" onclick="selectSuggestion('Generate tests')">Tests</div>
+            </div>
+            <div class="ai-input-container">
+                <input type="text" class="ai-input" placeholder="Ask AI to help with your code..." id="aiInput">
+                <button class="ai-send-btn" onclick="sendAIMessage()">
+                    <i data-lucide="send"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Enhanced Mobile Console -->
+        <div class="mobile-console" id="mobileConsole">
+            <div class="console-header">
+                <h3 class="console-title">
+                    <i data-lucide="terminal"></i>
+                    Console
+                </h3>
+                <div class="console-actions">
+                    <button class="console-btn" onclick="runCode()" id="runBtn">
+                        <i data-lucide="play"></i>
+                    </button>
+                    <button class="console-btn" onclick="stopCode()" id="stopBtn" disabled>
+                        <i data-lucide="square"></i>
+                    </button>
+                    <button class="console-btn" onclick="clearConsole()">
+                        <i data-lucide="trash-2"></i>
+                    </button>
+                    <div class="console-close" onclick="closeConsole()">
+                        <i data-lucide="x"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="console-output" id="consoleOutput">
+                <div class="console-line">Python 3.9.0 ready</div>
+                <div class="console-line">Type your code and press Run to execute</div>
             </div>
         </div>
     </div>
@@ -1640,294 +1661,289 @@
         // Initialize Lucide icons
         lucide.createIcons();
 
-        // Get elements
-        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarOverlay = document.getElementById('sidebar-overlay');
-        const saveBtnHeader = document.getElementById('save-btn-header');
-        const consoleToggle = document.getElementById('console-toggle');
-        const aiChatContainer = document.getElementById('ai-chat-container');
+        let editor;
+        let isConsoleOpen = false;
+        let isActionButtonsCollapsed = false;
+        let isEditorMode = false;
+        let consoleStatus = 'offline'; // offline, running, ready
 
-        // Mobile menu toggle with button hiding
-        mobileMenuBtn.addEventListener('click', () => {
-            const isOpen = sidebar.classList.toggle('open');
-            sidebarOverlay.classList.toggle('active');
-            
-            // Hide/show buttons and AI chat when sidebar opens/closes on mobile
-            if (window.innerWidth < 768) {
-                if (isOpen) {
-                    saveBtnHeader.classList.add('hidden');
-                    consoleToggle.classList.add('hidden');
-                    aiChatContainer.classList.add('hidden');
-                } else {
-                    saveBtnHeader.classList.remove('hidden');
-                    consoleToggle.classList.remove('hidden');
-                    aiChatContainer.classList.remove('hidden');
-                }
-            }
-        });
-
-        sidebarOverlay.addEventListener('click', () => {
-            sidebar.classList.remove('open');
-            sidebarOverlay.classList.remove('active');
-            
-            // Show buttons and AI chat when sidebar closes
-            if (window.innerWidth < 768) {
-                saveBtnHeader.classList.remove('hidden');
-                consoleToggle.classList.remove('hidden');
-                aiChatContainer.classList.remove('hidden');
-            }
-        });
-
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            if (window.innerWidth >= 768) {
-                // Desktop: always show buttons and AI chat
-                saveBtnHeader.classList.remove('hidden');
-                consoleToggle.classList.remove('hidden');
-                aiChatContainer.classList.remove('hidden');
-            } else {
-                // Mobile: hide if sidebar is open
-                if (sidebar.classList.contains('open')) {
-                    saveBtnHeader.classList.add('hidden');
-                    consoleToggle.classList.add('hidden');
-                    aiChatContainer.classList.add('hidden');
-                }
-            }
-        });
-
-        // User profile dropdown
-        const userProfile = document.getElementById('user-profile');
-        const userDropdown = document.getElementById('user-dropdown');
-
-        userProfile.addEventListener('click', (e) => {
-            e.stopPropagation();
-            userDropdown.classList.toggle('active');
-        });
-
-        document.addEventListener('click', () => {
-            userDropdown.classList.remove('active');
-        });
-
-        userDropdown.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
-
-        // Console toggle
-        const mobileConsole = document.getElementById('mobile-console');
-        const consoleClose = document.getElementById('console-close');
-
-        consoleToggle.addEventListener('click', () => {
-            mobileConsole.classList.toggle('open');
-            consoleToggle.classList.toggle('active');
-        });
-
-        consoleClose.addEventListener('click', () => {
-            mobileConsole.classList.remove('open');
-            consoleToggle.classList.remove('active');
-        });
-
-        // Console buttons
-        const startBotBtn = document.getElementById('start-bot-btn');
-        const stopBotBtn = document.getElementById('stop-bot-btn');
-        const restartBotBtn = document.getElementById('restart-bot-btn');
-        const clearConsoleBtn = document.getElementById('clear-console-btn');
-        const consoleOutput = document.getElementById('console-output');
-
-        clearConsoleBtn.addEventListener('click', () => {
-            consoleOutput.innerHTML = '<div class="console-line">Console cleared...</div>';
-        });
-
-        // AI Chat functionality
-        const aiInput = document.getElementById('ai-input');
-        const aiSendBtn = document.getElementById('ai-send-btn');
-        const suggestionChips = document.querySelectorAll('.suggestion-chip');
-
-        // Suggestion chips
-        suggestionChips.forEach(chip => {
-            chip.addEventListener('click', () => {
-                const suggestion = chip.getAttribute('data-suggestion');
-                aiInput.value = suggestion;
-                aiInput.focus();
-                aiSendBtn.disabled = false;
+        // Initialize CodeMirror
+        function initializeEditor() {
+            editor = CodeMirror.fromTextArea(document.getElementById('code-editor'), {
+                theme: 'material-darker',
+                mode: 'python',
+                lineNumbers: true,
+                autoCloseBrackets: true,
+                matchBrackets: true,
+                indentUnit: 4,
+                indentWithTabs: false,
+                lineWrapping: true
             });
-        });
+        }
 
-        // AI input and send
-        aiInput.addEventListener('input', () => {
-            aiSendBtn.disabled = aiInput.value.trim() === '';
-        });
-
-        aiInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !aiSendBtn.disabled) {
-                sendAIMessage();
-            }
-        });
-
-        aiSendBtn.addEventListener('click', () => {
-            if (!aiSendBtn.disabled) {
-                sendAIMessage();
-            }
-        });
-
-        function sendAIMessage() {
-            const message = aiInput.value.trim();
-            if (message) {
-                console.log('AI Message:', message);
-                // TODO: Implement AI message sending
-                aiInput.value = '';
-                aiSendBtn.disabled = true;
+        // Sidebar functions
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const menuBtn = document.querySelector('.mobile-menu-btn');
+            const actionButtons = document.getElementById('actionButtonsContainer');
+            
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+            
+            // Hide/show other buttons when sidebar is open
+            if (sidebar.classList.contains('open')) {
+                actionButtons.classList.add('hidden');
+                document.querySelector('.user-profile').classList.add('hidden');
+            } else {
+                actionButtons.classList.remove('hidden');
+                document.querySelector('.user-profile').classList.remove('hidden');
             }
         }
 
-        // Save buttons
-        const saveBtn = document.getElementById('save-btn');
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const actionButtons = document.getElementById('actionButtonsContainer');
+            
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+            actionButtons.classList.remove('hidden');
+            document.querySelector('.user-profile').classList.remove('hidden');
+        }
+
+        // User dropdown functions
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('active');
+        }
+
+        // Click outside to close dropdown
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('userDropdown');
+            const userProfile = document.querySelector('.user-profile');
+            
+            if (!userProfile.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.remove('active');
+            }
+        });
+
+        // Action buttons functions
+        function toggleActionButtons() {
+            const container = document.getElementById('actionButtonsContainer');
+            const icon = document.getElementById('collapseIcon');
+            
+            isActionButtonsCollapsed = !isActionButtonsCollapsed;
+            
+            if (isActionButtonsCollapsed) {
+                container.classList.add('collapsed');
+                icon.setAttribute('data-lucide', 'chevron-down');
+            } else {
+                container.classList.remove('collapsed');
+                icon.setAttribute('data-lucide', 'chevron-up');
+            }
+            
+            lucide.createIcons();
+        }
+
+        // Editor mode function
+        function toggleEditorMode() {
+            isEditorMode = !isEditorMode;
+            document.body.classList.toggle('editor-mode', isEditorMode);
+            
+            // Also close sidebar if open
+            if (isEditorMode) {
+                closeSidebar();
+            }
+        }
+
+        // Console functions
+        function toggleConsole() {
+            const console = document.getElementById('mobileConsole');
+            isConsoleOpen = !isConsoleOpen;
+            
+            if (isConsoleOpen) {
+                console.classList.add('open');
+                updateConsoleStatus('ready');
+            } else {
+                console.classList.remove('open');
+                updateConsoleStatus('offline');
+            }
+        }
+
+        function closeConsole() {
+            const console = document.getElementById('mobileConsole');
+            console.classList.remove('open');
+            isConsoleOpen = false;
+            updateConsoleStatus('offline');
+        }
+
+        function updateConsoleStatus(status) {
+            consoleStatus = status;
+            const dot = document.getElementById('consoleStatusDot');
+            
+            dot.className = 'console-status-dot';
+            switch(status) {
+                case 'running':
+                    dot.classList.add('running');
+                    break;
+                case 'ready':
+                    // Default orange color
+                    break;
+                case 'offline':
+                    dot.classList.add('offline');
+                    break;
+            }
+        }
+
+        // Console control functions
+        function runCode() {
+            const runBtn = document.getElementById('runBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const output = document.getElementById('consoleOutput');
+            
+            runBtn.disabled = true;
+            runBtn.classList.add('running');
+            stopBtn.disabled = false;
+            
+            updateConsoleStatus('running');
+            
+            // Add running message
+            const runningLine = document.createElement('div');
+            runningLine.className = 'console-line info';
+            runningLine.textContent = '> Running code...';
+            output.appendChild(runningLine);
+            
+            // Simulate code execution
+            setTimeout(() => {
+                const resultLine = document.createElement('div');
+                resultLine.className = 'console-line success';
+                resultLine.textContent = 'Code executed successfully!';
+                output.appendChild(resultLine);
+                
+                runBtn.disabled = false;
+                runBtn.classList.remove('running');
+                stopBtn.disabled = true;
+                updateConsoleStatus('ready');
+                
+                output.scrollTop = output.scrollHeight;
+            }, 2000);
+        }
+
+        function stopCode() {
+            const runBtn = document.getElementById('runBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const output = document.getElementById('consoleOutput');
+            
+            runBtn.disabled = false;
+            runBtn.classList.remove('running');
+            stopBtn.disabled = true;
+            
+            updateConsoleStatus('ready');
+            
+            const stoppedLine = document.createElement('div');
+            stoppedLine.className = 'console-line warning';
+            stoppedLine.textContent = 'Execution stopped by user';
+            output.appendChild(stoppedLine);
+            
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearConsole() {
+            const output = document.getElementById('consoleOutput');
+            output.innerHTML = '<div class="console-line">Console cleared</div>';
+        }
+
+        // File functions
+        function openFile(filename) {
+            // Update active file item
+            document.querySelectorAll('.file-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.file-item').classList.add('active');
+            
+            // Update header
+            document.querySelector('.file-path').textContent = filename;
+            
+            // Show editor and hide empty state
+            document.querySelector('.mobile-empty-state').style.display = 'none';
+            document.querySelector('.editor-wrapper').style.display = 'block';
+            document.querySelector('.mobile-tabs').style.display = 'flex';
+            
+            if (!editor) {
+                initializeEditor();
+            }
+            
+            // Close sidebar on mobile
+            if (window.innerWidth < 768) {
+                closeSidebar();
+            }
+        }
+
+        function saveFile() {
+            // Simulate saving
+            const saveBtn = document.querySelector('.save-btn');
+            const originalText = saveBtn.textContent;
+            
+            saveBtn.innerHTML = '<i data-lucide="check"></i>Saved';
+            lucide.createIcons();
+            
+            setTimeout(() => {
+                saveBtn.innerHTML = '<i data-lucide="save"></i>Save';
+                lucide.createIcons();
+            }, 2000);
+        }
+
+        function newFile() {
+            console.log('Create new file');
+        }
+
+        function closeTab(filename) {
+            console.log('Close tab:', filename);
+        }
+
+        // AI functions
+        function selectSuggestion(text) {
+            document.getElementById('aiInput').value = text;
+        }
+
+        function sendAIMessage() {
+            const input = document.getElementById('aiInput');
+            const message = input.value.trim();
+            
+            if (message) {
+                console.log('AI message:', message);
+                input.value = '';
+            }
+        }
+
+        // Enter key for AI input
+        document.getElementById('aiInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendAIMessage();
+            }
+        });
+
+        // Handle responsive behavior
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 768) {
+                // Desktop - always show sidebar
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+            }
+        });
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('Code Editor initialized');
-            aiSendBtn.disabled = true; // Start with disabled send button
-
-            const fileTreeContainer = document.getElementById('file-tree');
-            const filesTree = {{ bot.files_tree | tojson }};
-
-            function renderFileTree(tree, container, level = 0) {
-                for (const name in tree) {
-                    const item = tree[name];
-                    const element = document.createElement('div');
-                    element.className = 'file-item';
-                    element.style.paddingLeft = `${28 + level * 20}px`;
-
-                    const icon = document.createElement('i');
-                    icon.className = 'file-icon';
-
-                    const text = document.createElement('span');
-                    text.textContent = name;
-
-                    if (typeof item === 'object' && item !== null && Object.keys(item).length > 0) {
-                        // Folder
-                        icon.setAttribute('data-lucide', 'folder');
-                        element.appendChild(icon);
-                        element.appendChild(text);
-                        container.appendChild(element);
-                        renderFileTree(item, container, level + 1);
-                    } else if (typeof item === 'object' && item !== null) {
-                        // Empty Folder
-                        icon.setAttribute('data-lucide', 'folder');
-                        element.appendChild(icon);
-                        element.appendChild(text);
-                        container.appendChild(element);
-                    }
-                    else {
-                        // File
-                        icon.setAttribute('data-lucide', 'file');
-                        element.appendChild(icon);
-                        element.appendChild(text);
-                        container.appendChild(element);
-                    }
-                }
-                lucide.createIcons();
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+            updateConsoleStatus('offline');
+            
+            // Show tabs on desktop if window is large enough
+            if (window.innerWidth >= 768) {
+                document.querySelector('.mobile-tabs').style.display = 'flex';
             }
-
-            renderFileTree(filesTree, fileTreeContainer);
-
-            const startBotBtn = document.getElementById('start-bot-btn');
-            const stopBotBtn = document.getElementById('stop-bot-btn');
-            const newFileBtn = document.getElementById('new-file-btn');
-            const newFolderBtn = document.getElementById('new-folder-btn');
-            const serverIndex = {{ bot.server_index }};
-
-            if (startBotBtn) {
-                startBotBtn.addEventListener('click', () => {
-                    fetch(`/api/server/${serverIndex}/start`, {
-                        method: 'POST',
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Bot started successfully!');
-                            location.reload();
-                        } else {
-                            alert(`Error starting bot: ${data.error}`);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error starting bot:', error);
-                        alert('An error occurred while starting the bot.');
-                    });
-                });
-            }
-
-            if (stopBotBtn) {
-                stopBotBtn.addEventListener('click', () => {
-                    fetch(`/api/server/${serverIndex}/stop`, {
-                        method: 'POST',
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Bot stopped successfully!');
-                            location.reload();
-                        } else {
-                            alert(`Error stopping bot: ${data.error}`);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error stopping bot:', error);
-                        alert('An error occurred while stopping the bot.');
-                    });
-                });
-            }
-
-            newFileBtn.addEventListener('click', () => {
-                const path = prompt('Enter the path for the new file:');
-                if (path) {
-                    fetch(`/api/server/${serverIndex}/files/create`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ path: path, type: 'file' }),
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            location.reload();
-                        } else {
-                            alert(`Error creating file: ${data.error}`);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error creating file:', error);
-                        alert('An error occurred while creating the file.');
-                    });
-                }
-            });
-
-            newFolderBtn.addEventListener('click', () => {
-                const path = prompt('Enter the path for the new folder:');
-                if (path) {
-                    fetch(`/api/server/${serverIndex}/files/create`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ path: path, type: 'folder' }),
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            location.reload();
-                        } else {
-                            alert(`Error creating folder: ${data.error}`);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error creating folder:', error);
-                        alert('An error occurred while creating the folder.');
-                    });
-                }
-            });
         });
     </script>
 </body>
