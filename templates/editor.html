@@ -25,7 +25,7 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
             background: #101010;
             color: #ffffff;
             line-height: 1.6;
@@ -74,22 +74,24 @@
             box-shadow: none !important;
         }
 
-        /* Minimized Header */
+        /* Minimized Header with Rounded Borders */
         .header {
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 0 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 0 0 20px 20px;
+            padding: 12px 20px;
             height: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
             position: fixed;
             top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
+            left: 88px;
+            right: 88px;
+            z-index: 998;
+            margin-top: 8px;
         }
 
         .logo {
@@ -103,25 +105,25 @@
         }
 
         .logo-icon {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             background: rgba(255, 255, 255, 0.12);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
-            border-radius: 10px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #ffffff;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 700;
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        /* Updated file display - shows "Editor / filename" */
+        /* Updated file display */
         .current-file {
             color: rgba(255, 255, 255, 0.7);
-            font-size: 15px;
+            font-size: 14px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -139,89 +141,30 @@
             margin: 0 6px;
         }
 
-        /* Top Edge Positioned Buttons */
-        .top-edge-button {
-            position: fixed;
-            width: 48px;
-            height: 48px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 18px;
-            color: #ffffff;
-            border: none;
-            z-index: 1001;
-            top: 12px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .top-edge-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 32px rgba(255, 255, 255, 0.15);
-        }
-
-        .top-edge-button:active {
-            transform: translateY(0);
-        }
-
-        .top-edge-button:disabled {
-            transform: none !important;
-            box-shadow: none !important;
-        }
-
-        .top-edge-button.active {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 8px 32px rgba(255, 255, 255, 0.2);
-        }
-
-        /* Left Top - Menu Button */
-        .mobile-menu-btn {
-            left: 12px;
-        }
-
-        /* Right Top - Profile Button */
-        .profile-btn {
-            right: 12px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.12);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            overflow: hidden;
-            font-size: 16px;
-            font-weight: 700;
-        }
-
-        .profile-btn:hover {
-            border-color: rgba(255, 255, 255, 0.4);
-        }
-
-        /* Edge Positioned Action Buttons */
+        /* Top Edge Buttons - Updated positioning */
         .edge-button {
             position: fixed;
-            width: 48px;
-            height: 48px;
-            border-radius: 16px;
+            width: 56px;
+            height: 56px;
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 20px;
             color: #ffffff;
             border: none;
             z-index: 999;
-            right: 12px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .edge-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 32px rgba(255, 255, 255, 0.15);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(255, 255, 255, 0.15);
         }
 
         .edge-button:active {
-            transform: translateY(0);
+            transform: translateY(-1px);
         }
 
         .edge-button:disabled {
@@ -235,13 +178,144 @@
             box-shadow: 0 8px 32px rgba(255, 255, 255, 0.2);
         }
 
-        /* Right Edge Buttons - Save and Console */
+        /* Menu button - Top left */
+        .mobile-menu-btn {
+            left: 16px;
+            top: 16px;
+        }
+
+        /* User Profile - Top right */
+        .user-profile {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            width: 56px;
+            height: 56px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 999;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        .user-profile:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(255, 255, 255, 0.1);
+        }
+
+        .user-profile:active {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(0);
+        }
+
+        .user-avatar {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 16px;
+        }
+
+        /* User Profile Dropdown */
+        .user-dropdown {
+            position: fixed;
+            top: 80px;
+            right: 16px;
+            width: 240px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 16px 0;
+            box-shadow: 0 16px 64px rgba(0, 0, 0, 0.4);
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .user-dropdown.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .user-dropdown-header {
+            padding: 12px 20px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-dropdown-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            object-fit: cover;
+        }
+
+        .user-dropdown-info h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 2px;
+        }
+
+        .user-dropdown-info p {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .user-dropdown-item {
+            padding: 12px 20px;
+            color: #ffffff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .user-dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+        }
+
+        .user-dropdown-separator {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 8px 0;
+        }
+
+        /* Action buttons - Below user profile */
         .save-btn-header {
-            top: 72px; /* Below profile button */
+            right: 16px;
+            top: 88px;
         }
 
         .console-toggle {
-            top: 132px; /* Below save button */
+            right: 16px;
+            top: 156px;
         }
 
         /* Main Layout */
@@ -255,17 +329,17 @@
         .main-container {
             flex: 1;
             display: flex;
-            margin-top: 48px;
+            margin-top: 64px;
             overflow: hidden;
         }
 
         /* Sidebar */
         .sidebar {
             position: fixed;
-            top: 48px;
+            top: 64px;
             left: 0;
             width: 100%;
-            height: calc(100vh - 48px);
+            height: calc(100vh - 64px);
             background: rgba(255, 255, 255, 0.02);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
@@ -282,7 +356,7 @@
 
         .sidebar-overlay {
             position: fixed;
-            top: 48px;
+            top: 64px;
             left: 0;
             right: 0;
             bottom: 0;
@@ -301,7 +375,7 @@
         }
 
         .sidebar-header {
-            padding: 24px 20px 20px;
+            padding: 28px 24px 24px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
             align-items: center;
@@ -309,7 +383,7 @@
         }
 
         .sidebar-title {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 600;
             color: #ffffff;
             display: flex;
@@ -319,18 +393,18 @@
 
         .sidebar-actions {
             display: flex;
-            gap: 8px;
+            gap: 10px;
         }
 
         .sidebar-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 18px;
             color: #ffffff;
             border: none;
         }
@@ -344,16 +418,16 @@
         .file-item {
             display: flex;
             align-items: center;
-            padding: 16px 20px;
+            padding: 18px 24px;
             cursor: pointer;
-            font-size: 15px;
+            font-size: 16px;
             border: none;
             background: none;
             width: 100%;
             text-align: left;
-            gap: 12px;
+            gap: 14px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            min-height: 52px;
+            min-height: 56px;
             color: #ffffff;
             border-radius: 0;
             font-weight: 500;
@@ -377,8 +451,8 @@
         }
 
         .file-icon {
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             flex-shrink: 0;
         }
 
@@ -402,7 +476,7 @@
             white-space: nowrap;
             -webkit-overflow-scrolling: touch;
             display: none;
-            height: 48px;
+            height: 52px;
         }
 
         .mobile-tabs::-webkit-scrollbar {
@@ -418,17 +492,17 @@
         .mobile-tab {
             display: inline-flex;
             align-items: center;
-            padding: 14px 24px;
+            padding: 16px 28px;
             border: none;
             background: none;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 15px;
             color: rgba(255, 255, 255, 0.6);
             border-bottom: 2px solid transparent;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            gap: 10px;
+            gap: 12px;
             white-space: nowrap;
-            min-width: 140px;
+            min-width: 160px;
             justify-content: center;
             flex-shrink: 0;
             font-weight: 500;
@@ -451,9 +525,9 @@
         }
 
         .tab-close {
-            width: 20px;
-            height: 20px;
-            border-radius: 6px;
+            width: 22px;
+            height: 22px;
+            border-radius: 8px;
             border: none;
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -462,8 +536,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
-            margin-left: 8px;
+            font-size: 14px;
+            margin-left: 10px;
             color: rgba(255, 255, 255, 0.7);
             transition: all 0.2s ease;
         }
@@ -494,7 +568,7 @@
         .CodeMirror {
             height: 100% !important;
             font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
-            font-size: 14px;
+            font-size: 15px;
             line-height: 1.6;
             background: #101010 !important;
             color: #ffffff !important;
@@ -509,8 +583,8 @@
 
         .CodeMirror-linenumber {
             color: rgba(255, 255, 255, 0.4) !important;
-            padding: 0 8px;
-            font-size: 12px;
+            padding: 0 10px;
+            font-size: 13px;
             font-weight: 500;
         }
 
@@ -534,42 +608,42 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 40px 28px 100px;
+            padding: 48px 32px 120px;
             min-height: 0;
         }
 
         .empty-icon {
-            width: 80px;
-            height: 80px;
+            width: 96px;
+            height: 96px;
             background: rgba(255, 255, 255, 0.06);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
+            border-radius: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 28px;
+            margin-bottom: 32px;
             color: rgba(255, 255, 255, 0.6);
         }
 
         .mobile-empty-state h3 {
-            font-size: 20px;
+            font-size: 24px;
             font-weight: 600;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
             color: #ffffff;
         }
 
         .mobile-empty-state p {
             color: rgba(255, 255, 255, 0.6);
-            font-size: 15px;
+            font-size: 17px;
             line-height: 1.5;
-            max-width: 280px;
+            max-width: 320px;
         }
 
         /* Mobile Status Bar */
         .mobile-status-bar {
-            height: 56px;
+            height: 60px;
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
@@ -577,31 +651,31 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 20px;
-            font-size: 12px;
+            padding: 0 24px;
+            font-size: 13px;
             color: rgba(255, 255, 255, 0.7);
         }
 
         .status-left {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 20px;
         }
 
         .save-btn {
-            padding: 10px 20px;
-            border-radius: 14px;
+            padding: 12px 24px;
+            border-radius: 16px;
             background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             color: #ffffff;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             border: 1px solid rgba(255, 255, 255, 0.12);
         }
 
@@ -643,7 +717,7 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: 50vh;
+            height: 55vh;
             background: rgba(255, 255, 255, 0.02);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
@@ -663,7 +737,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 18px 20px;
+            padding: 20px 24px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             background: rgba(255, 255, 255, 0.02);
             backdrop-filter: blur(15px);
@@ -671,25 +745,25 @@
         }
 
         .console-title {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 600;
             color: #ffffff;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
         .console-actions {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             align-items: center;
         }
 
         /* Simplified Console Buttons - Only Icons */
         .console-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
             background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
@@ -700,7 +774,7 @@
             align-items: center;
             justify-content: center;
             border: 1px solid rgba(255, 255, 255, 0.12);
-            font-size: 14px;
+            font-size: 16px;
         }
 
         .console-btn:hover {
@@ -731,9 +805,9 @@
         }
 
         .console-close {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
             background: rgba(255, 255, 255, 0.06);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
@@ -741,7 +815,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            font-size: 18px;
             color: #ffffff;
             transition: all 0.2s ease;
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -759,10 +833,10 @@
 
         .console-output {
             flex: 1;
-            padding: 18px 20px;
+            padding: 20px 24px;
             overflow-y: auto;
             font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
-            font-size: 13px;
+            font-size: 14px;
             line-height: 1.5;
             background: rgba(16, 16, 16, 0.4);
             -webkit-overflow-scrolling: touch;
@@ -770,9 +844,9 @@
         }
 
         .console-line {
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             word-wrap: break-word;
-            padding: 2px 0;
+            padding: 3px 0;
             opacity: 0.9;
         }
 
@@ -795,75 +869,24 @@
             opacity: 0.7;
         }
 
-        /* Profile Dropdown */
-        .profile-dropdown {
-            position: fixed;
-            top: 68px;
-            right: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 12px 0;
-            box-shadow: 0 16px 64px rgba(0, 0, 0, 0.4);
-            z-index: 1002;
-            min-width: 200px;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .profile-dropdown.active {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .profile-dropdown-item {
-            padding: 14px 20px;
-            color: #ffffff;
-            cursor: pointer;
-            font-size: 14px;
-            border: none;
-            background: none;
-            width: 100%;
-            text-align: left;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-
-        .profile-dropdown-item:hover {
-            background: rgba(255, 255, 255, 0.08);
-            color: #ffffff;
-        }
-
-        .profile-dropdown-separator {
-            height: 1px;
-            background: rgba(255, 255, 255, 0.08);
-            margin: 8px 0;
-        }
-
         /* Desktop Styles */
         @media (min-width: 768px) {
             .header {
                 height: 56px;
-                padding: 0 28px;
+                padding: 16px 24px;
+                left: 88px;
+                right: 88px;
             }
 
             .main-container {
-                margin-top: 56px;
+                margin-top: 72px;
                 flex-direction: row;
             }
 
             .sidebar {
                 position: relative;
                 top: 0;
-                width: 300px;
+                width: 320px;
                 height: 100%;
                 transform: translateX(0);
                 transition: none;
@@ -883,66 +906,62 @@
             }
 
             .mobile-console {
-                height: 320px;
+                height: 360px;
             }
 
             .current-file {
-                font-size: 16px;
+                font-size: 15px;
             }
 
             .console-actions {
-                gap: 12px;
+                gap: 16px;
             }
 
             .console-btn {
-                width: 44px;
-                height: 44px;
+                width: 48px;
+                height: 48px;
             }
 
             .empty-icon {
-                width: 100px;
-                height: 100px;
+                width: 120px;
+                height: 120px;
             }
 
             .mobile-empty-state h3 {
-                font-size: 24px;
+                font-size: 28px;
             }
 
             .mobile-empty-state p {
-                font-size: 16px;
-                max-width: 360px;
+                font-size: 18px;
+                max-width: 440px;
             }
 
             .mobile-empty-state {
-                padding: 40px 28px 120px;
+                padding: 48px 32px 160px;
             }
 
-            /* Desktop edge button positioning */
-            .top-edge-button {
-                top: 16px;
-            }
-
-            .edge-button {
-                top: 76px;
+            /* Desktop positioning adjustments */
+            .save-btn-header {
+                top: 96px;
             }
 
             .console-toggle {
-                top: 136px;
+                top: 164px;
             }
 
-            .profile-dropdown {
-                top: 76px;
+            .user-dropdown {
+                top: 88px;
             }
         }
 
         /* Large screens */
         @media (min-width: 1200px) {
             .sidebar {
-                width: 340px;
+                width: 360px;
             }
 
             .mobile-console {
-                height: 380px;
+                height: 420px;
             }
         }
 
@@ -950,10 +969,10 @@
         .status-indicator {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            border-radius: 10px;
-            font-size: 11px;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -980,8 +999,8 @@
         }
 
         .status-dot {
-            width: 5px;
-            height: 5px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
             background: currentColor;
             animation: pulse 2s infinite;
@@ -1000,8 +1019,8 @@
 
         /* Scrollbars */
         ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+            width: 8px;
+            height: 8px;
         }
 
         ::-webkit-scrollbar-track {
@@ -1010,7 +1029,7 @@
 
         ::-webkit-scrollbar-thumb {
             background: rgba(255, 255, 255, 0.15);
-            border-radius: 3px;
+            border-radius: 4px;
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
         }
@@ -1022,8 +1041,8 @@
         /* Mobile scrollbars */
         @media (max-width: 767px) {
             ::-webkit-scrollbar {
-                width: 2px;
-                height: 2px;
+                width: 3px;
+                height: 3px;
             }
         }
 
@@ -1038,21 +1057,21 @@
             padding: 12px 0;
             box-shadow: 0 16px 64px rgba(0, 0, 0, 0.4);
             z-index: 1000;
-            min-width: 180px;
+            min-width: 200px;
         }
 
         .context-menu-item {
-            padding: 14px 20px;
+            padding: 16px 24px;
             color: #ffffff;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 15px;
             border: none;
             background: none;
             width: 100%;
             text-align: left;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
             font-weight: 500;
             transition: all 0.2s ease;
         }
@@ -1070,7 +1089,7 @@
         .context-menu-separator {
             height: 1px;
             background: rgba(255, 255, 255, 0.08);
-            margin: 10px 0;
+            margin: 12px 0;
         }
 
         /* Spinner animation */
@@ -1096,54 +1115,55 @@
         /* Landscape orientation adjustments */
         @media (orientation: landscape) and (max-height: 500px) {
             .header {
-                height: 44px;
+                height: 40px;
+                margin-top: 4px;
             }
             
             .main-container {
-                margin-top: 44px;
+                margin-top: 52px;
             }
             
             .sidebar {
-                top: 44px;
-                height: calc(100vh - 44px);
+                top: 52px;
+                height: calc(100vh - 52px);
             }
             
             .sidebar-overlay {
-                top: 44px;
+                top: 52px;
             }
             
             .mobile-console {
-                height: 60vh;
+                height: 65vh;
             }
             
             .file-item {
-                padding: 10px 20px;
-                min-height: 40px;
+                padding: 12px 24px;
+                min-height: 44px;
             }
             
             .mobile-tab {
-                padding: 10px 16px;
+                padding: 12px 20px;
             }
 
             .console-actions {
-                gap: 6px;
+                gap: 8px;
             }
 
             .console-btn {
-                width: 36px;
-                height: 36px;
+                width: 40px;
+                height: 40px;
             }
 
-            .top-edge-button {
-                top: 8px;
-            }
-
-            .edge-button {
-                top: 60px;
+            .save-btn-header {
+                top: 80px;
             }
 
             .console-toggle {
-                top: 112px;
+                top: 136px;
+            }
+
+            .user-dropdown {
+                top: 72px;
             }
         }
 
@@ -1161,7 +1181,7 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Minimized Header -->
+        <!-- Minimized Header with Rounded Borders -->
         <header class="header">
             <a href="#" class="logo">
                 <div class="logo-icon">E</div>
@@ -1173,18 +1193,41 @@
             </a>
         </header>
 
-        <!-- Top Edge Positioned Buttons -->
-        <!-- Left: Menu Button -->
-        <button class="top-edge-button glass-button mobile-menu-btn touch-target" id="mobile-menu-btn" title="Menu">
+        <!-- Top Edge Buttons -->
+        <button class="edge-button glass-button mobile-menu-btn touch-target" id="mobile-menu-btn" title="Menu">
             <i data-lucide="menu"></i>
         </button>
         
-        <!-- Right: Profile Button -->
-        <button class="top-edge-button profile-btn touch-target" id="profile-btn" title="Profile">
-            i need
-        </button>
+        <!-- User Profile -->
+        <div class="user-profile touch-target" id="user-profile" title="User Profile">
+            <img src="{{ user.avatar_url or url_for('static', filename='img/default_avatar.png') }}" alt="User Avatar" class="user-avatar">
+        </div>
+
+        <!-- User Dropdown -->
+        <div class="user-dropdown" id="user-dropdown">
+            <div class="user-dropdown-header">
+                <img src="{{ user.avatar_url or url_for('static', filename='img/default_avatar.png') }}" alt="User Avatar" class="user-dropdown-avatar">
+                <div class="user-dropdown-info">
+                    <h3>{{ user.username or 'User' }}</h3>
+                    <p>Developer</p>
+                </div>
+            </div>
+            <a href="{{ url_for('dashboard') if url_for else '#' }}" class="user-dropdown-item">
+                <i data-lucide="layout-dashboard" size="16"></i>
+                Dashboard
+            </a>
+            <a href="https://sycord.com" class="user-dropdown-item">
+                <i data-lucide="external-link" size="16"></i>
+                Sycord.com
+            </a>
+            <div class="user-dropdown-separator"></div>
+            <a href="{{ url_for('logout') if url_for else '#' }}" class="user-dropdown-item">
+                <i data-lucide="log-out" size="16"></i>
+                Logout
+            </a>
+        </div>
         
-        <!-- Right Edge Buttons (Vertical) -->
+        <!-- Action Buttons below user profile -->
         <button class="edge-button glass-button save-btn-header touch-target" id="save-btn-header" disabled title="Save File">
             <i data-lucide="save"></i>
         </button>
@@ -1192,23 +1235,6 @@
         <button class="edge-button glass-button console-toggle touch-target" id="console-toggle" title="Toggle Console">
             <i data-lucide="terminal"></i>
         </button>
-
-        <!-- Profile Dropdown -->
-        <div class="profile-dropdown" id="profile-dropdown">
-            <button class="profile-dropdown-item" id="profile-settings">
-                <i data-lucide="settings" size="16"></i>
-                Settings
-            </button>
-            <button class="profile-dropdown-item" id="profile-account">
-                <i data-lucide="user" size="16"></i>
-                Account
-            </button>
-            <div class="profile-dropdown-separator"></div>
-            <button class="profile-dropdown-item" id="profile-logout">
-                <i data-lucide="log-out" size="16"></i>
-                Logout
-            </button>
-        </div>
 
         <!-- Sidebar Overlay -->
         <div class="sidebar-overlay" id="sidebar-overlay"></div>
@@ -1249,7 +1275,7 @@
                 <div class="mobile-editor-container" id="editor-container">
                     <div class="mobile-empty-state" id="empty-state">
                         <div class="empty-icon">
-                            <i data-lucide="file-text" size="32"></i>
+                            <i data-lucide="file-text" size="36"></i>
                         </div>
                         <h3>Select a file to edit</h3>
                         <p>Choose a file from the sidebar to start editing your code</p>
@@ -1266,7 +1292,7 @@
                         </div>
                     </div>
                     <button class="save-btn glass-button touch-target" id="save-btn" disabled>
-                        <i data-lucide="save" size="14"></i>
+                        <i data-lucide="save" size="16"></i>
                         Save
                     </button>
                 </div>
@@ -1277,25 +1303,25 @@
         <div class="mobile-console" id="mobile-console">
             <div class="console-header">
                 <div class="console-title">
-                    <i data-lucide="terminal" size="18"></i>
+                    <i data-lucide="terminal" size="20"></i>
                     Console
                 </div>
                 <div class="console-actions">
                     <!-- Only show start OR stop button based on state -->
                     <button class="console-btn touch-target" id="start-bot-btn" title="Start Bot">
-                        <i data-lucide="play" size="16"></i>
+                        <i data-lucide="play" size="18"></i>
                     </button>
                     <button class="console-btn touch-target" id="stop-bot-btn" disabled style="display: none;" title="Stop Bot">
-                        <i data-lucide="square" size="14"></i>
+                        <i data-lucide="square" size="16"></i>
                     </button>
                     <button class="console-btn touch-target" id="restart-bot-btn" disabled style="display: none;" title="Restart Bot">
-                        <i data-lucide="rotate-cw" size="14"></i>
+                        <i data-lucide="rotate-cw" size="16"></i>
                     </button>
                     <button class="console-btn touch-target" id="clear-console-btn" title="Clear Console">
-                        <i data-lucide="trash-2" size="14"></i>
+                        <i data-lucide="trash-2" size="16"></i>
                     </button>
                     <button class="console-close touch-target" id="console-close">
-                        <i data-lucide="x" size="18"></i>
+                        <i data-lucide="x" size="20"></i>
                     </button>
                 </div>
             </div>
@@ -1308,16 +1334,16 @@
         <!-- Context Menu -->
         <div class="context-menu" id="context-menu" style="display: none;">
             <button class="context-menu-item" id="rename-file">
-                <i data-lucide="edit-3" size="14"></i>
+                <i data-lucide="edit-3" size="16"></i>
                 Rename
             </button>
             <button class="context-menu-item" id="delete-file">
-                <i data-lucide="trash-2" size="14"></i>
+                <i data-lucide="trash-2" size="16"></i>
                 Delete
             </button>
             <div class="context-menu-separator"></div>
             <button class="context-menu-item" id="download-file">
-                <i data-lucide="download" size="14"></i>
+                <i data-lucide="download" size="16"></i>
                 Download
             </button>
         </div>
@@ -1335,8 +1361,6 @@
             const sidebar = document.getElementById('sidebar');
             const sidebarOverlay = document.getElementById('sidebar-overlay');
             const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-            const profileBtn = document.getElementById('profile-btn');
-            const profileDropdown = document.getElementById('profile-dropdown');
             const fileTree = document.getElementById('file-tree');
             const mobileTabs = document.getElementById('mobile-tabs');
             const tabsWrapper = document.getElementById('tabs-wrapper');
@@ -1353,6 +1377,8 @@
             const botStatus = document.getElementById('bot-status');
             const consoleBotStatus = document.getElementById('console-bot-status');
             const contextMenu = document.getElementById('context-menu');
+            const userProfile = document.getElementById('user-profile');
+            const userDropdown = document.getElementById('user-dropdown');
             
             // Bot control elements
             const startBotBtn = document.getElementById('start-bot-btn');
@@ -1367,44 +1393,18 @@
             let botRunning = false;
             let selectedFile = null;
 
-            // Profile dropdown toggle
-            profileBtn.addEventListener('click', (e) => {
+            // User profile dropdown toggle
+            userProfile.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const isActive = profileDropdown.classList.contains('active');
-                hideAllDropdowns();
-                if (!isActive) {
-                    profileDropdown.classList.add('active');
+                userDropdown.classList.toggle('active');
+            });
+
+            // Close user dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!userProfile.contains(e.target) && !userDropdown.contains(e.target)) {
+                    userDropdown.classList.remove('active');
                 }
             });
-
-            // Profile dropdown actions
-            document.getElementById('profile-settings').addEventListener('click', () => {
-                // Handle settings
-                console.log('Settings clicked');
-                hideAllDropdowns();
-            });
-
-            document.getElementById('profile-account').addEventListener('click', () => {
-                // Handle account
-                console.log('Account clicked');
-                hideAllDropdowns();
-            });
-
-            document.getElementById('profile-logout').addEventListener('click', () => {
-                // Handle logout
-                if (confirm('Are you sure you want to logout?')) {
-                    // i need - logout logic
-                    window.location.href = '/logout';
-                }
-                hideAllDropdowns();
-            });
-
-            function hideAllDropdowns() {
-                profileDropdown.classList.remove('active');
-                contextMenu.style.display = 'none';
-            }
-
-            document.addEventListener('click', hideAllDropdowns);
 
             // Initialize Socket.IO connection
             function initSocket() {
@@ -1553,7 +1553,6 @@
             function showContextMenu(e, filePath) {
                 e.preventDefault();
                 selectedFile = filePath;
-                hideAllDropdowns();
                 contextMenu.style.display = 'block';
                 contextMenu.style.left = `${e.pageX}px`;
                 contextMenu.style.top = `${e.pageY}px`;
@@ -1563,6 +1562,8 @@
                 contextMenu.style.display = 'none';
                 selectedFile = null;
             }
+
+            document.addEventListener('click', hideContextMenu);
 
             // Context menu actions
             document.getElementById('rename-file').addEventListener('click', async () => {
@@ -1828,7 +1829,7 @@
                 closeBtn.className = 'tab-close touch-target';
                 const closeIcon = document.createElement('i');
                 closeIcon.setAttribute('data-lucide', 'x');
-                closeIcon.setAttribute('size', '12');
+                closeIcon.setAttribute('size', '14');
                 closeBtn.appendChild(closeIcon);
                 closeBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
