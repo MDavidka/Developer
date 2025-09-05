@@ -1,9 +1,9 @@
 import unittest
 import os
-from app.app import app, db, User
+from app import app, db, User
 from mongomock import MongoClient
 
-import app.app as main_app
+import app as main_app
 
 class SycordTestCase(unittest.TestCase):
     def setUp(self):

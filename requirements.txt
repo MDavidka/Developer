@@ -6,3 +6,5 @@ Flask-Login
 Flask-SocketIO
 mongomock
 pytest
+python-dotenv==0.19.2
+discord.py>=2.3.0
