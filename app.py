@@ -422,7 +422,7 @@ def create_file(server_index):
         if file_type == "folder":
             os.makedirs(full_path, exist_ok=True)
             db.users.update_one(
-                {"_id": current_user.id, f"servers.{server_index}.server_name": bot_data['server_name']},
+                {"_id": current_user.id, "servers.server_name": bot_data['server_name']},
                 {"$push": {"servers.$.files": {"path": path, "type": "folder"}}}
             )
         else:
@@ -430,7 +430,7 @@ def create_file(server_index):
             with open(full_path, "w", encoding='utf-8') as f:
                 f.write("")
             db.users.update_one(
-                {"_id": current_user.id, f"servers.{server_index}.server_name": bot_data['server_name']},
+                {"_id": current_user.id, "servers.server_name": bot_data['server_name']},
                 {"$push": {"servers.$.files": {"path": path, "type": "file", "content": ""}}}
             )
         return jsonify({"success": True})
@@ -460,13 +460,13 @@ def delete_file(server_index):
             shutil.rmtree(full_path)
             # Remove the folder and all its contents from the database
             db.users.update_one(
-                {"_id": current_user.id, f"servers.{server_index}.server_name": bot_data['server_name']},
+                {"_id": current_user.id, "servers.server_name": bot_data['server_name']},
                 {"$pull": {"servers.$.files": {"path": {"$regex": f"^{path}(/.*)?$"}}}}
             )
         elif os.path.isfile(full_path):
             os.remove(full_path)
             db.users.update_one(
-                {"_id": current_user.id, f"servers.{server_index}.server_name": bot_data['server_name']},
+                {"_id": current_user.id, "servers.server_name": bot_data['server_name']},
                 {"$pull": {"servers.$.files": {"path": path}}}
             )
         else:
@@ -590,7 +590,8 @@ def start_bot(server_index):
     socketio.emit('log', {'data': f'✅ Token validation passed.'}, room=bot_id)
 
     # Check if bot_template.py exists
-    if not os.path.isfile("bot_template.py"):
+    bot_template_path = os.path.abspath("bot_template.py")
+    if not os.path.isfile(bot_template_path):
         error_msg = '❌ Bot template file not found: bot_template.py'
         socketio.emit('log', {'data': error_msg}, room=bot_id)
         return jsonify({"error": "Bot template not found"}), 500
@@ -600,7 +601,7 @@ def start_bot(server_index):
 
     socketio.emit('log', {'data': f'✅ Pre-flight checks passed'}, room=bot_id)
     
-    startup_command = [sys.executable, "-u", "bot_template.py"]
+    startup_command = [sys.executable, "-u", bot_template_path]
     socketio.emit('log', {'data': f'🚀 Executing: {" ".join(startup_command)}'}, room=bot_id)
 
     try:
