@@ -80,15 +80,15 @@
             box-shadow: none !important;
         }
 
-        /* Normalized Mobile Header and Button Sizing with padding */
+        /* Normalized Mobile Header with padding */
         .header {
             background: rgba(255, 255, 255, 0.015);
             backdrop-filter: blur(35px) saturate(1.4);
             -webkit-backdrop-filter: blur(35px) saturate(1.4);
             border: 1px solid rgba(255, 255, 255, 0.04);
             border-radius: 0 0 20px 20px;
-            padding: 16px 24px;
-            height: 60px;
+            padding: 14px 24px; /* Increased padding */
+            height: 56px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -150,7 +150,7 @@
             margin: 0 6px;
         }
 
-        /* Normalized Edge Buttons - Same size as header */
+        /* Normalized Edge Buttons */
         .edge-button {
             position: fixed;
             width: 56px;
@@ -371,17 +371,17 @@
         .main-container {
             flex: 1;
             display: flex;
-            margin-top: 76px;
+            margin-top: 72px;
             overflow: hidden;
         }
 
-        /* Enhanced Sidebar with padding */
+        /* Enhanced Sidebar */
         .sidebar {
             position: fixed;
-            top: 76px;
+            top: 72px;
             left: 0;
             width: 100%;
-            height: calc(100vh - 76px);
+            height: calc(100vh - 72px);
             background: rgba(255, 255, 255, 0.008);
             backdrop-filter: blur(30px) saturate(1.3);
             -webkit-backdrop-filter: blur(30px) saturate(1.3);
@@ -400,7 +400,7 @@
 
         .sidebar-overlay {
             position: fixed;
-            top: 76px;
+            top: 72px;
             left: 0;
             right: 0;
             bottom: 0;
@@ -419,7 +419,7 @@
         }
 
         .sidebar-header {
-            padding: 32px 28px 28px;
+            padding: 32px 28px 28px; /* Increased padding */
             border-bottom: 1px solid rgba(255, 255, 255, 0.04);
             background: rgba(255, 255, 255, 0.01);
             backdrop-filter: blur(20px);
@@ -459,13 +459,13 @@
         .file-tree {
             flex: 1;
             overflow-y: auto;
-            padding: 20px 0;
+            padding: 20px 0; /* Increased padding */
         }
 
         .file-item {
             display: flex;
             align-items: center;
-            padding: 18px 28px;
+            padding: 20px 28px; /* Increased padding */
             cursor: pointer;
             font-size: 16px;
             border: none;
@@ -512,6 +512,133 @@
             flex-direction: column;
             width: 100%;
             overflow: hidden;
+            position: relative;
+        }
+
+        /* AI Chat Interface */
+        .ai-chat-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            z-index: 500;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .ai-chat-container.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translateY(-20px);
+        }
+
+        /* AI Suggestions */
+        .ai-suggestions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .suggestion-chip {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        .suggestion-chip:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .suggestion-chip:active {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(0);
+        }
+
+        /* AI Input */
+        .ai-input-container {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(30px) saturate(1.3);
+            -webkit-backdrop-filter: blur(30px) saturate(1.3);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            padding: 12px 16px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03),
+                        0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .ai-input {
+            flex: 1;
+            background: none;
+            border: none;
+            outline: none;
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 500;
+            placeholder-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .ai-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .ai-send-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .ai-send-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .ai-send-btn:active {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(0);
+        }
+
+        .ai-send-btn:disabled {
+            background: rgba(255, 255, 255, 0.02);
+            border-color: rgba(255, 255, 255, 0.04);
+            color: rgba(255, 255, 255, 0.3);
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
         }
 
         /* Mobile Tabs with padding */
@@ -526,8 +653,8 @@
             white-space: nowrap;
             -webkit-overflow-scrolling: touch;
             display: none;
-            height: 56px;
-            padding: 0 4px;
+            height: 52px;
+            padding: 0 8px; /* Added padding */
         }
 
         .mobile-tabs::-webkit-scrollbar {
@@ -543,7 +670,7 @@
         .mobile-tab {
             display: inline-flex;
             align-items: center;
-            padding: 18px 32px;
+            padding: 16px 32px; /* Increased padding */
             border: none;
             background: none;
             cursor: pointer;
@@ -651,16 +778,17 @@
             background: rgba(255, 255, 255, 0.12) !important;
         }
 
-        /* Empty State - Moved down by 30% */
+        /* Empty State - Moved down by 20% */
         .mobile-empty-state {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
+            justify-content: center;
             text-align: center;
-            padding: calc(48px + 30vh) 32px 120px;
+            padding: 48px 32px 120px;
             min-height: 0;
+            transform: translateY(20%); /* Moved down by 20% */
         }
 
         .empty-icon {
@@ -769,95 +897,6 @@
             transform: translateY(-2px);
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05),
                         0 8px 24px rgba(0, 0, 0, 0.15);
-        }
-
-        /* Chat Input Section */
-        .chat-input-section {
-            padding: 20px 24px;
-            border-top: 1px solid rgba(255, 255, 255, 0.04);
-            background: rgba(255, 255, 255, 0.01);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-        }
-
-        .chat-input-container {
-            display: flex;
-            gap: 12px;
-            align-items: flex-end;
-            max-width: 100%;
-        }
-
-        .chat-input {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            padding: 14px 18px;
-            color: #ffffff;
-            font-size: 15px;
-            font-family: inherit;
-            resize: none;
-            min-height: 48px;
-            max-height: 120px;
-            overflow-y: auto;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
-        }
-
-        .chat-input::placeholder {
-            color: rgba(255, 255, 255, 0.4);
-        }
-
-        .chat-input:focus {
-            outline: none;
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.15);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04),
-                        0 0 0 3px rgba(255, 255, 255, 0.05);
-        }
-
-        .send-btn {
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.9);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
-        }
-
-        .send-btn:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.15);
-            color: #ffffff;
-            transform: translateY(-1px);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04),
-                        0 4px 16px rgba(0, 0, 0, 0.15);
-        }
-
-        .send-btn:active {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateY(0);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
-        }
-
-        .send-btn:disabled {
-            background: rgba(255, 255, 255, 0.02);
-            border-color: rgba(255, 255, 255, 0.04);
-            color: rgba(255, 255, 255, 0.3);
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
         }
 
         /* Enhanced Mobile Console */
@@ -989,13 +1028,6 @@
             transform: scale(0.95);
         }
 
-        .console-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
         .console-output {
             flex: 1;
             padding: 20px 24px;
@@ -1039,8 +1071,8 @@
         /* Desktop Styles */
         @media (min-width: 768px) {
             .header {
-                height: 68px;
-                padding: 18px 28px;
+                height: 64px;
+                padding: 18px 28px; /* Increased padding */
                 left: calc(16px + 56px + 16px);
                 right: calc(16px + 56px + 16px);
                 border-radius: 0 0 24px 24px;
@@ -1057,7 +1089,7 @@
             }
 
             .main-container {
-                margin-top: 84px;
+                margin-top: 80px;
                 flex-direction: row;
             }
 
@@ -1081,12 +1113,7 @@
 
             .mobile-tabs {
                 display: flex;
-                height: 60px;
-                padding: 0 8px;
-            }
-
-            .mobile-tab {
-                padding: 20px 36px;
+                padding: 0 12px; /* Increased padding for desktop */
             }
 
             .mobile-console {
@@ -1117,7 +1144,7 @@
             }
 
             .mobile-empty-state {
-                padding: calc(48px + 20vh) 32px 160px;
+                padding: 48px 32px 160px;
             }
 
             /* Desktop symmetrical positioning */
@@ -1141,9 +1168,15 @@
                 transform: none;
             }
 
-            .chat-input-container {
-                max-width: 800px;
-                margin: 0 auto;
+            /* AI Chat responsive */
+            .ai-chat-container {
+                top: 30px;
+                left: 30px;
+                right: 30px;
+            }
+
+            .ai-suggestions {
+                justify-content: flex-start;
             }
         }
 
@@ -1309,22 +1342,22 @@
         /* Landscape orientation adjustments */
         @media (orientation: landscape) and (max-height: 500px) {
             .header {
-                height: 52px;
+                height: 48px;
                 margin-top: 4px;
-                padding: 14px 20px;
+                padding: 12px 20px;
             }
             
             .main-container {
-                margin-top: 64px;
+                margin-top: 60px;
             }
             
             .sidebar {
-                top: 64px;
-                height: calc(100vh - 64px);
+                top: 60px;
+                height: calc(100vh - 60px);
             }
             
             .sidebar-overlay {
-                top: 64px;
+                top: 60px;
             }
             
             .mobile-console {
@@ -1361,8 +1394,10 @@
                 top: calc(16px + 56px + 8px);
             }
 
-            .mobile-empty-state {
-                padding: calc(24px + 25vh) 32px 80px;
+            .ai-chat-container {
+                top: 15px;
+                left: 15px;
+                right: 15px;
             }
         }
 
@@ -1380,7 +1415,7 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Enhanced Header with padding -->
+        <!-- Normalized Header -->
         <header class="header">
             <a href="#" class="logo">
                 <div class="logo-icon">E</div>
@@ -1440,7 +1475,7 @@
 
         <!-- Main Container -->
         <div class="main-container">
-            <!-- Sidebar with enhanced padding -->
+            <!-- Sidebar -->
             <aside class="sidebar" id="sidebar">
                 <div class="sidebar-header">
                     <div class="sidebar-title">
@@ -1463,7 +1498,25 @@
 
             <!-- Content Area -->
             <main class="content-area">
-                <!-- Mobile Tabs with enhanced padding -->
+                <!-- AI Chat Interface -->
+                <div class="ai-chat-container" id="ai-chat-container">
+                    <!-- AI Suggestions -->
+                    <div class="ai-suggestions">
+                        <button class="suggestion-chip" data-suggestion="fix code">fix code</button>
+                        <button class="suggestion-chip" data-suggestion="add a function">add a function</button>
+                        <button class="suggestion-chip" data-suggestion="clear up">clear up</button>
+                    </div>
+                    
+                    <!-- AI Input -->
+                    <div class="ai-input-container">
+                        <input type="text" class="ai-input" id="ai-input" placeholder="Ask AI to help with your code...">
+                        <button class="ai-send-btn" id="ai-send-btn" title="Send">
+                            <i data-lucide="send" size="16"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mobile Tabs -->
                 <div class="mobile-tabs" id="mobile-tabs">
                     <div class="tabs-wrapper" id="tabs-wrapper">
                         <!-- Tabs will be populated here -->
@@ -1472,7 +1525,6 @@
 
                 <!-- Editor -->
                 <div class="mobile-editor-container" id="editor-container">
-                    <!-- Empty State moved down by 30% -->
                     <div class="mobile-empty-state" id="empty-state">
                         <div class="empty-icon">
                             <i data-lucide="file-text" size="28"></i>
@@ -1499,7 +1551,7 @@
             </main>
         </div>
 
-        <!-- Enhanced Mobile Console with Chat Input -->
+        <!-- Mobile Console -->
         <div class="mobile-console" id="mobile-console">
             <div class="console-header">
                 <div class="console-title">
@@ -1525,25 +1577,9 @@
                     </button>
                 </div>
             </div>
-            <div class="console-content">
-                <div class="console-output" id="console-output">
-                    <div class="console-line">Welcome to the console...</div>
-                    <div class="console-line">Bot status: <span id="console-bot-status">Stopped</span></div>
-                </div>
-                <!-- Chat Input Section -->
-                <div class="chat-input-section">
-                    <div class="chat-input-container">
-                        <textarea 
-                            class="chat-input touch-target" 
-                            id="chat-input" 
-                            placeholder="Type your message..."
-                            rows="1"
-                        ></textarea>
-                        <button class="send-btn touch-target" id="send-btn" title="Send Message">
-                            <i data-lucide="send" size="18"></i>
-                        </button>
-                    </div>
-                </div>
+            <div class="console-output" id="console-output">
+                <div class="console-line">Welcome to the console...</div>
+                <div class="console-line">Bot status: <span id="console-bot-status">Stopped</span></div>
             </div>
         </div>
     </div>
@@ -1558,20 +1594,23 @@
         const sidebarOverlay = document.getElementById('sidebar-overlay');
         const saveBtnHeader = document.getElementById('save-btn-header');
         const consoleToggle = document.getElementById('console-toggle');
+        const aiChatContainer = document.getElementById('ai-chat-container');
 
         // Mobile menu toggle with button hiding
         mobileMenuBtn.addEventListener('click', () => {
             const isOpen = sidebar.classList.toggle('open');
             sidebarOverlay.classList.toggle('active');
             
-            // Hide/show buttons when sidebar opens/closes on mobile
+            // Hide/show buttons and AI chat when sidebar opens/closes on mobile
             if (window.innerWidth < 768) {
                 if (isOpen) {
                     saveBtnHeader.classList.add('hidden');
                     consoleToggle.classList.add('hidden');
+                    aiChatContainer.classList.add('hidden');
                 } else {
                     saveBtnHeader.classList.remove('hidden');
                     consoleToggle.classList.remove('hidden');
+                    aiChatContainer.classList.remove('hidden');
                 }
             }
         });
@@ -1580,24 +1619,27 @@
             sidebar.classList.remove('open');
             sidebarOverlay.classList.remove('active');
             
-            // Show buttons when sidebar closes
+            // Show buttons and AI chat when sidebar closes
             if (window.innerWidth < 768) {
                 saveBtnHeader.classList.remove('hidden');
                 consoleToggle.classList.remove('hidden');
+                aiChatContainer.classList.remove('hidden');
             }
         });
 
         // Handle window resize
         window.addEventListener('resize', () => {
             if (window.innerWidth >= 768) {
-                // Desktop: always show buttons
+                // Desktop: always show buttons and AI chat
                 saveBtnHeader.classList.remove('hidden');
                 consoleToggle.classList.remove('hidden');
+                aiChatContainer.classList.remove('hidden');
             } else {
                 // Mobile: hide if sidebar is open
                 if (sidebar.classList.contains('open')) {
                     saveBtnHeader.classList.add('hidden');
                     consoleToggle.classList.add('hidden');
+                    aiChatContainer.classList.add('hidden');
                 }
             }
         });
@@ -1644,60 +1686,46 @@
             consoleOutput.innerHTML = '<div class="console-line">Console cleared...</div>';
         });
 
-        // Chat input functionality
-        const chatInput = document.getElementById('chat-input');
-        const sendBtn = document.getElementById('send-btn');
+        // AI Chat functionality
+        const aiInput = document.getElementById('ai-input');
+        const aiSendBtn = document.getElementById('ai-send-btn');
+        const suggestionChips = document.querySelectorAll('.suggestion-chip');
 
-        // Auto-resize textarea
-        chatInput.addEventListener('input', function() {
-            this.style.height = '48px';
-            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
-            
-            // Enable/disable send button based on input
-            sendBtn.disabled = !this.value.trim();
+        // Suggestion chips
+        suggestionChips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                const suggestion = chip.getAttribute('data-suggestion');
+                aiInput.value = suggestion;
+                aiInput.focus();
+            });
         });
 
-        // Send message on button click
-        sendBtn.addEventListener('click', () => {
-            const message = chatInput.value.trim();
+        // AI input and send
+        aiInput.addEventListener('input', () => {
+            aiSendBtn.disabled = aiInput.value.trim() === '';
+        });
+
+        aiInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !aiSendBtn.disabled) {
+                sendAIMessage();
+            }
+        });
+
+        aiSendBtn.addEventListener('click', () => {
+            if (!aiSendBtn.disabled) {
+                sendAIMessage();
+            }
+        });
+
+        function sendAIMessage() {
+            const message = aiInput.value.trim();
             if (message) {
-                // Add message to console (placeholder functionality)
-                const messageDiv = document.createElement('div');
-                messageDiv.className = 'console-line';
-                messageDiv.textContent = `> ${message}`;
-                consoleOutput.appendChild(messageDiv);
-                
-                // Clear input
-                chatInput.value = '';
-                chatInput.style.height = '48px';
-                sendBtn.disabled = true;
-                
-                // Scroll to bottom
-                consoleOutput.scrollTop = consoleOutput.scrollHeight;
-                
-                // Placeholder response (you can remove this)
-                setTimeout(() => {
-                    const responseDiv = document.createElement('div');
-                    responseDiv.className = 'console-line info';
-                    responseDiv.textContent = 'Message received (placeholder)';
-                    consoleOutput.appendChild(responseDiv);
-                    consoleOutput.scrollTop = consoleOutput.scrollHeight;
-                }, 500);
+                console.log('AI Message:', message);
+                // TODO: Implement AI message sending
+                aiInput.value = '';
+                aiSendBtn.disabled = true;
             }
-        });
-
-        // Send message on Enter (Shift+Enter for new line)
-        chatInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                if (!sendBtn.disabled) {
-                    sendBtn.click();
-                }
-            }
-        });
-
-        // Initialize send button state
-        sendBtn.disabled = true;
+        }
 
         // Save buttons
         const saveBtn = document.getElementById('save-btn');
@@ -1709,6 +1737,7 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             console.log('Code Editor initialized');
+            aiSendBtn.disabled = true; // Start with disabled send button
         });
     </script>
 </body>
