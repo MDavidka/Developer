@@ -371,17 +371,17 @@
         .main-container {
             flex: 1;
             display: flex;
-            margin-top: 72px;
+            margin-top: 96px; /* Increased from 72px to add more padding */
             overflow: hidden;
         }
 
         /* Enhanced Sidebar */
         .sidebar {
             position: fixed;
-            top: 72px;
+            top: 96px; /* Adjusted to match main-container */
             left: 0;
             width: 100%;
-            height: calc(100vh - 72px);
+            height: calc(100vh - 96px); /* Adjusted height */
             background: rgba(255, 255, 255, 0.008);
             backdrop-filter: blur(30px) saturate(1.3);
             -webkit-backdrop-filter: blur(30px) saturate(1.3);
@@ -400,7 +400,7 @@
 
         .sidebar-overlay {
             position: fixed;
-            top: 72px;
+            top: 96px; /* Adjusted to match sidebar */
             left: 0;
             right: 0;
             bottom: 0;
@@ -652,7 +652,7 @@
             background: rgba(255, 255, 255, 0.12) !important;
         }
 
-        /* Empty State - Moved down by 20% */
+        /* Empty State - Moved down by 26% total (20% + 6%) */
         .mobile-empty-state {
             flex: 1;
             display: flex;
@@ -662,7 +662,7 @@
             text-align: center;
             padding: 48px 32px 120px;
             min-height: 0;
-            transform: translateY(20%); /* Moved down by 20% */
+            transform: translateY(26%); /* Increased from 20% to 26% */
         }
 
         .empty-icon {
@@ -695,7 +695,7 @@
             max-width: 280px;
         }
 
-        /* AI Chat Interface at Bottom */
+        /* AI Chat Interface at Bottom - Transparent Input */
         .ai-chat-container {
             position: fixed;
             bottom: 0;
@@ -760,18 +760,15 @@
             transform: translateY(0);
         }
 
-        /* AI Input */
+        /* AI Input - Transparent Background */
         .ai-input-container {
             display: flex;
             gap: 12px;
             align-items: center;
-            background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(25px) saturate(1.2);
-            -webkit-backdrop-filter: blur(25px) saturate(1.2);
-            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: transparent; /* Removed background */
+            border: 1px solid rgba(255, 255, 255, 0.08); /* Only border */
             border-radius: 18px;
             padding: 10px 14px;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
         }
 
         .ai-input {
@@ -1096,7 +1093,7 @@
             }
 
             .main-container {
-                margin-top: 80px;
+                margin-top: 104px; /* Increased from 80px for more padding */
                 flex-direction: row;
             }
 
@@ -1385,16 +1382,16 @@
             }
             
             .main-container {
-                margin-top: 60px;
+                margin-top: 84px; /* Adjusted for increased padding */
             }
             
             .sidebar {
-                top: 60px;
-                height: calc(100vh - 60px);
+                top: 84px;
+                height: calc(100vh - 84px);
             }
             
             .sidebar-overlay {
-                top: 60px;
+                top: 84px;
             }
             
             .mobile-console {
@@ -1573,7 +1570,7 @@
             </main>
         </div>
 
-        <!-- AI Chat Interface at Bottom -->
+        <!-- AI Chat Interface at Bottom - Transparent Input -->
         <div class="ai-chat-container" id="ai-chat-container">
             <!-- AI Suggestions -->
             <div class="ai-suggestions">
