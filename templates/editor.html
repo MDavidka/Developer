@@ -80,15 +80,15 @@
             box-shadow: none !important;
         }
 
-        /* Perfect Header Symmetry */
+        /* Normalized Mobile Header and Button Sizing */
         .header {
             background: rgba(255, 255, 255, 0.015);
             backdrop-filter: blur(35px) saturate(1.4);
             -webkit-backdrop-filter: blur(35px) saturate(1.4);
             border: 1px solid rgba(255, 255, 255, 0.04);
-            border-radius: 0 0 24px 24px;
+            border-radius: 0 0 20px 20px;
             padding: 12px 20px;
-            height: 48px;
+            height: 56px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -113,17 +113,17 @@
         }
 
         .logo-icon {
-            width: 28px;
-            height: 28px;
+            width: 32px;
+            height: 32px;
             background: rgba(255, 255, 255, 0.04);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border-radius: 8px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #ffffff;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 700;
             border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
@@ -132,7 +132,7 @@
         /* Updated file display */
         .current-file {
             color: rgba(255, 255, 255, 0.7);
-            font-size: 14px;
+            font-size: 15px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -150,7 +150,7 @@
             margin: 0 6px;
         }
 
-        /* Perfect Button Symmetry - Reduced Light */
+        /* Normalized Edge Buttons - Same size as header */
         .edge-button {
             position: fixed;
             width: 56px;
@@ -206,13 +206,21 @@
                         0 8px 24px rgba(0, 0, 0, 0.2);
         }
 
-        /* Left Side - Menu button only */
+        /* Hide buttons when sidebar is open */
+        .edge-button.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translateY(-10px);
+        }
+
+        /* Left Side - Menu button */
         .mobile-menu-btn {
             left: 16px;
             top: 16px;
         }
 
-        /* Right Side - User Profile and Action Buttons (symmetrical) */
+        /* Right Side - User Profile and Action Buttons */
         .user-profile {
             position: fixed;
             top: 16px;
@@ -341,7 +349,7 @@
             margin: 8px 0;
         }
 
-        /* Right side action buttons - positioned symmetrically below user profile */
+        /* Right side action buttons - positioned symmetrically */
         .save-btn-header {
             right: 16px;
             top: calc(16px + 56px + 16px);
@@ -363,17 +371,17 @@
         .main-container {
             flex: 1;
             display: flex;
-            margin-top: 64px;
+            margin-top: 72px;
             overflow: hidden;
         }
 
         /* Enhanced Sidebar */
         .sidebar {
             position: fixed;
-            top: 64px;
+            top: 72px;
             left: 0;
             width: 100%;
-            height: calc(100vh - 64px);
+            height: calc(100vh - 72px);
             background: rgba(255, 255, 255, 0.008);
             backdrop-filter: blur(30px) saturate(1.3);
             -webkit-backdrop-filter: blur(30px) saturate(1.3);
@@ -392,7 +400,7 @@
 
         .sidebar-overlay {
             position: fixed;
-            top: 64px;
+            top: 72px;
             left: 0;
             right: 0;
             bottom: 0;
@@ -642,7 +650,7 @@
             background: rgba(255, 255, 255, 0.12) !important;
         }
 
-        /* Empty State - Moved down slightly */
+        /* Empty State */
         .mobile-empty-state {
             flex: 1;
             display: flex;
@@ -655,33 +663,33 @@
         }
 
         .empty-icon {
-            width: 96px;
-            height: 96px;
+            width: 80px;
+            height: 80px;
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(25px) saturate(1.2);
             -webkit-backdrop-filter: blur(25px) saturate(1.2);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 24px;
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 32px;
+            margin-bottom: 24px;
             color: rgba(255, 255, 255, 0.6);
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
         }
 
         .mobile-empty-state h3 {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 600;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             color: #ffffff;
         }
 
         .mobile-empty-state p {
             color: rgba(255, 255, 255, 0.6);
-            font-size: 17px;
+            font-size: 15px;
             line-height: 1.5;
-            max-width: 320px;
+            max-width: 280px;
         }
 
         /* Enhanced Status Bar */
@@ -934,14 +942,25 @@
         /* Desktop Styles */
         @media (min-width: 768px) {
             .header {
-                height: 56px;
+                height: 64px;
                 padding: 16px 24px;
                 left: calc(16px + 56px + 16px);
                 right: calc(16px + 56px + 16px);
+                border-radius: 0 0 24px 24px;
+            }
+
+            .logo-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+            }
+
+            .current-file {
+                font-size: 16px;
             }
 
             .main-container {
-                margin-top: 72px;
+                margin-top: 80px;
                 flex-direction: row;
             }
 
@@ -969,10 +988,6 @@
 
             .mobile-console {
                 height: 360px;
-            }
-
-            .current-file {
-                font-size: 15px;
             }
 
             .console-actions {
@@ -1013,6 +1028,14 @@
 
             .user-dropdown {
                 top: calc(16px + 56px + 16px);
+            }
+
+            /* Don't hide buttons on desktop */
+            .edge-button.hidden {
+                opacity: 1;
+                visibility: visible;
+                pointer-events: auto;
+                transform: none;
             }
         }
 
@@ -1178,21 +1201,21 @@
         /* Landscape orientation adjustments */
         @media (orientation: landscape) and (max-height: 500px) {
             .header {
-                height: 40px;
+                height: 48px;
                 margin-top: 4px;
             }
             
             .main-container {
-                margin-top: 52px;
+                margin-top: 60px;
             }
             
             .sidebar {
-                top: 52px;
-                height: calc(100vh - 52px);
+                top: 60px;
+                height: calc(100vh - 60px);
             }
             
             .sidebar-overlay {
-                top: 52px;
+                top: 60px;
             }
             
             .mobile-console {
@@ -1218,15 +1241,15 @@
             }
 
             .save-btn-header {
-                top: calc(16px + 40px + 16px);
+                top: calc(16px + 56px + 8px);
             }
 
             .console-toggle {
-                top: calc(16px + 40px + 16px + 40px + 16px);
+                top: calc(16px + 56px + 8px + 56px + 8px);
             }
 
             .user-dropdown {
-                top: calc(16px + 40px + 16px);
+                top: calc(16px + 56px + 8px);
             }
         }
 
@@ -1244,7 +1267,7 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Symmetrical Header with Rounded Borders -->
+        <!-- Normalized Header -->
         <header class="header">
             <a href="#" class="logo">
                 <div class="logo-icon">E</div>
@@ -1338,7 +1361,7 @@
                 <div class="mobile-editor-container" id="editor-container">
                     <div class="mobile-empty-state" id="empty-state">
                         <div class="empty-icon">
-                            <i data-lucide="file-text" size="36"></i>
+                            <i data-lucide="file-text" size="28"></i>
                         </div>
                         <h3>Select a file to edit</h3>
                         <p>Choose a file from the sidebar to start editing your code</p>
@@ -1399,19 +1422,54 @@
         // Initialize Lucide icons
         lucide.createIcons();
 
-        // Mobile menu toggle
+        // Get elements
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
         const sidebar = document.getElementById('sidebar');
         const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const saveBtnHeader = document.getElementById('save-btn-header');
+        const consoleToggle = document.getElementById('console-toggle');
 
+        // Mobile menu toggle with button hiding
         mobileMenuBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('open');
+            const isOpen = sidebar.classList.toggle('open');
             sidebarOverlay.classList.toggle('active');
+            
+            // Hide/show buttons when sidebar opens/closes on mobile
+            if (window.innerWidth < 768) {
+                if (isOpen) {
+                    saveBtnHeader.classList.add('hidden');
+                    consoleToggle.classList.add('hidden');
+                } else {
+                    saveBtnHeader.classList.remove('hidden');
+                    consoleToggle.classList.remove('hidden');
+                }
+            }
         });
 
         sidebarOverlay.addEventListener('click', () => {
             sidebar.classList.remove('open');
             sidebarOverlay.classList.remove('active');
+            
+            // Show buttons when sidebar closes
+            if (window.innerWidth < 768) {
+                saveBtnHeader.classList.remove('hidden');
+                consoleToggle.classList.remove('hidden');
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                // Desktop: always show buttons
+                saveBtnHeader.classList.remove('hidden');
+                consoleToggle.classList.remove('hidden');
+            } else {
+                // Mobile: hide if sidebar is open
+                if (sidebar.classList.contains('open')) {
+                    saveBtnHeader.classList.add('hidden');
+                    consoleToggle.classList.add('hidden');
+                }
+            }
         });
 
         // User profile dropdown
@@ -1432,7 +1490,6 @@
         });
 
         // Console toggle
-        const consoleToggle = document.getElementById('console-toggle');
         const mobileConsole = document.getElementById('mobile-console');
         const consoleClose = document.getElementById('console-close');
 
@@ -1459,7 +1516,6 @@
 
         // Save buttons
         const saveBtn = document.getElementById('save-btn');
-        const saveBtnHeader = document.getElementById('save-btn-header');
 
         // File operations placeholder
         const newFileBtn = document.getElementById('new-file-btn');
@@ -1467,7 +1523,6 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            // Add any initialization code here
             console.log('Code Editor initialized');
         });
     </script>
