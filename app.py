@@ -820,7 +820,7 @@ def ai_edit(server_index):
         return jsonify({"error": "AI service is not configured."}), 500
 
     genai.configure(api_key=google_api_key)
-    model = genai.GenerativeModel('gemini-pro')
+    model = genai.GenerativeModel('gemini-1.5-flash-latest')
 
     # Get the bot's data
     user_data = db.users.find_one({"_id": current_user.id})
