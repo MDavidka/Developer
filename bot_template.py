@@ -1,4 +1,5 @@
 import os
+print("Executing bot_template.py")
 import sys
 import traceback
 import discord
@@ -23,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 logger.info("🚀 Starting Discord Bot...")
 logger.info(f"Python version: {sys.version}")
+logger.info(f"BOT_TOKEN value: {BOT_TOKEN}")
 
 # Validate token
 if not BOT_TOKEN:

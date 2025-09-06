@@ -599,6 +599,10 @@ def start_bot(server_index):
     bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
     logger.info(f"Bot workspace directory: {os.path.abspath(bot_dir)}")
 
+    main_py_path = os.path.join(bot_dir, "main.py")
+    logger.info(f"Executing script: {os.path.abspath(main_py_path)}")
+
+
     socketio.emit('log', {'data': f'🔄 Starting bot {bot_id}...'}, room=bot_id)
 
     # Pre-flight checks
