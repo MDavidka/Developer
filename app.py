@@ -861,8 +861,20 @@ Please provide the updated code for the files that need to be changed. Your resp
         # Call the Google AI API
         response = model.generate_content(ai_prompt)
 
+        # Log the raw response for debugging
+        logger.info(f"AI response: {response.text}")
+
+        # Extract the JSON from the response
+        text_response = response.text
+        if '```json' in text_response:
+            text_response = text_response.split('```json')[1].split('```')[0]
+
         # Parse the AI's response
-        edited_files = json.loads(response.text)
+        try:
+            edited_files = json.loads(text_response)
+        except json.JSONDecodeError:
+            logger.error("Failed to decode JSON from AI response.")
+            return jsonify({"error": "The AI returned an invalid response. Please try again."}), 500
 
         # Apply the changes
         for filepath, new_content in edited_files.items():
