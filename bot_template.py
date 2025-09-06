@@ -1,5 +1,5 @@
 import os
-print("Executing bot_template.py")
+print("Starting Discord Bot from workspace...")
 import sys
 import traceback
 import discord
