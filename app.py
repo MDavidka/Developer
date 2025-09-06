@@ -703,11 +703,6 @@ def stop_bot(server_index):
 
     return jsonify({"success": True})
 
-    except Exception as e:
-        error_msg = f'💥 Error stopping bot: {str(e)}'
-        socketio.emit('log', {'data': error_msg}, room=bot_id)
-        return jsonify({"error": f"Error stopping bot: {str(e)}"}), 500
-
 @app.route("/api/server/<int:server_index>/status", methods=["GET"])
 @login_required
 def bot_status(server_index):
