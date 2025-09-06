@@ -387,20 +387,28 @@
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background: #ff8800;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 0 8px rgba(255, 136, 0, 0.6);
+            background: #808080;
+            border: 2px solid #101010;
+            box-shadow: 0 0 8px rgba(128, 128, 128, 0.6);
             transition: all 0.3s ease;
         }
 
         .console-status-dot.running {
-            background: #00ff00;
-            box-shadow: 0 0 8px rgba(0, 255, 0, 0.6);
+            background: #00B300;
+            box-shadow: 0 0 8px rgba(0, 179, 0, 0.6);
         }
 
         .console-status-dot.offline {
-            background: rgba(255, 255, 255, 0.3);
+            background: #808080;
             box-shadow: none;
+        }
+
+        .pause-icon {
+            display: none;
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            color: #ffffff;
         }
 
         /* Editor Mode and File Editing State */
@@ -1368,14 +1376,14 @@
 
         /* AI Loading Overlay */
         .ai-loading-overlay {
-            position: fixed;
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
             z-index: 1000;
             display: none;
             justify-content: center;
@@ -1385,12 +1393,12 @@
         }
 
         .ai-loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-top: 2px solid #ffffff;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
+            width: 30px;
+            height: 30px;
+            animation: spin 0.8s linear infinite;
         }
 
         @keyframes spin {
@@ -1405,10 +1413,6 @@
     </style>
 </head>
 <body>
-    <div id="ai-loading-overlay" class="ai-loading-overlay">
-        <div class="ai-loader"></div>
-        <div class="ai-timer" id="ai-timer">0s</div>
-    </div>
     <div class="app-container">
         <!-- Enhanced Mobile Header -->
         <header class="header">
@@ -1448,6 +1452,7 @@
                 <button class="console-toggle" onclick="toggleConsole()">
                     <i data-lucide="terminal"></i>
                     <div class="console-status-dot" id="consoleStatusDot"></div>
+                    <i data-lucide="pause-circle" class="pause-icon" id="pauseIcon"></i>
                 </button>
             </div>
         </div>
@@ -1506,7 +1511,11 @@
                 </div>
 
                 <!-- Mobile Editor Container -->
-                <div class="mobile-editor-container">
+                <div class="mobile-editor-container" id="mobile-editor-container">
+                    <div id="ai-loading-overlay" class="ai-loading-overlay">
+                        <div class="ai-loader"></div>
+                        <div class="ai-timer" id="ai-timer">0s</div>
+                    </div>
                     <!-- Empty State -->
                     <div class="mobile-empty-state" id="emptyState">
                         <div class="empty-icon">
@@ -1720,12 +1729,16 @@
         function updateConsoleStatus(status) {
             consoleStatus = status;
             const dot = document.getElementById('consoleStatusDot');
+            const pauseIcon = document.getElementById('pauseIcon');
             
             dot.className = 'console-status-dot';
+            pauseIcon.style.display = 'none';
+
             if (status === 'running') {
                 dot.classList.add('running');
             } else if (status === 'stopped') {
                 dot.classList.add('offline');
+                pauseIcon.style.display = 'block';
             }
         }
 
@@ -1907,9 +1920,11 @@
                 console.log('Sending AI prompt:', prompt);
                 input.value = '';
 
-                // Show loading overlay
+                // Show loading overlay and disable buttons
                 const overlay = document.getElementById('ai-loading-overlay');
                 overlay.style.display = 'flex';
+                document.querySelectorAll('button').forEach(button => button.disabled = true);
+
                 let seconds = 0;
                 const timerElement = document.getElementById('ai-timer');
                 const timerInterval = setInterval(() => {
@@ -1946,9 +1961,11 @@
                     }
                 })
                 .finally(() => {
-                    // Hide loading overlay
+                    // Hide loading overlay and re-enable buttons
                     overlay.style.display = 'none';
                     clearInterval(timerInterval);
+                    document.querySelectorAll('button').forEach(button => button.disabled = false);
+                    checkBotStatus(); // Re-sync button states
                 });
             }
         }

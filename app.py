@@ -247,21 +247,6 @@ def dashboard():
 
 from flask import jsonify
 
-def build_file_tree(file_list):
-    tree = {}
-    for file_doc in sorted(file_list, key=lambda x: x['path']):
-        path_parts = file_doc['path'].split('/')
-        current_level = tree
-        for part in path_parts[:-1]:
-            current_level = current_level.setdefault(part, {})
-
-        if file_doc['type'] == 'file':
-            current_level[path_parts[-1]] = file_doc.get('content', '')
-        else:
-            current_level[path_parts[-1]] = {}
-
-    return tree
-
 @app.route("/editor/<int:server_index>")
 @login_required
 def editor(server_index):
@@ -847,22 +832,24 @@ def ai_edit(server_index):
             return jsonify({"error": f"Error reading file {file['path']}"}), 500
 
     # Construct the prompt for the AI
-    ai_prompt = f"""The user wants to make the following change to their Python Discord bot project:
+    ai_prompt = f"""You are an expert Python Discord bot developer. A user wants to make the following change to their project:
 {prompt}
+
+**VERY IMPORTANT INSTRUCTIONS:**
+1.  Do not put all the code in `main.py`.
+2.  For new commands or features, you **must** create new files inside a `functions` directory. If the directory does not exist, you can create it.
+3.  This is a Discord.py project that uses Cogs for organizing commands. New commands should be in their own cog file inside the `functions` directory.
+4.  After creating a new cog file in `functions/`, you **must** update `main.py` to load the new cog.
 
 Here is the current file structure and content of the project:
 {json.dumps(file_contents, indent=2)}
 
-Your task is to provide the updated code for the files that need to be changed. You can also create new files.
 Your response must be a JSON object where the keys are the file paths and the values are the new, complete code for that file.
-If you are creating a new file, simply include its path and content in the JSON response. For example, to create a new cog, you could add:
-`"cogs/new_cog.py": "import discord\\n..."`
-Remember to also update `main.py` to load the new cog.
 
-Example response format:
+Example of creating a new cog and loading it:
 {{
-  "main.py": "import discord\\n\\nclient = discord.Client()\\n\\n@client.event\\nasync def on_ready():\\n    print('Bot is ready.')\\n\\nclient.run('YOUR_TOKEN')",
-  "cogs/new_cog.py": "import discord\\n..."
+  "functions/new_cog.py": "import discord\\nfrom discord.ext import commands\\n\\nclass NewCog(commands.Cog):\\n    def __init__(self, bot):\\n        self.bot = bot\\n\\n    @commands.command()\\n    async def new_command(self, ctx):\\n        await ctx.send('This is a new command!')\\n\\ndef setup(bot):\\n    bot.add_cog(NewCog(bot))",
+  "main.py": "# ... (existing main.py code) ...\\n# Add this at the end to load the cog\\nbot.load_extension('functions.new_cog')"
 }}
 """
 
