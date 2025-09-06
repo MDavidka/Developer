@@ -31,8 +31,8 @@ BOT_WORKSPACES_PATH = "bot_workspaces"
 if not os.path.exists(BOT_WORKSPACES_PATH):
     os.makedirs(BOT_WORKSPACES_PATH)
 
-# Enhanced bot process management
-running_bots = {} # {bot_id: {"process": subprocess.Popen, "thread": threading.Thread, "status": "running"}}
+# Bot process management
+db.bot_processes.delete_many({}) # Clear any stale processes on startup
 
 # Discord OAuth2 settings
 DISCORD_CLIENT_ID = os.getenv("DISCORD_CLIENT_ID")
@@ -224,15 +224,14 @@ def dashboard():
             )
 
         # Update server status based on running processes
-        if bot_id in running_bots:
-            process = running_bots[bot_id]["process"]
-            if process.poll() is None:
+        bot_process = db.bot_processes.find_one({"bot_id": bot_id})
+        server_status = "offline"
+        if bot_process:
+            try:
+                os.kill(bot_process['pid'], 0)
                 server_status = "online"
-            else:
-                server_status = "offline"
-                del running_bots[bot_id]
-        else:
-            server_status = "offline"
+            except OSError:
+                db.bot_processes.delete_one({"bot_id": bot_id})
 
         db.users.update_one(
             {"_id": current_user.id},
@@ -247,6 +246,20 @@ def dashboard():
 
 from flask import jsonify
 
+def build_file_tree(file_list):
+    tree = {}
+    for file_doc in sorted(file_list, key=lambda x: x['path']):
+        path_parts = file_doc['path'].split('/')
+        current_level = tree
+        for part in path_parts[:-1]:
+            current_level = current_level.setdefault(part, {})
+
+        if file_doc['type'] == 'file':
+            current_level[path_parts[-1]] = 'file'
+        # We don't need to handle folders explicitly, as setdefault does it.
+
+    return tree
+
 @app.route("/editor/<int:server_index>")
 @login_required
 def editor(server_index):
@@ -259,20 +272,22 @@ def editor(server_index):
     bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
 
     # Check current bot status
-    if bot_id in running_bots:
-        process = running_bots[bot_id]["process"]
-        if process.poll() is None:
+    bot_process = db.bot_processes.find_one({"bot_id": bot_id})
+    bot_data['status'] = "offline"
+    if bot_process:
+        try:
+            os.kill(bot_process['pid'], 0)
             bot_data['status'] = "online"
-        else:
-            bot_data['status'] = "offline"
-            del running_bots[bot_id]
-    else:
-        bot_data['status'] = "offline"
+        except OSError:
+            db.bot_processes.delete_one({"bot_id": bot_id})
 
     bot_data['_id'] = bot_id
     bot_data['server_index'] = server_index
 
-    return render_template("editor.html", bot=bot_data, user=current_user, files=bot_data.get('files', []))
+    file_tree = build_file_tree(bot_data.get('files', []))
+    bot_data['files_tree'] = file_tree
+
+    return render_template("editor.html", bot=bot_data, user=current_user)
 
 # Debug endpoint
 @app.route("/api/server/<int:server_index>/debug", methods=["GET"])
@@ -576,16 +591,16 @@ def start_bot(server_index):
     bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
 
     # Check if bot is already running
-    logger.info(f"Checking if bot {bot_id} is already running. Current running_bots: {list(running_bots.keys())}")
-    if bot_id in running_bots:
-        process = running_bots[bot_id]["process"]
-        if process.poll() is None:  # Still running
-            logger.warning(f"Bot {bot_id} is already running (PID: {process.pid}). Aborting start.")
-            socketio.emit('log', {'data': f'⚠️ Bot {bot_id} is already running (PID: {process.pid})'}, room=bot_id)
+    bot_process = db.bot_processes.find_one({"bot_id": bot_id})
+    if bot_process:
+        try:
+            os.kill(bot_process['pid'], 0)
+            logger.warning(f"Bot {bot_id} is already running (PID: {bot_process['pid']}). Aborting start.")
+            socketio.emit('log', {'data': f'⚠️ Bot {bot_id} is already running (PID: {bot_process["pid"]})'}, room=bot_id)
             return jsonify({"error": "Bot is already running"}), 400
-        else:
-            logger.info(f"Bot {bot_id} was in running_bots but process was dead. Cleaning up.")
-            del running_bots[bot_id]
+        except OSError:
+            logger.info(f"Bot {bot_id} had a stale process record. Cleaning up.")
+            db.bot_processes.delete_one({"bot_id": bot_id})
 
     bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
 
@@ -627,13 +642,12 @@ def start_bot(server_index):
         log_thread = threading.Thread(target=stream_bot_logs, args=(bot_id, process), daemon=True)
         log_thread.start()
 
-        running_bots[bot_id] = {
-            "process": process,
-            "thread": log_thread,
-            "status": "running",
+        db.bot_processes.insert_one({
+            "bot_id": bot_id,
+            "pid": process.pid,
             "started_at": datetime.datetime.now(),
             "command": " ".join(startup_command)
-        }
+        })
 
         socketio.emit('log', {'data': f'✅ Bot subprocess started (PID: {process.pid})'}, room=bot_id)
 
@@ -657,44 +671,37 @@ def stop_bot(server_index):
     bot_data = servers[server_index]
     bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
 
-    if bot_id not in running_bots:
+    bot_process = db.bot_processes.find_one({"bot_id": bot_id})
+    if not bot_process:
         socketio.emit('log', {
             'data': f'⚠️ Bot {bot_id} is not running'
         }, room=bot_id)
         return jsonify({"error": "Bot is not running"}), 400
 
-    bot_info = running_bots[bot_id]
-    process = bot_info["process"]
-
+    pid = bot_process['pid']
     socketio.emit('log', {
-        'data': f'🛑 Stopping bot {bot_id} (PID: {process.pid})...'
+        'data': f'🛑 Stopping bot {bot_id} (PID: {pid})...'
     }, room=bot_id)
 
     try:
-        # Graceful termination
-        process.terminate()
+        os.kill(pid, signal.SIGTERM)
+        socketio.emit('log', {
+            'data': f'✅ Bot stopped gracefully'
+        }, room=bot_id)
+    except OSError:
+        socketio.emit('log', {
+            'data': f'⚠️ Bot process with PID {pid} not found. It might have already stopped.'
+        }, room=bot_id)
+    except Exception as e:
+        logger.error(f"Error stopping bot {bot_id} with PID {pid}: {e}")
+        socketio.emit('log', {
+            'data': f'💥 Error stopping bot: {e}'
+        }, room=bot_id)
 
-        try:
-            # Wait for graceful shutdown
-            process.wait(timeout=10)
-            socketio.emit('log', {
-                'data': f'✅ Bot stopped gracefully'
-            }, room=bot_id)
-        except subprocess.TimeoutExpired:
-            # Force kill if it doesn't stop gracefully
-            socketio.emit('log', {
-                'data': f'⚠️ Bot didn\'t stop gracefully, forcing termination...'
-            }, room=bot_id)
-            process.kill()
-            process.wait()
-            socketio.emit('log', {
-                'data': f'💀 Bot terminated forcefully'
-            }, room=bot_id)
+    # Clean up
+    db.bot_processes.delete_one({"bot_id": bot_id})
 
-        # Clean up
-        del running_bots[bot_id]
-
-        return jsonify({"success": True})
+    return jsonify({"success": True})
 
     except Exception as e:
         error_msg = f'💥 Error stopping bot: {str(e)}'
@@ -714,18 +721,18 @@ def bot_status(server_index):
     bot_data = servers[server_index]
     bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
 
-    if bot_id in running_bots:
-        process = running_bots[bot_id]["process"]
-        if process.poll() is None:
+    bot_process = db.bot_processes.find_one({"bot_id": bot_id})
+    if bot_process:
+        try:
+            os.kill(bot_process['pid'], 0)
             return jsonify({
                 "status": "running",
-                "pid": process.pid,
-                "started_at": running_bots[bot_id]["started_at"].isoformat(),
-                "command": running_bots[bot_id]["command"]
+                "pid": bot_process['pid'],
+                "started_at": bot_process['started_at'].isoformat(),
+                "command": bot_process['command']
             })
-        else:
-            # Process died, clean up
-            del running_bots[bot_id]
+        except OSError:
+            db.bot_processes.delete_one({"bot_id": bot_id})
 
     return jsonify({"status": "stopped"})
 

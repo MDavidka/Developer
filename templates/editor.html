@@ -567,6 +567,36 @@
             flex-shrink: 0;
         }
 
+        .folder-item {
+            display: flex;
+            align-items: center;
+            padding: 20px 28px;
+            cursor: pointer;
+            font-size: 16px;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            gap: 14px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 56px;
+            color: rgba(255, 255, 255, 0.9);
+            border-radius: 0;
+            font-weight: 500;
+        }
+
+        .folder-item:hover {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            color: #ffffff;
+        }
+
+        .folder-content {
+            padding-left: 20px;
+            display: none;
+        }
+
         /* Content Area */
         .content-area {
             flex: 1;
@@ -1477,12 +1507,27 @@
                 </div>
             </div>
             <div class="file-tree">
-                {% for file in files %}
-                <button class="file-item" onclick="openFile('{{ file.path }}')">
-                    <i data-lucide="file-text" class="file-icon"></i>
-                    {{ file.path }}
-                </button>
-                {% endfor %}
+                {% macro render_tree(tree, path='') %}
+                    {% for name, item in tree.items() %}
+                        {% if item == 'file' %}
+                            <button class="file-item" onclick="openFile('{{ path }}{{ name }}')">
+                                <i data-lucide="file-text" class="file-icon"></i>
+                                {{ name }}
+                            </button>
+                        {% else %}
+                            <div class="folder">
+                                <div class="folder-item" onclick="toggleFolder(this)">
+                                    <i data-lucide="folder" class="file-icon"></i>
+                                    {{ name }}
+                                </div>
+                                <div class="folder-content">
+                                    {{ render_tree(item, path + name + '/') }}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endmacro %}
+                {{ render_tree(bot.files_tree) }}
             </div>
         </aside>
 
@@ -1905,6 +1950,15 @@
             console.log('Close tab:', filename);
             // If this is the last/only tab, close the file
             closeFile();
+        }
+
+        function toggleFolder(element) {
+            const folderContent = element.nextElementSibling;
+            if (folderContent.style.display === 'block') {
+                folderContent.style.display = 'none';
+            } else {
+                folderContent.style.display = 'block';
+            }
         }
 
         // AI functions
