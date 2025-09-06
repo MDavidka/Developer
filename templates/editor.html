@@ -1498,11 +1498,11 @@
                     Files
                 </h2>
                 <div class="sidebar-actions">
-                    <button class="sidebar-btn glass-button" onclick="newFile()">
-                        <i data-lucide="plus"></i>
+                    <button class="sidebar-btn glass-button" onclick="openNewFileModal('file')" title="New File">
+                        <i data-lucide="file-plus"></i>
                     </button>
-                    <button class="sidebar-btn glass-button" onclick="toggleEditorMode()">
-                        <i data-lucide="maximize-2"></i>
+                    <button class="sidebar-btn glass-button" onclick="openNewFileModal('folder')" title="New Folder">
+                        <i data-lucide="folder-plus"></i>
                     </button>
                 </div>
             </div>
@@ -1510,10 +1510,15 @@
                 {% macro render_tree(tree, path='') %}
                     {% for name, item in tree.items() %}
                         {% if item == 'file' %}
-                            <button class="file-item" onclick="openFile('{{ path }}{{ name }}')">
-                                <i data-lucide="file-text" class="file-icon"></i>
-                                {{ name }}
-                            </button>
+                            <div style="display: flex; align-items: center;">
+                                <button class="file-item" style="flex-grow: 1;" onclick="openFile('{{ path }}{{ name }}')">
+                                    <i data-lucide="file-text" class="file-icon"></i>
+                                    {{ name }}
+                                </button>
+                                <button class="sidebar-btn glass-button" onclick="deleteFile('{{ path }}{{ name }}')" style="width: 30px; height: 30px; margin-right: 10px;">
+                                    <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                                </button>
+                            </div>
                         {% else %}
                             <div class="folder">
                                 <div class="folder-item" onclick="toggleFolder(this)">
@@ -1638,7 +1643,18 @@
         </div>
     </div>
 
+    <div id="new-file-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1001; justify-content: center; align-items: center;">
+        <div style="background: #2c2c2c; padding: 20px; border-radius: 10px;">
+            <h3 id="new-item-title">Create New</h3>
+            <input type="text" id="new-item-path" placeholder="path/to/item" style="width: 100%; margin: 10px 0;">
+            <button onclick="createNewItem()">Create</button>
+            <button onclick="closeNewFileModal()">Cancel</button>
+        </div>
+    </div>
     <script>
+        let newItemType = 'file'; // 'file' or 'folder'
+        let currentFolderPath = '';
+
         // Initialize Lucide icons
         lucide.createIcons();
 
@@ -1931,8 +1947,54 @@
             });
         }
 
-        function newFile() {
-            console.log('Create new file');
+        function openNewFileModal(type) {
+            newItemType = type;
+            document.getElementById('new-item-title').textContent = `Create New ${type}`;
+            document.getElementById('new-file-modal').style.display = 'flex';
+        }
+
+        function closeNewFileModal() {
+            document.getElementById('new-file-modal').style.display = 'none';
+        }
+
+        function createNewItem() {
+            const path = document.getElementById('new-item-path').value;
+            if (!path) {
+                alert('Path is required');
+                return;
+            }
+
+            fetch(`/api/server/${serverIndex}/files/create`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path: path, type: newItemType })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            });
+        }
+
+        function deleteFile(path) {
+            if (confirm(`Are you sure you want to delete ${path}?`)) {
+                fetch(`/api/server/${serverIndex}/files/delete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path: path })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                });
+            }
         }
 
         function closeFile() {

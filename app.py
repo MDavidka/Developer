@@ -31,7 +31,12 @@ BOT_WORKSPACES_PATH = "bot_workspaces"
 if not os.path.exists(BOT_WORKSPACES_PATH):
     os.makedirs(BOT_WORKSPACES_PATH)
 
+# MongoDB setup
+mongo_client = MongoClient(os.getenv("MONGO_URI"))
+db = mongo_client['dash-bot']
+
 # Bot process management
+running_processes = {}
 db.bot_processes.delete_many({}) # Clear any stale processes on startup
 
 # Discord OAuth2 settings
@@ -40,10 +45,6 @@ DISCORD_CLIENT_SECRET = os.getenv("DISCORD_CLIENT_SECRET")
 DISCORD_REDIRECT_URI = os.getenv("DISCORD_REDIRECT_URI", "http://localhost:5000/callback")
 DISCORD_API_BASE_URL = "https://discord.com/api"
 DISCORD_AUTHORIZATION_URL = f"https://discord.com/api/oauth2/authorize?client_id={DISCORD_CLIENT_ID}&redirect_uri={DISCORD_REDIRECT_URI}&response_type=code&scope=identify%20email"
-
-# MongoDB setup
-mongo_client = MongoClient(os.getenv("MONGO_URI"))
-db = mongo_client['dash-bot']
 
 # Flask-Login setup
 login_manager = LoginManager()
@@ -209,8 +210,8 @@ def dashboard():
 
             # Update database
             new_files = [
-                {"path": "main.py", "type": "file", "content": main_py_content},
-                {"path": ".env", "type": "file", "content": f"BOT_TOKEN={server.get('botToken', '')}"}
+                {"path": "main.py", "type": "file"},
+                {"path": ".env", "type": "file"}
             ]
 
             db.users.update_one(
@@ -454,7 +455,7 @@ def create_file(server_index):
                 f.write("")
             db.users.update_one(
                 {"_id": current_user.id, "servers.server_name": bot_data['server_name']},
-                {"$push": {"servers.$.files": {"path": path, "type": "file", "content": ""}}}
+                {"$push": {"servers.$.files": {"path": path, "type": "file"}}}
             )
         return jsonify({"success": True})
     except Exception as e:
@@ -642,6 +643,8 @@ def start_bot(server_index):
         log_thread = threading.Thread(target=stream_bot_logs, args=(bot_id, process), daemon=True)
         log_thread.start()
 
+        running_processes[bot_id] = process
+
         db.bot_processes.insert_one({
             "bot_id": bot_id,
             "pid": process.pid,
@@ -683,20 +686,27 @@ def stop_bot(server_index):
         'data': f'🛑 Stopping bot {bot_id} (PID: {pid})...'
     }, room=bot_id)
 
-    try:
-        os.kill(pid, signal.SIGTERM)
-        socketio.emit('log', {
-            'data': f'✅ Bot stopped gracefully'
-        }, room=bot_id)
-    except OSError:
-        socketio.emit('log', {
-            'data': f'⚠️ Bot process with PID {pid} not found. It might have already stopped.'
-        }, room=bot_id)
-    except Exception as e:
-        logger.error(f"Error stopping bot {bot_id} with PID {pid}: {e}")
-        socketio.emit('log', {
-            'data': f'💥 Error stopping bot: {e}'
-        }, room=bot_id)
+    if bot_id in running_processes:
+        process = running_processes[bot_id]
+        try:
+            process.terminate()
+            try:
+                process.wait(timeout=10)
+                socketio.emit('log', {'data': '✅ Bot stopped gracefully'}, room=bot_id)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait()
+                socketio.emit('log', {'data': '💀 Bot terminated forcefully'}, room=bot_id)
+            del running_processes[bot_id]
+        except Exception as e:
+            logger.error(f"Error stopping bot {bot_id} with PID {pid}: {e}")
+            socketio.emit('log', {'data': f'💥 Error stopping bot: {e}'}, room=bot_id)
+    else:
+        try:
+            os.kill(pid, signal.SIGTERM)
+            socketio.emit('log', {'data': '✅ Bot stopped gracefully (by PID)'}, room=bot_id)
+        except OSError:
+            socketio.emit('log', {'data': f'⚠️ Bot process with PID {pid} not found.'}, room=bot_id)
 
     # Clean up
     db.bot_processes.delete_one({"bot_id": bot_id})
@@ -891,17 +901,7 @@ Example of creating a new cog and loading it:
                 # Add the new file to the database
                 db.users.update_one(
                     {"_id": current_user.id, "servers.server_name": bot_data['server_name']},
-                    {"$push": {"servers.$.files": {"path": filepath, "type": "file", "content": new_content}}}
-                )
-            else:
-                # Update the content in the database
-                db.users.update_one(
-                    {"_id": current_user.id, "servers.server_name": bot_data['server_name'], "servers.files.path": filepath},
-                    {"$set": {"servers.$[server].files.$[file].content": new_content}},
-                    array_filters=[
-                        {"server.server_name": bot_data['server_name']},
-                        {"file.path": filepath}
-                    ]
+                    {"$push": {"servers.$.files": {"path": filepath, "type": "file"}}}
                 )
 
         return jsonify({"success": True})
