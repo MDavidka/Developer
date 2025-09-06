@@ -801,6 +801,91 @@ def uninstall_package(server_index):
     except Exception as e:
         return jsonify({"error": f"Error uninstalling package: {str(e)}"}), 500
 
+import google.generativeai as genai
+
+@app.route("/api/server/<int:server_index>/ai-edit", methods=["POST"])
+@login_required
+def ai_edit(server_index):
+    logger.info(f"AI edit request for server {server_index} by user {current_user.id}")
+
+    # Get the user's prompt from the request
+    prompt = request.json.get("prompt")
+    if not prompt:
+        return jsonify({"error": "Prompt is required"}), 400
+
+    # Configure the Google AI API
+    google_api_key = os.getenv("GOOGLE_API_KEY")
+    if not google_api_key:
+        logger.error("GOOGLE_API_KEY not found in environment variables.")
+        return jsonify({"error": "AI service is not configured."}), 500
+
+    genai.configure(api_key=google_api_key)
+    model = genai.GenerativeModel('gemini-pro')
+
+    # Get the bot's data
+    user_data = db.users.find_one({"_id": current_user.id})
+    servers = user_data.get("servers", [])
+    if server_index >= len(servers):
+        return jsonify({"error": "Server not found"}), 404
+
+    bot_data = servers[server_index]
+    bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
+    bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
+
+    # Get the file list and their contents
+    files = bot_data.get('files', [])
+    file_contents = {}
+    for file in files:
+        try:
+            with open(os.path.join(bot_dir, file['path']), 'r') as f:
+                file_contents[file['path']] = f.read()
+        except Exception as e:
+            logger.error(f"Error reading file {file['path']}: {e}")
+            return jsonify({"error": f"Error reading file {file['path']}"}), 500
+
+    # Construct the prompt for the AI
+    ai_prompt = f"""The user wants to make the following change to their Python Discord bot project:
+{prompt}
+
+Here is the current file structure and content of the project:
+{json.dumps(file_contents, indent=2)}
+
+Please provide the updated code for the files that need to be changed. Your response should be a JSON object where the keys are the file paths and the values are the new, complete code for that file. For example:
+{{
+  "main.py": "import discord\\n\\nclient = discord.Client()\\n\\n@client.event\\nasync def on_ready():\\n    print('Bot is ready.')\\n\\nclient.run('YOUR_TOKEN')",
+  "utils.py": "def helper_function():\\n    pass"
+}}
+"""
+
+    try:
+        # Call the Google AI API
+        response = model.generate_content(ai_prompt)
+
+        # Parse the AI's response
+        edited_files = json.loads(response.text)
+
+        # Apply the changes
+        for filepath, new_content in edited_files.items():
+            full_path = os.path.join(bot_dir, filepath)
+            with open(full_path, 'w') as f:
+                f.write(new_content)
+
+            # Update the content in the database
+            db.users.update_one(
+                {"_id": current_user.id, "servers.server_name": bot_data['server_name'], "servers.files.path": filepath},
+                {"$set": {"servers.$[server].files.$[file].content": new_content}},
+                array_filters=[
+                    {"server.server_name": bot_data['server_name']},
+                    {"file.path": filepath}
+                ]
+            )
+
+        return jsonify({"success": True})
+
+    except Exception as e:
+        logger.error(f"Error during AI edit: {e}")
+        return jsonify({"error": "An error occurred during the AI edit."}), 500
+
 if __name__ == "__main__":
     try:
         print("🚀 Starting Flask application...")
