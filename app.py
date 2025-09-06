@@ -191,7 +191,8 @@ def dashboard():
             os.makedirs(bot_dir)
 
             # Create main.py
-            with open('bot_template.py', 'r') as f:
+            template_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'bot_template.py')
+            with open(template_path, 'r') as f:
                 bot_template_content = f.read()
 
             main_py_content = "from dotenv import load_dotenv\nload_dotenv()\n\n" + bot_template_content
