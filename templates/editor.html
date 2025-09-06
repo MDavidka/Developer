@@ -1365,9 +1365,50 @@
                 height: 4px;
             }
         }
+
+        /* AI Loading Overlay */
+        .ai-loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+        }
+
+        .ai-loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .ai-timer {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
     </style>
 </head>
 <body>
+    <div id="ai-loading-overlay" class="ai-loading-overlay">
+        <div class="ai-loader"></div>
+        <div class="ai-timer" id="ai-timer">0s</div>
+    </div>
     <div class="app-container">
         <!-- Enhanced Mobile Header -->
         <header class="header">
@@ -1710,6 +1751,7 @@
         // Console control functions
         function runCode() {
             console.log('Attempting to start bot...');
+            document.getElementById('runBtn').disabled = true;
             const output = document.getElementById('consoleOutput');
             const line = document.createElement('div');
             line.className = 'console-line info';
@@ -1865,6 +1907,16 @@
                 console.log('Sending AI prompt:', prompt);
                 input.value = '';
 
+                // Show loading overlay
+                const overlay = document.getElementById('ai-loading-overlay');
+                overlay.style.display = 'flex';
+                let seconds = 0;
+                const timerElement = document.getElementById('ai-timer');
+                const timerInterval = setInterval(() => {
+                    seconds++;
+                    timerElement.textContent = `${seconds}s`;
+                }, 1000);
+
                 // Add a message to the console
                 const output = document.getElementById('consoleOutput');
                 const line = document.createElement('div');
@@ -1892,6 +1944,11 @@
                     } else {
                         alert('AI edit failed: ' + data.error);
                     }
+                })
+                .finally(() => {
+                    // Hide loading overlay
+                    overlay.style.display = 'none';
+                    clearInterval(timerInterval);
                 });
             }
         }

@@ -591,12 +591,15 @@ def start_bot(server_index):
     bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
 
     # Check if bot is already running
+    logger.info(f"Checking if bot {bot_id} is already running. Current running_bots: {list(running_bots.keys())}")
     if bot_id in running_bots:
         process = running_bots[bot_id]["process"]
         if process.poll() is None:  # Still running
+            logger.warning(f"Bot {bot_id} is already running (PID: {process.pid}). Aborting start.")
             socketio.emit('log', {'data': f'⚠️ Bot {bot_id} is already running (PID: {process.pid})'}, room=bot_id)
             return jsonify({"error": "Bot is already running"}), 400
         else:
+            logger.info(f"Bot {bot_id} was in running_bots but process was dead. Cleaning up.")
             del running_bots[bot_id]
 
     bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
@@ -850,10 +853,16 @@ def ai_edit(server_index):
 Here is the current file structure and content of the project:
 {json.dumps(file_contents, indent=2)}
 
-Please provide the updated code for the files that need to be changed. Your response should be a JSON object where the keys are the file paths and the values are the new, complete code for that file. For example:
+Your task is to provide the updated code for the files that need to be changed. You can also create new files.
+Your response must be a JSON object where the keys are the file paths and the values are the new, complete code for that file.
+If you are creating a new file, simply include its path and content in the JSON response. For example, to create a new cog, you could add:
+`"cogs/new_cog.py": "import discord\\n..."`
+Remember to also update `main.py` to load the new cog.
+
+Example response format:
 {{
   "main.py": "import discord\\n\\nclient = discord.Client()\\n\\n@client.event\\nasync def on_ready():\\n    print('Bot is ready.')\\n\\nclient.run('YOUR_TOKEN')",
-  "utils.py": "def helper_function():\\n    pass"
+  "cogs/new_cog.py": "import discord\\n..."
 }}
 """
 
@@ -879,18 +888,32 @@ Please provide the updated code for the files that need to be changed. Your resp
         # Apply the changes
         for filepath, new_content in edited_files.items():
             full_path = os.path.join(bot_dir, filepath)
+
+            # Create directories if they don't exist
+            os.makedirs(os.path.dirname(full_path), exist_ok=True)
+
             with open(full_path, 'w') as f:
                 f.write(new_content)
 
-            # Update the content in the database
-            db.users.update_one(
-                {"_id": current_user.id, "servers.server_name": bot_data['server_name'], "servers.files.path": filepath},
-                {"$set": {"servers.$[server].files.$[file].content": new_content}},
-                array_filters=[
-                    {"server.server_name": bot_data['server_name']},
-                    {"file.path": filepath}
-                ]
-            )
+            # Check if the file is new
+            is_new_file = not any(f['path'] == filepath for f in files)
+
+            if is_new_file:
+                # Add the new file to the database
+                db.users.update_one(
+                    {"_id": current_user.id, "servers.server_name": bot_data['server_name']},
+                    {"$push": {"servers.$.files": {"path": filepath, "type": "file", "content": new_content}}}
+                )
+            else:
+                # Update the content in the database
+                db.users.update_one(
+                    {"_id": current_user.id, "servers.server_name": bot_data['server_name'], "servers.files.path": filepath},
+                    {"$set": {"servers.$[server].files.$[file].content": new_content}},
+                    array_filters=[
+                        {"server.server_name": bot_data['server_name']},
+                        {"file.path": filepath}
+                    ]
+                )
 
         return jsonify({"success": True})
 
