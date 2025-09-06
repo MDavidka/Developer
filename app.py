@@ -100,19 +100,13 @@ def load_user(user_id):
 def cleanup_bot_processes():
     """Clean up all running bot processes on shutdown"""
     print("Cleaning up bot processes...")
-    for bot_id, bot_info in running_bots.items():
+    for bot_process in db.bot_processes.find():
         try:
-            process = bot_info["process"]
-            if process.poll() is None:  # Process is still running
-                print(f"Terminating bot {bot_id}...")
-                process.terminate()
-                try:
-                    process.wait(timeout=5)
-                except subprocess.TimeoutExpired:
-                    print(f"Killing bot {bot_id}...")
-                    process.kill()
-        except Exception as e:
-            print(f"Error cleaning up bot {bot_id}: {e}")
+            os.kill(bot_process['pid'], signal.SIGTERM)
+            print(f"Terminated bot {bot_process['bot_id']} (PID: {bot_process['pid']})")
+        except OSError:
+            pass # Process already dead
+    db.bot_processes.delete_many({})
 
 def signal_handler(sig, frame):
     """Handle shutdown signals"""
@@ -552,8 +546,7 @@ def stream_bot_logs(bot_id, process):
         }, room=bot_id)
     finally:
         # Clean up
-        if bot_id in running_bots and running_bots[bot_id]["process"].pid == process.pid:
-            running_bots[bot_id]["status"] = "stopped"
+        db.bot_processes.delete_one({"bot_id": bot_id})
 
 @socketio.on('connect', namespace='/editor')
 def editor_connect():
@@ -567,14 +560,14 @@ def on_join(data):
     join_room(bot_id)
 
     # Check if bot is running and send status
-    if bot_id in running_bots:
-        process = running_bots[bot_id]["process"]
-        if process.poll() is None:
-            emit('log', {'data': f'📡 Console connected - Bot {bot_id} is running (PID: {process.pid})'}, room=bot_id)
-        else:
+    bot_process = db.bot_processes.find_one({"bot_id": bot_id})
+    if bot_process:
+        try:
+            os.kill(bot_process['pid'], 0)
+            emit('log', {'data': f'📡 Console connected - Bot {bot_id} is running (PID: {bot_process["pid"]})'}, room=bot_id)
+        except OSError:
+            db.bot_processes.delete_one({"bot_id": bot_id})
             emit('log', {'data': f'📡 Console connected - Bot {bot_id} is stopped'}, room=bot_id)
-            # Clean up dead process
-            del running_bots[bot_id]
     else:
         emit('log', {'data': f'📡 Console connected - Bot {bot_id} is offline'}, room=bot_id)
 
@@ -604,6 +597,7 @@ def start_bot(server_index):
             db.bot_processes.delete_one({"bot_id": bot_id})
 
     bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
+    logger.info(f"Bot workspace directory: {os.path.abspath(bot_dir)}")
 
     socketio.emit('log', {'data': f'🔄 Starting bot {bot_id}...'}, room=bot_id)
 
