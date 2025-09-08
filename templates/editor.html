@@ -553,6 +553,37 @@
             background: rgba(255, 255, 255, 0.05);
         }
 
+        .info-btn {
+            width: 30px;
+            height: 30px;
+            margin-right: 5px;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        .file-container:hover .info-btn {
+            opacity: 1;
+        }
+
+        .info-tooltip {
+            display: none;
+            position: absolute;
+            background-color: #333;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 5px;
+            z-index: 100;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            margin-left: 10px;
+            white-space: nowrap;
+        }
+
+        .info-btn:hover + .info-tooltip {
+            display: block;
+        }
+
         .file-item.active {
             background: rgba(255, 255, 255, 0.06);
             backdrop-filter: blur(15px);
@@ -1411,23 +1442,40 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             z-index: 1000;
             display: none;
             justify-content: center;
             align-items: center;
             flex-direction: column;
             color: white;
+            overflow: hidden;
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            animation: sparkle-animation 1s infinite;
+            opacity: 0;
+        }
+
+        @keyframes sparkle-animation {
+            0% { transform: scale(0) rotate(0deg); opacity: 0.5; }
+            50% { transform: scale(1.5) rotate(180deg); opacity: 1; }
+            100% { transform: scale(0) rotate(360deg); opacity: 0.5; }
         }
 
         .ai-loader {
             border: 2px solid rgba(255, 255, 255, 0.2);
             border-top: 2px solid #ffffff;
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            width: 50px;
+            height: 50px;
             animation: spin 0.8s linear infinite;
         }
 
@@ -1436,9 +1484,15 @@
             100% { transform: rotate(360deg); }
         }
 
-        .ai-timer {
+        .ai-loading-text {
             margin-top: 20px;
             font-size: 1.2em;
+        }
+
+        .ai-files-list {
+            margin-top: 20px;
+            font-size: 1em;
+            color: #ccc;
         }
 
         /* AI Mode Selector */
@@ -1911,13 +1965,17 @@
                 </div>
             </div>
             <div class="file-tree">
-                {% macro render_tree(tree, path='') %}
+                {% macro render_tree(tree, file_info, path='') %}
                     {% for name, item in tree.items() %}
                         {% if item == 'file' %}
-                            <div style="display: flex; align-items: center;">
+                            <div style="display: flex; align-items: center; position: relative;" class="file-container">
                                 <button class="file-item" style="flex-grow: 1;" onclick="openFile('{{ path }}{{ name }}')">
                                     <i data-lucide="file-text" class="file-icon"></i>
                                     {{ name }}
+                                </button>
+                                <div class="info-tooltip">{{ file_info.get(path + name, 'No info available') }}</div>
+                                <button class="sidebar-btn glass-button info-btn">
+                                    <i data-lucide="info" style="width: 16px; height: 16px;"></i>
                                 </button>
                                 <button class="sidebar-btn glass-button" onclick="deleteFile('{{ path }}{{ name }}')" style="width: 30px; height: 30px; margin-right: 10px;">
                                     <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
@@ -1930,13 +1988,13 @@
                                     {{ name }}
                                 </div>
                                 <div class="folder-content">
-                                    {{ render_tree(item, path + name + '/') }}
+                                    {{ render_tree(item, file_info, path + name + '/') }}
                                 </div>
                             </div>
                         {% endif %}
                     {% endfor %}
                 {% endmacro %}
-                {{ render_tree(bot.files_tree) }}
+                {{ render_tree(bot.files_tree, bot.file_info) }}
             </div>
         </aside>
 
@@ -1967,8 +2025,10 @@
                 <!-- Mobile Editor Container -->
                 <div class="mobile-editor-container" id="mobile-editor-container">
                     <div id="ai-loading-overlay" class="ai-loading-overlay">
+                        <div id="sparkle-container"></div>
                         <div class="ai-loader"></div>
-                        <div class="ai-timer" id="ai-timer">0s</div>
+                        <div class="ai-loading-text" id="ai-loading-text">AI is thinking...</div>
+                        <div class="ai-files-list" id="ai-files-list"></div>
                     </div>
                     <!-- Empty State -->
                     <div class="mobile-empty-state" id="emptyState">
@@ -2146,6 +2206,8 @@
         let isFileEditing = false;
         let consoleStatus = 'offline'; // offline, running, ready
         let currentOpenFile = null;
+        let currentAIMode = 'general';
+        let conversationHistory = [];
         const botId = "{{ bot._id }}";
         const serverIndex = "{{ bot.server_index }}";
 
@@ -2562,6 +2624,10 @@
                     alert(`AI edit successful! Modified: ${data.modified_files.join(', ')}`);
                     if (currentOpenFile && data.modified_files.includes(currentOpenFile)) {
                         openFile(currentOpenFile);
+                    } else if (data.modified_files.length > 0) {
+                        // A file was created, so we need to refresh the file tree.
+                        // A full reload is the simplest way to do this for now.
+                        location.reload();
                     }
                 })
                 .catch(error => {
@@ -2591,6 +2657,110 @@
             }
         });
 
+        // Enhanced AI Features
+        function getSmartSuggestions() {
+            if (!currentOpenFile) return;
+
+            const cursorLine = editor ? editor.getCursor().line + 1 : 1;
+            const context = editor ? editor.getLine(cursorLine - 1) : '';
+
+            // Get suggestions based on current context
+            fetch(`/api/server/${serverIndex}/ai-suggest`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    file_path: currentOpenFile,
+                    cursor_line: cursorLine,
+                    context: context
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.suggestions.suggestions.length > 0) {
+                    showInlineSuggestions(data.suggestions.suggestions);
+                }
+            });
+        }
+
+        function showInlineSuggestions(suggestions) {
+            // Create a floating suggestion panel
+            const suggestionPanel = document.createElement('div');
+            suggestionPanel.className = 'inline-suggestions';
+            suggestionPanel.style.cssText = `
+                position: absolute;
+                top: 50px;
+                right: 20px;
+                width: 300px;
+                max-height: 200px;
+                background: rgba(255, 255, 255, 0.05);
+                backdrop-filter: blur(20px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+                padding: 12px;
+                z-index: 1000;
+                overflow-y: auto;
+            `;
+
+            suggestions.slice(0, 3).forEach(suggestion => {
+                const item = document.createElement('div');
+                item.style.cssText = `
+                    padding: 8px;
+                    margin-bottom: 4px;
+                    background: rgba(255, 255, 255, 0.03);
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 12px;
+                `;
+                item.textContent = suggestion.title;
+                item.onclick = () => applySuggestion(suggestion);
+                suggestionPanel.appendChild(item);
+            });
+
+            document.body.appendChild(suggestionPanel);
+
+            // Auto-remove after 10 seconds
+            setTimeout(() => {
+                if (suggestionPanel.parentNode) {
+                    suggestionPanel.parentNode.removeChild(suggestionPanel);
+                }
+            }, 10000);
+        }
+
+        // Real-time code analysis
+        function setupRealTimeAnalysis() {
+            if (!editor) return;
+
+            let analysisTimeout;
+            editor.on('change', () => {
+                clearTimeout(analysisTimeout);
+                analysisTimeout = setTimeout(() => {
+                    // Only analyze if file has been open for a while
+                    if (currentOpenFile && editor.getValue().length > 100) {
+                        getSmartSuggestions();
+                    }
+                }, 2000); // Analyze 2 seconds after last change
+            });
+        }
+
+        // AI-powered code completion
+        function setupAICodeCompletion() {
+            if (!editor) return;
+
+            editor.on('keyup', (cm, event) => {
+                // Trigger AI completion on certain patterns
+                const cursor = cm.getCursor();
+                const line = cm.getLine(cursor.line);
+
+                // Check for patterns that might benefit from AI completion
+                if (line.includes('@commands.command') ||
+                    line.includes('async def') ||
+                    line.includes('def ') ||
+                    line.includes('class ')) {
+                    getSmartSuggestions();
+                }
+            });
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             lucide.createIcons();
@@ -2601,6 +2771,14 @@
             if (window.innerWidth >= 768) {
                 document.querySelector('.mobile-tabs').style.display = 'flex';
             }
+
+            // Setup AI features after editor is initialized
+            setTimeout(() => {
+                if (editor) {
+                    setupRealTimeAnalysis();
+                    setupAICodeCompletion();
+                }
+            }, 1000);
         });
     </script>
 </body>
