@@ -549,37 +549,6 @@
             color: #ffffff;
         }
 
-        .info-btn {
-            width: 30px;
-            height: 30px;
-            margin-right: 5px;
-            opacity: 0;
-            transition: opacity 0.2s ease-in-out;
-        }
-
-        .file-container:hover .info-btn {
-            opacity: 1;
-        }
-
-        .info-tooltip {
-            display: none;
-            position: absolute;
-            background-color: #333;
-            color: #fff;
-            padding: 5px 10px;
-            border-radius: 5px;
-            z-index: 100;
-            left: 100%;
-            top: 50%;
-            transform: translateY(-50%);
-            margin-left: 10px;
-            white-space: nowrap;
-        }
-
-        .info-btn:hover + .info-tooltip {
-            display: block;
-        }
-
         .file-item:active {
             background: rgba(255, 255, 255, 0.05);
         }
@@ -1442,40 +1411,23 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
             z-index: 1000;
             display: none;
             justify-content: center;
             align-items: center;
             flex-direction: column;
             color: white;
-            overflow: hidden;
-        }
-
-        .sparkle {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: white;
-            border-radius: 50%;
-            animation: sparkle-animation 1s infinite;
-            opacity: 0;
-        }
-
-        @keyframes sparkle-animation {
-            0% { transform: scale(0) rotate(0deg); opacity: 0.5; }
-            50% { transform: scale(1.5) rotate(180deg); opacity: 1; }
-            100% { transform: scale(0) rotate(360deg); opacity: 0.5; }
         }
 
         .ai-loader {
             border: 2px solid rgba(255, 255, 255, 0.2);
             border-top: 2px solid #ffffff;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            width: 30px;
+            height: 30px;
             animation: spin 0.8s linear infinite;
         }
 
@@ -1484,15 +1436,9 @@
             100% { transform: rotate(360deg); }
         }
 
-        .ai-loading-text {
+        .ai-timer {
             margin-top: 20px;
             font-size: 1.2em;
-        }
-
-        .ai-files-list {
-            margin-top: 20px;
-            font-size: 1em;
-            color: #ccc;
         }
 
         /* AI Mode Selector */
@@ -1965,17 +1911,13 @@
                 </div>
             </div>
             <div class="file-tree">
-                {% macro render_tree(tree, file_info, path='') %}
+                {% macro render_tree(tree, path='') %}
                     {% for name, item in tree.items() %}
                         {% if item == 'file' %}
-                            <div style="display: flex; align-items: center; position: relative;" class="file-container">
+                            <div style="display: flex; align-items: center;">
                                 <button class="file-item" style="flex-grow: 1;" onclick="openFile('{{ path }}{{ name }}')">
                                     <i data-lucide="file-text" class="file-icon"></i>
                                     {{ name }}
-                                </button>
-                                <div class="info-tooltip">{{ file_info.get(path + name, 'No info available') }}</div>
-                                <button class="sidebar-btn glass-button info-btn">
-                                    <i data-lucide="info" style="width: 16px; height: 16px;"></i>
                                 </button>
                                 <button class="sidebar-btn glass-button" onclick="deleteFile('{{ path }}{{ name }}')" style="width: 30px; height: 30px; margin-right: 10px;">
                                     <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
@@ -1988,13 +1930,13 @@
                                     {{ name }}
                                 </div>
                                 <div class="folder-content">
-                                    {{ render_tree(item, file_info, path + name + '/') }}
+                                    {{ render_tree(item, path + name + '/') }}
                                 </div>
                             </div>
                         {% endif %}
                     {% endfor %}
                 {% endmacro %}
-                {{ render_tree(bot.files_tree, bot.file_info) }}
+                {{ render_tree(bot.files_tree) }}
             </div>
         </aside>
 
@@ -2025,10 +1967,8 @@
                 <!-- Mobile Editor Container -->
                 <div class="mobile-editor-container" id="mobile-editor-container">
                     <div id="ai-loading-overlay" class="ai-loading-overlay">
-                        <div id="sparkle-container"></div>
                         <div class="ai-loader"></div>
-                        <div class="ai-loading-text" id="ai-loading-text">AI is thinking...</div>
-                        <div class="ai-files-list" id="ai-files-list"></div>
+                        <div class="ai-timer" id="ai-timer">0s</div>
                     </div>
                     <!-- Empty State -->
                     <div class="mobile-empty-state" id="emptyState">
@@ -2062,14 +2002,49 @@
             <div>Python | UTF-8 | Ln 42, Col 16</div>
         </div>
 
-        <!-- AI Input Bar -->
-        <div class="ai-chat-container" id="aiInputBarContainer">
+        <!-- Enhanced AI Chat Interface -->
+        <div class="ai-chat-container" id="aiChatContainer">
+            <!-- AI Mode Selector -->
+            <div class="ai-mode-selector">
+                <button class="ai-mode-btn active" data-mode="general" onclick="setAIMode('general')">
+                    <i data-lucide="message-circle"></i>
+                    General
+                </button>
+                <button class="ai-mode-btn" data-mode="debugging" onclick="setAIMode('debugging')">
+                    <i data-lucide="bug"></i>
+                    Debug
+                </button>
+                <button class="ai-mode-btn" data-mode="optimization" onclick="setAIMode('optimization')">
+                    <i data-lucide="zap"></i>
+                    Optimize
+                </button>
+                <button class="ai-mode-btn" data-mode="learning" onclick="setAIMode('learning')">
+                    <i data-lucide="book-open"></i>
+                    Learn
+                </button>
+            </div>
+
+            <!-- AI Suggestions -->
+            <div class="ai-suggestions">
+                <div class="suggestion-chip" onclick="selectSuggestion('Debug this code')">Debug this code</div>
+                <div class="suggestion-chip" onclick="selectSuggestion('Add comments')">Add comments</div>
+                <div class="suggestion-chip" onclick="selectSuggestion('Optimize performance')">Optimize</div>
+                <div class="suggestion-chip" onclick="selectSuggestion('Generate tests')">Tests</div>
+                <div class="suggestion-chip" onclick="analyzeCurrentFile()">Analyze Code</div>
+                <div class="suggestion-chip" onclick="refactorCurrentFile()">Refactor</div>
+            </div>
+
             <!-- AI Input Container -->
             <div class="ai-input-container">
-                <input type="text" class="ai-input" placeholder="What would you like to build?" id="aiInput">
+                <input type="text" class="ai-input" placeholder="Ask AI to help with your code..." id="aiInput">
                 <button class="ai-send-btn" onclick="sendAIMessage()">
                     <i data-lucide="send"></i>
                 </button>
+            </div>
+
+            <!-- AI Chat History -->
+            <div class="ai-chat-history" id="aiChatHistory" style="display: none;">
+                <div class="chat-messages" id="chatMessages"></div>
             </div>
         </div>
 
@@ -2587,8 +2562,6 @@
                     alert(`AI edit successful! Modified: ${data.modified_files.join(', ')}`);
                     if (currentOpenFile && data.modified_files.includes(currentOpenFile)) {
                         openFile(currentOpenFile);
-                    } else {
-                        location.reload(); // Reload to see new files
                     }
                 })
                 .catch(error => {

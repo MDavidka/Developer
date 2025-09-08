@@ -1,0 +1,6 @@
+{
+    "main.py": "The main entry point of the bot.",
+    ".env": "Environment variables, including the bot token.",
+    "functions/hello.py": "A sample cog with a hello command.",
+    "functions/debug_cog.py": "A cog with debugging commands."
+}

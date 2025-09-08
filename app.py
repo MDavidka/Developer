@@ -284,11 +284,8 @@ def editor(server_index):
     file_tree = build_file_tree(bot_data.get('files', []))
     bot_data['files_tree'] = file_tree
 
-    file_info = {
-        "main.py": "The main entry point of the bot.",
-        ".env": "Environment variables, including the bot token.",
-        "functions/hello.py": "A sample cog with a hello command."
-    }
+    with open('file_info.json', 'r') as f:
+        file_info = json.load(f)
     bot_data['file_info'] = file_info
 
     return render_template("editor.html", bot=bot_data, user=current_user)
