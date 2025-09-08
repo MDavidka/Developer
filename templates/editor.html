@@ -1440,6 +1440,410 @@
             margin-top: 20px;
             font-size: 1.2em;
         }
+
+        /* AI Mode Selector */
+        .ai-mode-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .ai-mode-btn {
+            padding: 8px 16px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .ai-mode-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+            transform: translateY(-1px);
+        }
+
+        .ai-mode-btn.active {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04),
+                        0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .ai-mode-btn i {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* AI Chat History */
+        .ai-chat-history {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+        }
+
+        .chat-messages {
+            padding: 12px;
+        }
+
+        .chat-message {
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .chat-message.user {
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 3px solid rgba(255, 255, 255, 0.3);
+            margin-left: 20px;
+        }
+
+        .chat-message.ai {
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 3px solid rgba(0, 150, 255, 0.5);
+            margin-right: 20px;
+        }
+
+        .chat-message .timestamp {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 4px;
+        }
+
+        /* AI Analysis Panel */
+        .ai-analysis-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(30px) saturate(1.3);
+            -webkit-backdrop-filter: blur(30px) saturate(1.3);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            display: none;
+            overflow: hidden;
+        }
+
+        .ai-analysis-panel.open {
+            display: block;
+        }
+
+        .analysis-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .analysis-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .analysis-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .analysis-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+
+        .analysis-content {
+            padding: 20px 24px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .analysis-section {
+            margin-bottom: 24px;
+        }
+
+        .analysis-section h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .issue-item, .optimization-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .issue-item.high {
+            border-left: 4px solid #ff4444;
+        }
+
+        .issue-item.medium {
+            border-left: 4px solid #ffaa00;
+        }
+
+        .issue-item.low {
+            border-left: 4px solid #44aa44;
+        }
+
+        .issue-type {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .issue-type.error {
+            color: #ff6666;
+        }
+
+        .issue-type.warning {
+            color: #ffaa44;
+        }
+
+        .issue-type.suggestion {
+            color: #66aa66;
+        }
+
+        .issue-message {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 6px;
+        }
+
+        .issue-suggestion {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            font-style: italic;
+        }
+
+        .overall-score {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .score-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, #44aa44 0deg, #44aa44 var(--score-angle, 0deg), rgba(255, 255, 255, 0.1) var(--score-angle, 0deg));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .score-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* AI Suggestions Panel */
+        .ai-suggestions-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 500px;
+            max-height: 70vh;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(30px) saturate(1.3);
+            -webkit-backdrop-filter: blur(30px) saturate(1.3);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            display: none;
+            overflow: hidden;
+        }
+
+        .ai-suggestions-panel.open {
+            display: block;
+        }
+
+        .suggestions-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .suggestions-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .suggestions-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .suggestions-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+
+        .suggestions-content {
+            padding: 20px 24px;
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+
+        .suggestion-item {
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .suggestion-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .suggestion-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .suggestion-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .suggestion-priority {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .suggestion-priority.high {
+            background: rgba(255, 68, 68, 0.2);
+            color: #ff6666;
+        }
+
+        .suggestion-priority.medium {
+            background: rgba(255, 170, 0, 0.2);
+            color: #ffaa44;
+        }
+
+        .suggestion-priority.low {
+            background: rgba(68, 170, 68, 0.2);
+            color: #66aa66;
+        }
+
+        .suggestion-description {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 8px;
+        }
+
+        .suggestion-code {
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.8);
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px;
+            border-radius: 6px;
+            margin-top: 8px;
+            white-space: pre-wrap;
+        }
+
+        /* Overlay for modals */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 999;
+            display: none;
+        }
+
+        .modal-overlay.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -1598,19 +2002,49 @@
             <div>Python | UTF-8 | Ln 42, Col 16</div>
         </div>
 
-        <!-- AI Chat Interface -->
+        <!-- Enhanced AI Chat Interface -->
         <div class="ai-chat-container" id="aiChatContainer">
+            <!-- AI Mode Selector -->
+            <div class="ai-mode-selector">
+                <button class="ai-mode-btn active" data-mode="general" onclick="setAIMode('general')">
+                    <i data-lucide="message-circle"></i>
+                    General
+                </button>
+                <button class="ai-mode-btn" data-mode="debugging" onclick="setAIMode('debugging')">
+                    <i data-lucide="bug"></i>
+                    Debug
+                </button>
+                <button class="ai-mode-btn" data-mode="optimization" onclick="setAIMode('optimization')">
+                    <i data-lucide="zap"></i>
+                    Optimize
+                </button>
+                <button class="ai-mode-btn" data-mode="learning" onclick="setAIMode('learning')">
+                    <i data-lucide="book-open"></i>
+                    Learn
+                </button>
+            </div>
+
+            <!-- AI Suggestions -->
             <div class="ai-suggestions">
                 <div class="suggestion-chip" onclick="selectSuggestion('Debug this code')">Debug this code</div>
                 <div class="suggestion-chip" onclick="selectSuggestion('Add comments')">Add comments</div>
                 <div class="suggestion-chip" onclick="selectSuggestion('Optimize performance')">Optimize</div>
                 <div class="suggestion-chip" onclick="selectSuggestion('Generate tests')">Tests</div>
+                <div class="suggestion-chip" onclick="analyzeCurrentFile()">Analyze Code</div>
+                <div class="suggestion-chip" onclick="refactorCurrentFile()">Refactor</div>
             </div>
+
+            <!-- AI Input Container -->
             <div class="ai-input-container">
                 <input type="text" class="ai-input" placeholder="Ask AI to help with your code..." id="aiInput">
                 <button class="ai-send-btn" onclick="sendAIMessage()">
                     <i data-lucide="send"></i>
                 </button>
+            </div>
+
+            <!-- AI Chat History -->
+            <div class="ai-chat-history" id="aiChatHistory" style="display: none;">
+                <div class="chat-messages" id="chatMessages"></div>
             </div>
         </div>
 
@@ -1643,6 +2077,53 @@
         </div>
     </div>
 
+    <!-- Modal Overlay -->
+    <div class="modal-overlay" id="modalOverlay"></div>
+
+    <!-- AI Analysis Panel -->
+    <div class="ai-analysis-panel" id="aiAnalysisPanel">
+        <div class="analysis-header">
+            <h3 class="analysis-title">
+                <i data-lucide="search"></i>
+                Code Analysis
+            </h3>
+            <button class="analysis-close" onclick="closeAnalysisPanel()">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+        <div class="analysis-content" id="analysisContent">
+            <div class="overall-score">
+                <div class="score-circle" id="scoreCircle">85</div>
+                <div class="score-label">Overall Score</div>
+            </div>
+            <div class="analysis-section">
+                <h4><i data-lucide="alert-triangle"></i> Issues Found</h4>
+                <div id="issuesList"></div>
+            </div>
+            <div class="analysis-section">
+                <h4><i data-lucide="zap"></i> Optimizations</h4>
+                <div id="optimizationsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Suggestions Panel -->
+    <div class="ai-suggestions-panel" id="aiSuggestionsPanel">
+        <div class="suggestions-header">
+            <h3 class="suggestions-title">
+                <i data-lucide="lightbulb"></i>
+                AI Suggestions
+            </h3>
+            <button class="suggestions-close" onclick="closeSuggestionsPanel()">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+        <div class="suggestions-content" id="suggestionsContent">
+            <div id="suggestionsList"></div>
+        </div>
+    </div>
+
+    <!-- New File Modal -->
     <div id="new-file-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1001; justify-content: center; align-items: center;">
         <div style="background: #2c2c2c; padding: 20px; border-radius: 10px;">
             <h3 id="new-item-title">Create New</h3>
@@ -1665,6 +2146,8 @@
         let isFileEditing = false;
         let consoleStatus = 'offline'; // offline, running, ready
         let currentOpenFile = null;
+        let currentAIMode = 'general';
+        let conversationHistory = [];
         const botId = "{{ bot._id }}";
         const serverIndex = "{{ bot.server_index }}";
 
@@ -2023,6 +2506,25 @@
             }
         }
 
+        // AI Mode Management
+        function setAIMode(mode) {
+            currentAIMode = mode;
+            document.querySelectorAll('.ai-mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
+            
+            // Update placeholder text based on mode
+            const input = document.getElementById('aiInput');
+            const placeholders = {
+                'general': 'Ask AI to help with your code...',
+                'debugging': 'Describe the issue you\'re debugging...',
+                'optimization': 'What would you like to optimize?',
+                'learning': 'What would you like to learn about?'
+            };
+            input.placeholder = placeholders[mode] || placeholders['general'];
+        }
+
         // AI functions
         function selectSuggestion(text) {
             document.getElementById('aiInput').value = text;
@@ -2034,6 +2536,9 @@
             
             if (prompt) {
                 console.log('Sending AI prompt:', prompt);
+                
+                // Add user message to chat history
+                addChatMessage('user', prompt);
                 input.value = '';
 
                 // Show loading overlay and disable buttons
@@ -2056,24 +2561,49 @@
                 output.appendChild(line);
                 output.scrollTop = output.scrollHeight;
 
-                fetch(`/api/server/${serverIndex}/ai-edit`, {
+                // Choose the appropriate AI endpoint based on mode
+                let endpoint = '/ai-edit';
+                let requestBody = { prompt: prompt };
+                
+                if (currentAIMode === 'general' || currentAIMode === 'debugging' || currentAIMode === 'optimization' || currentAIMode === 'learning') {
+                    endpoint = '/ai-chat';
+                    requestBody = {
+                        message: prompt,
+                        history: conversationHistory,
+                        context_type: currentAIMode
+                    };
+                }
+
+                fetch(`/api/server/${serverIndex}${endpoint}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ prompt: prompt })
+                    body: JSON.stringify(requestBody)
                 })
                 .then(response => response.json())
                 .then(data => {
-                    console.log('AI edit response:', data);
+                    console.log('AI response:', data);
                     if (data.success) {
-                        alert('AI edit successful!');
-                        // Refresh the current file if it was edited
-                        if (currentOpenFile) {
-                            openFile(currentOpenFile);
+                        if (endpoint === '/ai-chat') {
+                            // Add AI response to chat history
+                            addChatMessage('ai', data.response);
+                            conversationHistory.push({ role: 'user', content: prompt });
+                            conversationHistory.push({ role: 'assistant', content: data.response });
+                        } else {
+                            // Handle edit response
+                            if (data.modified_files && data.modified_files.length > 0) {
+                                alert(`AI edit successful! Modified: ${data.modified_files.join(', ')}`);
+                                // Refresh the current file if it was edited
+                                if (currentOpenFile) {
+                                    openFile(currentOpenFile);
+                                }
+                            } else {
+                                alert('AI edit successful!');
+                            }
                         }
                     } else {
-                        alert('AI edit failed: ' + data.error);
+                        alert('AI request failed: ' + data.error);
                     }
                 })
                 .finally(() => {
@@ -2084,6 +2614,235 @@
                     checkBotStatus(); // Re-sync button states
                 });
             }
+        }
+
+        // Chat History Management
+        function addChatMessage(sender, message) {
+            const chatHistory = document.getElementById('aiChatHistory');
+            const chatMessages = document.getElementById('chatMessages');
+            
+            // Show chat history if it was hidden
+            chatHistory.style.display = 'block';
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${sender}`;
+            messageDiv.innerHTML = `
+                <div>${message}</div>
+                <div class="timestamp">${new Date().toLocaleTimeString()}</div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Code Analysis
+        function analyzeCurrentFile() {
+            if (!currentOpenFile) {
+                alert('Please open a file first to analyze it.');
+                return;
+            }
+
+            const overlay = document.getElementById('ai-loading-overlay');
+            overlay.style.display = 'flex';
+
+            fetch(`/api/server/${serverIndex}/ai-analyze`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ file_path: currentOpenFile })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayAnalysisResults(data.analysis);
+                } else {
+                    alert('Analysis failed: ' + data.error);
+                }
+            })
+            .finally(() => {
+                overlay.style.display = 'none';
+            });
+        }
+
+        function displayAnalysisResults(analysis) {
+            const panel = document.getElementById('aiAnalysisPanel');
+            const overlay = document.getElementById('modalOverlay');
+            
+            // Update score
+            const scoreCircle = document.getElementById('scoreCircle');
+            scoreCircle.textContent = analysis.overall_score || 85;
+            scoreCircle.style.setProperty('--score-angle', `${(analysis.overall_score || 85) * 3.6}deg`);
+            
+            // Display issues
+            const issuesList = document.getElementById('issuesList');
+            issuesList.innerHTML = '';
+            
+            if (analysis.issues && analysis.issues.length > 0) {
+                analysis.issues.forEach(issue => {
+                    const issueDiv = document.createElement('div');
+                    issueDiv.className = `issue-item ${issue.severity}`;
+                    issueDiv.innerHTML = `
+                        <div class="issue-type ${issue.type}">${issue.type.toUpperCase()}</div>
+                        <div class="issue-message">${issue.message}</div>
+                        <div class="issue-suggestion">${issue.suggestion}</div>
+                    `;
+                    issuesList.appendChild(issueDiv);
+                });
+            } else {
+                issuesList.innerHTML = '<div style="color: rgba(255,255,255,0.6); font-style: italic;">No issues found!</div>';
+            }
+            
+            // Display optimizations
+            const optimizationsList = document.getElementById('optimizationsList');
+            optimizationsList.innerHTML = '';
+            
+            if (analysis.optimizations && analysis.optimizations.length > 0) {
+                analysis.optimizations.forEach(opt => {
+                    const optDiv = document.createElement('div');
+                    optDiv.className = 'optimization-item';
+                    optDiv.innerHTML = `
+                        <div class="issue-message"><strong>${opt.area}:</strong> ${opt.description}</div>
+                        <div class="issue-suggestion">${opt.suggestion}</div>
+                    `;
+                    optimizationsList.appendChild(optDiv);
+                });
+            } else {
+                optimizationsList.innerHTML = '<div style="color: rgba(255,255,255,0.6); font-style: italic;">No optimizations suggested!</div>';
+            }
+            
+            // Show panel
+            overlay.classList.add('active');
+            panel.classList.add('open');
+        }
+
+        function closeAnalysisPanel() {
+            const panel = document.getElementById('aiAnalysisPanel');
+            const overlay = document.getElementById('modalOverlay');
+            panel.classList.remove('open');
+            overlay.classList.remove('active');
+        }
+
+        // Code Suggestions
+        function getSuggestions() {
+            if (!currentOpenFile) {
+                alert('Please open a file first to get suggestions.');
+                return;
+            }
+
+            const cursorLine = editor ? editor.getCursor().line + 1 : 1;
+            const overlay = document.getElementById('ai-loading-overlay');
+            overlay.style.display = 'flex';
+
+            fetch(`/api/server/${serverIndex}/ai-suggest`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    file_path: currentOpenFile,
+                    cursor_line: cursorLine,
+                    context: 'Get suggestions for improvements'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displaySuggestions(data.suggestions);
+                } else {
+                    alert('Suggestions failed: ' + data.error);
+                }
+            })
+            .finally(() => {
+                overlay.style.display = 'none';
+            });
+        }
+
+        function displaySuggestions(suggestions) {
+            const panel = document.getElementById('aiSuggestionsPanel');
+            const overlay = document.getElementById('modalOverlay');
+            const suggestionsList = document.getElementById('suggestionsList');
+            
+            suggestionsList.innerHTML = '';
+            
+            if (suggestions.suggestions && suggestions.suggestions.length > 0) {
+                suggestions.suggestions.forEach(suggestion => {
+                    const suggestionDiv = document.createElement('div');
+                    suggestionDiv.className = 'suggestion-item';
+                    suggestionDiv.onclick = () => applySuggestion(suggestion);
+                    suggestionDiv.innerHTML = `
+                        <div class="suggestion-header">
+                            <div class="suggestion-title">${suggestion.title}</div>
+                            <div class="suggestion-priority ${suggestion.priority}">${suggestion.priority}</div>
+                        </div>
+                        <div class="suggestion-description">${suggestion.description}</div>
+                        ${suggestion.code_example ? `<div class="suggestion-code">${suggestion.code_example}</div>` : ''}
+                    `;
+                    suggestionsList.appendChild(suggestionDiv);
+                });
+            } else {
+                suggestionsList.innerHTML = '<div style="color: rgba(255,255,255,0.6); font-style: italic;">No suggestions available!</div>';
+            }
+            
+            // Show panel
+            overlay.classList.add('active');
+            panel.classList.add('open');
+        }
+
+        function applySuggestion(suggestion) {
+            if (suggestion.code_example && editor) {
+                const cursor = editor.getCursor();
+                editor.replaceRange(suggestion.code_example, cursor);
+            }
+            closeSuggestionsPanel();
+        }
+
+        function closeSuggestionsPanel() {
+            const panel = document.getElementById('aiSuggestionsPanel');
+            const overlay = document.getElementById('modalOverlay');
+            panel.classList.remove('open');
+            overlay.classList.remove('active');
+        }
+
+        // Code Refactoring
+        function refactorCurrentFile() {
+            if (!currentOpenFile) {
+                alert('Please open a file first to refactor it.');
+                return;
+            }
+
+            const refactorType = prompt('Refactor type (general/optimize/clean/modernize):', 'general');
+            if (!refactorType) return;
+
+            const overlay = document.getElementById('ai-loading-overlay');
+            overlay.style.display = 'flex';
+
+            fetch(`/api/server/${serverIndex}/ai-refactor`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    file_path: currentOpenFile,
+                    type: refactorType,
+                    instructions: ''
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`Refactoring successful! Changes: ${data.changes_made.length} improvements made.`);
+                    // Refresh the current file
+                    if (currentOpenFile) {
+                        openFile(currentOpenFile);
+                    }
+                } else {
+                    alert('Refactoring failed: ' + data.error);
+                }
+            })
+            .finally(() => {
+                overlay.style.display = 'none';
+            });
         }
 
         // Enter key for AI input
@@ -2104,6 +2863,110 @@
             }
         });
 
+        // Enhanced AI Features
+        function getSmartSuggestions() {
+            if (!currentOpenFile) return;
+            
+            const cursorLine = editor ? editor.getCursor().line + 1 : 1;
+            const context = editor ? editor.getLine(cursorLine - 1) : '';
+            
+            // Get suggestions based on current context
+            fetch(`/api/server/${serverIndex}/ai-suggest`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    file_path: currentOpenFile,
+                    cursor_line: cursorLine,
+                    context: context
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.suggestions.suggestions.length > 0) {
+                    showInlineSuggestions(data.suggestions.suggestions);
+                }
+            });
+        }
+
+        function showInlineSuggestions(suggestions) {
+            // Create a floating suggestion panel
+            const suggestionPanel = document.createElement('div');
+            suggestionPanel.className = 'inline-suggestions';
+            suggestionPanel.style.cssText = `
+                position: absolute;
+                top: 50px;
+                right: 20px;
+                width: 300px;
+                max-height: 200px;
+                background: rgba(255, 255, 255, 0.05);
+                backdrop-filter: blur(20px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+                padding: 12px;
+                z-index: 1000;
+                overflow-y: auto;
+            `;
+            
+            suggestions.slice(0, 3).forEach(suggestion => {
+                const item = document.createElement('div');
+                item.style.cssText = `
+                    padding: 8px;
+                    margin-bottom: 4px;
+                    background: rgba(255, 255, 255, 0.03);
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 12px;
+                `;
+                item.textContent = suggestion.title;
+                item.onclick = () => applySuggestion(suggestion);
+                suggestionPanel.appendChild(item);
+            });
+            
+            document.body.appendChild(suggestionPanel);
+            
+            // Auto-remove after 10 seconds
+            setTimeout(() => {
+                if (suggestionPanel.parentNode) {
+                    suggestionPanel.parentNode.removeChild(suggestionPanel);
+                }
+            }, 10000);
+        }
+
+        // Real-time code analysis
+        function setupRealTimeAnalysis() {
+            if (!editor) return;
+            
+            let analysisTimeout;
+            editor.on('change', () => {
+                clearTimeout(analysisTimeout);
+                analysisTimeout = setTimeout(() => {
+                    // Only analyze if file has been open for a while
+                    if (currentOpenFile && editor.getValue().length > 100) {
+                        getSmartSuggestions();
+                    }
+                }, 2000); // Analyze 2 seconds after last change
+            });
+        }
+
+        // AI-powered code completion
+        function setupAICodeCompletion() {
+            if (!editor) return;
+            
+            editor.on('keyup', (cm, event) => {
+                // Trigger AI completion on certain patterns
+                const cursor = cm.getCursor();
+                const line = cm.getLine(cursor.line);
+                
+                // Check for patterns that might benefit from AI completion
+                if (line.includes('@commands.command') || 
+                    line.includes('async def') || 
+                    line.includes('def ') ||
+                    line.includes('class ')) {
+                    getSmartSuggestions();
+                }
+            });
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             lucide.createIcons();
@@ -2114,6 +2977,14 @@
             if (window.innerWidth >= 768) {
                 document.querySelector('.mobile-tabs').style.display = 'flex';
             }
+            
+            // Setup AI features after editor is initialized
+            setTimeout(() => {
+                if (editor) {
+                    setupRealTimeAnalysis();
+                    setupAICodeCompletion();
+                }
+            }, 1000);
         });
     </script>
 </body>
