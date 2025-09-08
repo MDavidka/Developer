@@ -549,6 +549,37 @@
             color: #ffffff;
         }
 
+        .info-btn {
+            width: 30px;
+            height: 30px;
+            margin-right: 5px;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        .file-container:hover .info-btn {
+            opacity: 1;
+        }
+
+        .info-tooltip {
+            display: none;
+            position: absolute;
+            background-color: #333;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 5px;
+            z-index: 100;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            margin-left: 10px;
+            white-space: nowrap;
+        }
+
+        .info-btn:hover + .info-tooltip {
+            display: block;
+        }
+
         .file-item:active {
             background: rgba(255, 255, 255, 0.05);
         }
@@ -1411,23 +1442,40 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             z-index: 1000;
             display: none;
             justify-content: center;
             align-items: center;
             flex-direction: column;
             color: white;
+            overflow: hidden;
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            animation: sparkle-animation 1s infinite;
+            opacity: 0;
+        }
+
+        @keyframes sparkle-animation {
+            0% { transform: scale(0) rotate(0deg); opacity: 0.5; }
+            50% { transform: scale(1.5) rotate(180deg); opacity: 1; }
+            100% { transform: scale(0) rotate(360deg); opacity: 0.5; }
         }
 
         .ai-loader {
             border: 2px solid rgba(255, 255, 255, 0.2);
             border-top: 2px solid #ffffff;
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            width: 50px;
+            height: 50px;
             animation: spin 0.8s linear infinite;
         }
 
@@ -1436,9 +1484,15 @@
             100% { transform: rotate(360deg); }
         }
 
-        .ai-timer {
+        .ai-loading-text {
             margin-top: 20px;
             font-size: 1.2em;
+        }
+
+        .ai-files-list {
+            margin-top: 20px;
+            font-size: 1em;
+            color: #ccc;
         }
 
         /* AI Mode Selector */
@@ -1911,13 +1965,17 @@
                 </div>
             </div>
             <div class="file-tree">
-                {% macro render_tree(tree, path='') %}
+                {% macro render_tree(tree, file_info, path='') %}
                     {% for name, item in tree.items() %}
                         {% if item == 'file' %}
-                            <div style="display: flex; align-items: center;">
+                            <div style="display: flex; align-items: center; position: relative;" class="file-container">
                                 <button class="file-item" style="flex-grow: 1;" onclick="openFile('{{ path }}{{ name }}')">
                                     <i data-lucide="file-text" class="file-icon"></i>
                                     {{ name }}
+                                </button>
+                                <div class="info-tooltip">{{ file_info.get(path + name, 'No info available') }}</div>
+                                <button class="sidebar-btn glass-button info-btn">
+                                    <i data-lucide="info" style="width: 16px; height: 16px;"></i>
                                 </button>
                                 <button class="sidebar-btn glass-button" onclick="deleteFile('{{ path }}{{ name }}')" style="width: 30px; height: 30px; margin-right: 10px;">
                                     <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
@@ -1930,13 +1988,13 @@
                                     {{ name }}
                                 </div>
                                 <div class="folder-content">
-                                    {{ render_tree(item, path + name + '/') }}
+                                    {{ render_tree(item, file_info, path + name + '/') }}
                                 </div>
                             </div>
                         {% endif %}
                     {% endfor %}
                 {% endmacro %}
-                {{ render_tree(bot.files_tree) }}
+                {{ render_tree(bot.files_tree, bot.file_info) }}
             </div>
         </aside>
 
@@ -1967,8 +2025,10 @@
                 <!-- Mobile Editor Container -->
                 <div class="mobile-editor-container" id="mobile-editor-container">
                     <div id="ai-loading-overlay" class="ai-loading-overlay">
+                        <div id="sparkle-container"></div>
                         <div class="ai-loader"></div>
-                        <div class="ai-timer" id="ai-timer">0s</div>
+                        <div class="ai-loading-text" id="ai-loading-text">AI is thinking...</div>
+                        <div class="ai-files-list" id="ai-files-list"></div>
                     </div>
                     <!-- Empty State -->
                     <div class="mobile-empty-state" id="emptyState">
@@ -2002,49 +2062,14 @@
             <div>Python | UTF-8 | Ln 42, Col 16</div>
         </div>
 
-        <!-- Enhanced AI Chat Interface -->
-        <div class="ai-chat-container" id="aiChatContainer">
-            <!-- AI Mode Selector -->
-            <div class="ai-mode-selector">
-                <button class="ai-mode-btn active" data-mode="general" onclick="setAIMode('general')">
-                    <i data-lucide="message-circle"></i>
-                    General
-                </button>
-                <button class="ai-mode-btn" data-mode="debugging" onclick="setAIMode('debugging')">
-                    <i data-lucide="bug"></i>
-                    Debug
-                </button>
-                <button class="ai-mode-btn" data-mode="optimization" onclick="setAIMode('optimization')">
-                    <i data-lucide="zap"></i>
-                    Optimize
-                </button>
-                <button class="ai-mode-btn" data-mode="learning" onclick="setAIMode('learning')">
-                    <i data-lucide="book-open"></i>
-                    Learn
-                </button>
-            </div>
-
-            <!-- AI Suggestions -->
-            <div class="ai-suggestions">
-                <div class="suggestion-chip" onclick="selectSuggestion('Debug this code')">Debug this code</div>
-                <div class="suggestion-chip" onclick="selectSuggestion('Add comments')">Add comments</div>
-                <div class="suggestion-chip" onclick="selectSuggestion('Optimize performance')">Optimize</div>
-                <div class="suggestion-chip" onclick="selectSuggestion('Generate tests')">Tests</div>
-                <div class="suggestion-chip" onclick="analyzeCurrentFile()">Analyze Code</div>
-                <div class="suggestion-chip" onclick="refactorCurrentFile()">Refactor</div>
-            </div>
-
+        <!-- AI Input Bar -->
+        <div class="ai-chat-container" id="aiInputBarContainer">
             <!-- AI Input Container -->
             <div class="ai-input-container">
-                <input type="text" class="ai-input" placeholder="Ask AI to help with your code..." id="aiInput">
+                <input type="text" class="ai-input" placeholder="What would you like to build?" id="aiInput">
                 <button class="ai-send-btn" onclick="sendAIMessage()">
                     <i data-lucide="send"></i>
                 </button>
-            </div>
-
-            <!-- AI Chat History -->
-            <div class="ai-chat-history" id="aiChatHistory" style="display: none;">
-                <div class="chat-messages" id="chatMessages"></div>
             </div>
         </div>
 
@@ -2146,8 +2171,6 @@
         let isFileEditing = false;
         let consoleStatus = 'offline'; // offline, running, ready
         let currentOpenFile = null;
-        let currentAIMode = 'general';
-        let conversationHistory = [];
         const botId = "{{ bot._id }}";
         const serverIndex = "{{ bot.server_index }}";
 
@@ -2506,343 +2529,75 @@
             }
         }
 
-        // AI Mode Management
-        function setAIMode(mode) {
-            currentAIMode = mode;
-            document.querySelectorAll('.ai-mode-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
-            
-            // Update placeholder text based on mode
-            const input = document.getElementById('aiInput');
-            const placeholders = {
-                'general': 'Ask AI to help with your code...',
-                'debugging': 'Describe the issue you\'re debugging...',
-                'optimization': 'What would you like to optimize?',
-                'learning': 'What would you like to learn about?'
-            };
-            input.placeholder = placeholders[mode] || placeholders['general'];
-        }
-
         // AI functions
-        function selectSuggestion(text) {
-            document.getElementById('aiInput').value = text;
-        }
-
         function sendAIMessage() {
             const input = document.getElementById('aiInput');
             const prompt = input.value.trim();
             
             if (prompt) {
-                console.log('Sending AI prompt:', prompt);
-                
-                // Add user message to chat history
-                addChatMessage('user', prompt);
                 input.value = '';
-
-                // Show loading overlay and disable buttons
                 const overlay = document.getElementById('ai-loading-overlay');
+                const loadingText = document.getElementById('ai-loading-text');
+                const filesList = document.getElementById('ai-files-list');
+                const sparkleContainer = document.getElementById('sparkle-container');
+
+                // --- Show Loading Overlay ---
                 overlay.style.display = 'flex';
-                document.querySelectorAll('button').forEach(button => button.disabled = true);
-
-                let seconds = 0;
-                const timerElement = document.getElementById('ai-timer');
-                const timerInterval = setInterval(() => {
-                    seconds++;
-                    timerElement.textContent = `${seconds}s`;
-                }, 1000);
-
-                // Add a message to the console
-                const output = document.getElementById('consoleOutput');
-                const line = document.createElement('div');
-                line.className = 'console-line info';
-                line.textContent = '> Sending prompt to AI...';
-                output.appendChild(line);
-                output.scrollTop = output.scrollHeight;
-
-                // Choose the appropriate AI endpoint based on mode
-                let endpoint = '/ai-edit';
-                let requestBody = { prompt: prompt };
+                loadingText.textContent = 'AI is thinking...';
+                filesList.innerHTML = '';
                 
-                if (currentAIMode === 'general' || currentAIMode === 'debugging' || currentAIMode === 'optimization' || currentAIMode === 'learning') {
-                    endpoint = '/ai-chat';
-                    requestBody = {
-                        message: prompt,
-                        history: conversationHistory,
-                        context_type: currentAIMode
-                    };
+                // --- Sparkle Effect ---
+                sparkleContainer.innerHTML = '';
+                for (let i = 0; i < 50; i++) {
+                    const sparkle = document.createElement('div');
+                    sparkle.className = 'sparkle';
+                    sparkle.style.top = `${Math.random() * 100}%`;
+                    sparkle.style.left = `${Math.random() * 100}%`;
+                    sparkle.style.animationDelay = `${Math.random() * 1}s`;
+                    sparkleContainer.appendChild(sparkle);
                 }
 
-                fetch(`/api/server/${serverIndex}${endpoint}`, {
+                // --- Step 1: Identify Files ---
+                fetch(`/api/server/${serverIndex}/ai-identify-files`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(requestBody)
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: prompt })
                 })
                 .then(response => response.json())
                 .then(data => {
-                    console.log('AI response:', data);
-                    if (data.success) {
-                        if (endpoint === '/ai-chat') {
-                            // Add AI response to chat history
-                            addChatMessage('ai', data.response);
-                            conversationHistory.push({ role: 'user', content: prompt });
-                            conversationHistory.push({ role: 'assistant', content: data.response });
-                        } else {
-                            // Handle edit response
-                            if (data.modified_files && data.modified_files.length > 0) {
-                                alert(`AI edit successful! Modified: ${data.modified_files.join(', ')}`);
-                                // Refresh the current file if it was edited
-                                if (currentOpenFile) {
-                                    openFile(currentOpenFile);
-                                }
-                            } else {
-                                alert('AI edit successful!');
-                            }
-                        }
-                    } else {
-                        alert('AI request failed: ' + data.error);
+                    if (!data.success) {
+                        throw new Error(data.error || 'Failed to identify files.');
                     }
+
+                    loadingText.textContent = 'Editing files...';
+                    filesList.innerHTML = data.files.map(file => `<div>${file}</div>`).join('');
+
+                    // --- Step 2: Edit Files ---
+                    return fetch(`/api/server/${serverIndex}/ai-edit`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt: prompt, files: data.files })
+                    });
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        throw new Error(data.error || 'Failed to edit files.');
+                    }
+                    alert(`AI edit successful! Modified: ${data.modified_files.join(', ')}`);
+                    if (currentOpenFile && data.modified_files.includes(currentOpenFile)) {
+                        openFile(currentOpenFile);
+                    } else {
+                        location.reload(); // Reload to see new files
+                    }
+                })
+                .catch(error => {
+                    alert(`An error occurred: ${error.message}`);
                 })
                 .finally(() => {
-                    // Hide loading overlay and re-enable buttons
                     overlay.style.display = 'none';
-                    clearInterval(timerInterval);
-                    document.querySelectorAll('button').forEach(button => button.disabled = false);
-                    checkBotStatus(); // Re-sync button states
                 });
             }
-        }
-
-        // Chat History Management
-        function addChatMessage(sender, message) {
-            const chatHistory = document.getElementById('aiChatHistory');
-            const chatMessages = document.getElementById('chatMessages');
-            
-            // Show chat history if it was hidden
-            chatHistory.style.display = 'block';
-            
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `chat-message ${sender}`;
-            messageDiv.innerHTML = `
-                <div>${message}</div>
-                <div class="timestamp">${new Date().toLocaleTimeString()}</div>
-            `;
-            
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        // Code Analysis
-        function analyzeCurrentFile() {
-            if (!currentOpenFile) {
-                alert('Please open a file first to analyze it.');
-                return;
-            }
-
-            const overlay = document.getElementById('ai-loading-overlay');
-            overlay.style.display = 'flex';
-
-            fetch(`/api/server/${serverIndex}/ai-analyze`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ file_path: currentOpenFile })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    displayAnalysisResults(data.analysis);
-                } else {
-                    alert('Analysis failed: ' + data.error);
-                }
-            })
-            .finally(() => {
-                overlay.style.display = 'none';
-            });
-        }
-
-        function displayAnalysisResults(analysis) {
-            const panel = document.getElementById('aiAnalysisPanel');
-            const overlay = document.getElementById('modalOverlay');
-            
-            // Update score
-            const scoreCircle = document.getElementById('scoreCircle');
-            scoreCircle.textContent = analysis.overall_score || 85;
-            scoreCircle.style.setProperty('--score-angle', `${(analysis.overall_score || 85) * 3.6}deg`);
-            
-            // Display issues
-            const issuesList = document.getElementById('issuesList');
-            issuesList.innerHTML = '';
-            
-            if (analysis.issues && analysis.issues.length > 0) {
-                analysis.issues.forEach(issue => {
-                    const issueDiv = document.createElement('div');
-                    issueDiv.className = `issue-item ${issue.severity}`;
-                    issueDiv.innerHTML = `
-                        <div class="issue-type ${issue.type}">${issue.type.toUpperCase()}</div>
-                        <div class="issue-message">${issue.message}</div>
-                        <div class="issue-suggestion">${issue.suggestion}</div>
-                    `;
-                    issuesList.appendChild(issueDiv);
-                });
-            } else {
-                issuesList.innerHTML = '<div style="color: rgba(255,255,255,0.6); font-style: italic;">No issues found!</div>';
-            }
-            
-            // Display optimizations
-            const optimizationsList = document.getElementById('optimizationsList');
-            optimizationsList.innerHTML = '';
-            
-            if (analysis.optimizations && analysis.optimizations.length > 0) {
-                analysis.optimizations.forEach(opt => {
-                    const optDiv = document.createElement('div');
-                    optDiv.className = 'optimization-item';
-                    optDiv.innerHTML = `
-                        <div class="issue-message"><strong>${opt.area}:</strong> ${opt.description}</div>
-                        <div class="issue-suggestion">${opt.suggestion}</div>
-                    `;
-                    optimizationsList.appendChild(optDiv);
-                });
-            } else {
-                optimizationsList.innerHTML = '<div style="color: rgba(255,255,255,0.6); font-style: italic;">No optimizations suggested!</div>';
-            }
-            
-            // Show panel
-            overlay.classList.add('active');
-            panel.classList.add('open');
-        }
-
-        function closeAnalysisPanel() {
-            const panel = document.getElementById('aiAnalysisPanel');
-            const overlay = document.getElementById('modalOverlay');
-            panel.classList.remove('open');
-            overlay.classList.remove('active');
-        }
-
-        // Code Suggestions
-        function getSuggestions() {
-            if (!currentOpenFile) {
-                alert('Please open a file first to get suggestions.');
-                return;
-            }
-
-            const cursorLine = editor ? editor.getCursor().line + 1 : 1;
-            const overlay = document.getElementById('ai-loading-overlay');
-            overlay.style.display = 'flex';
-
-            fetch(`/api/server/${serverIndex}/ai-suggest`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ 
-                    file_path: currentOpenFile,
-                    cursor_line: cursorLine,
-                    context: 'Get suggestions for improvements'
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    displaySuggestions(data.suggestions);
-                } else {
-                    alert('Suggestions failed: ' + data.error);
-                }
-            })
-            .finally(() => {
-                overlay.style.display = 'none';
-            });
-        }
-
-        function displaySuggestions(suggestions) {
-            const panel = document.getElementById('aiSuggestionsPanel');
-            const overlay = document.getElementById('modalOverlay');
-            const suggestionsList = document.getElementById('suggestionsList');
-            
-            suggestionsList.innerHTML = '';
-            
-            if (suggestions.suggestions && suggestions.suggestions.length > 0) {
-                suggestions.suggestions.forEach(suggestion => {
-                    const suggestionDiv = document.createElement('div');
-                    suggestionDiv.className = 'suggestion-item';
-                    suggestionDiv.onclick = () => applySuggestion(suggestion);
-                    suggestionDiv.innerHTML = `
-                        <div class="suggestion-header">
-                            <div class="suggestion-title">${suggestion.title}</div>
-                            <div class="suggestion-priority ${suggestion.priority}">${suggestion.priority}</div>
-                        </div>
-                        <div class="suggestion-description">${suggestion.description}</div>
-                        ${suggestion.code_example ? `<div class="suggestion-code">${suggestion.code_example}</div>` : ''}
-                    `;
-                    suggestionsList.appendChild(suggestionDiv);
-                });
-            } else {
-                suggestionsList.innerHTML = '<div style="color: rgba(255,255,255,0.6); font-style: italic;">No suggestions available!</div>';
-            }
-            
-            // Show panel
-            overlay.classList.add('active');
-            panel.classList.add('open');
-        }
-
-        function applySuggestion(suggestion) {
-            if (suggestion.code_example && editor) {
-                const cursor = editor.getCursor();
-                editor.replaceRange(suggestion.code_example, cursor);
-            }
-            closeSuggestionsPanel();
-        }
-
-        function closeSuggestionsPanel() {
-            const panel = document.getElementById('aiSuggestionsPanel');
-            const overlay = document.getElementById('modalOverlay');
-            panel.classList.remove('open');
-            overlay.classList.remove('active');
-        }
-
-        // Code Refactoring
-        function refactorCurrentFile() {
-            if (!currentOpenFile) {
-                alert('Please open a file first to refactor it.');
-                return;
-            }
-
-            const refactorType = prompt('Refactor type (general/optimize/clean/modernize):', 'general');
-            if (!refactorType) return;
-
-            const overlay = document.getElementById('ai-loading-overlay');
-            overlay.style.display = 'flex';
-
-            fetch(`/api/server/${serverIndex}/ai-refactor`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ 
-                    file_path: currentOpenFile,
-                    type: refactorType,
-                    instructions: ''
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(`Refactoring successful! Changes: ${data.changes_made.length} improvements made.`);
-                    // Refresh the current file
-                    if (currentOpenFile) {
-                        openFile(currentOpenFile);
-                    }
-                } else {
-                    alert('Refactoring failed: ' + data.error);
-                }
-            })
-            .finally(() => {
-                overlay.style.display = 'none';
-            });
         }
 
         // Enter key for AI input
@@ -2863,110 +2618,6 @@
             }
         });
 
-        // Enhanced AI Features
-        function getSmartSuggestions() {
-            if (!currentOpenFile) return;
-            
-            const cursorLine = editor ? editor.getCursor().line + 1 : 1;
-            const context = editor ? editor.getLine(cursorLine - 1) : '';
-            
-            // Get suggestions based on current context
-            fetch(`/api/server/${serverIndex}/ai-suggest`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    file_path: currentOpenFile,
-                    cursor_line: cursorLine,
-                    context: context
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success && data.suggestions.suggestions.length > 0) {
-                    showInlineSuggestions(data.suggestions.suggestions);
-                }
-            });
-        }
-
-        function showInlineSuggestions(suggestions) {
-            // Create a floating suggestion panel
-            const suggestionPanel = document.createElement('div');
-            suggestionPanel.className = 'inline-suggestions';
-            suggestionPanel.style.cssText = `
-                position: absolute;
-                top: 50px;
-                right: 20px;
-                width: 300px;
-                max-height: 200px;
-                background: rgba(255, 255, 255, 0.05);
-                backdrop-filter: blur(20px);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                border-radius: 12px;
-                padding: 12px;
-                z-index: 1000;
-                overflow-y: auto;
-            `;
-            
-            suggestions.slice(0, 3).forEach(suggestion => {
-                const item = document.createElement('div');
-                item.style.cssText = `
-                    padding: 8px;
-                    margin-bottom: 4px;
-                    background: rgba(255, 255, 255, 0.03);
-                    border-radius: 6px;
-                    cursor: pointer;
-                    font-size: 12px;
-                `;
-                item.textContent = suggestion.title;
-                item.onclick = () => applySuggestion(suggestion);
-                suggestionPanel.appendChild(item);
-            });
-            
-            document.body.appendChild(suggestionPanel);
-            
-            // Auto-remove after 10 seconds
-            setTimeout(() => {
-                if (suggestionPanel.parentNode) {
-                    suggestionPanel.parentNode.removeChild(suggestionPanel);
-                }
-            }, 10000);
-        }
-
-        // Real-time code analysis
-        function setupRealTimeAnalysis() {
-            if (!editor) return;
-            
-            let analysisTimeout;
-            editor.on('change', () => {
-                clearTimeout(analysisTimeout);
-                analysisTimeout = setTimeout(() => {
-                    // Only analyze if file has been open for a while
-                    if (currentOpenFile && editor.getValue().length > 100) {
-                        getSmartSuggestions();
-                    }
-                }, 2000); // Analyze 2 seconds after last change
-            });
-        }
-
-        // AI-powered code completion
-        function setupAICodeCompletion() {
-            if (!editor) return;
-            
-            editor.on('keyup', (cm, event) => {
-                // Trigger AI completion on certain patterns
-                const cursor = cm.getCursor();
-                const line = cm.getLine(cursor.line);
-                
-                // Check for patterns that might benefit from AI completion
-                if (line.includes('@commands.command') || 
-                    line.includes('async def') || 
-                    line.includes('def ') ||
-                    line.includes('class ')) {
-                    getSmartSuggestions();
-                }
-            });
-        }
-
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             lucide.createIcons();
@@ -2977,14 +2628,6 @@
             if (window.innerWidth >= 768) {
                 document.querySelector('.mobile-tabs').style.display = 'flex';
             }
-            
-            // Setup AI features after editor is initialized
-            setTimeout(() => {
-                if (editor) {
-                    setupRealTimeAnalysis();
-                    setupAICodeCompletion();
-                }
-            }, 1000);
         });
     </script>
 </body>

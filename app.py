@@ -283,6 +283,13 @@ def editor(server_index):
     file_tree = build_file_tree(bot_data.get('files', []))
     bot_data['files_tree'] = file_tree
 
+    file_info = {
+        "main.py": "The main entry point of the bot.",
+        ".env": "Environment variables, including the bot token.",
+        "functions/hello.py": "A sample cog with a hello command."
+    }
+    bot_data['file_info'] = file_info
+
     return render_template("editor.html", bot=bot_data, user=current_user)
 
 # Debug endpoint
@@ -802,6 +809,78 @@ def uninstall_package(server_index):
 
 import google.generativeai as genai
 
+@app.route("/api/server/<int:server_index>/ai-identify-files", methods=["POST"])
+@login_required
+def ai_identify_files(server_index):
+    logger.info(f"AI identify files request for server {server_index} by user {current_user.id}")
+
+    # Get the user's prompt from the request
+    prompt = request.json.get("prompt")
+    if not prompt:
+        return jsonify({"error": "Prompt is required"}), 400
+
+    # Configure the Google AI API
+    google_api_key = os.getenv("GOOGLE_API_KEY")
+    if not google_api_key:
+        logger.error("GOOGLE_API_KEY not found in environment variables.")
+        return jsonify({"error": "AI service is not configured."}), 500
+
+    genai.configure(api_key=google_api_key)
+    model = genai.GenerativeModel('gemini-1.5-flash-latest')
+
+    # Get the bot's data
+    user_data = db.users.find_one({"_id": current_user.id})
+    servers = user_data.get("servers", [])
+    if server_index >= len(servers):
+        return jsonify({"error": "Server not found"}), 404
+
+    bot_data = servers[server_index]
+
+    # Get the file list
+    files = bot_data.get('files', [])
+    file_paths = [file['path'] for file in files]
+
+    # Construct the prompt for the AI
+    ai_prompt = f"""You are an expert code architect. Based on the user's request and the following file list, identify which files need to be edited.
+
+User request: "{prompt}"
+
+File list:
+{json.dumps(file_paths, indent=2)}
+
+Your response must be a JSON array of strings, where each string is a file path from the list above.
+For example:
+["main.py", "utils/helpers.py"]
+"""
+
+    try:
+        # Call the Google AI API
+        response = model.generate_content(ai_prompt)
+
+        # Log the raw response for debugging
+        logger.info(f"AI response: {response.text}")
+
+        # Extract the JSON from the response
+        text_response = response.text
+        if '```json' in text_response:
+            text_response = text_response.split('```json')[1].split('```')[0]
+
+        # Parse the AI's response
+        try:
+            identified_files = json.loads(text_response)
+        except json.JSONDecodeError:
+            logger.error("Failed to decode JSON from AI response.")
+            return jsonify({"error": "The AI returned an invalid response. Please try again."}), 500
+
+        return jsonify({
+            "success": True,
+            "files": identified_files
+        })
+
+    except Exception as e:
+        logger.error(f"Error during AI file identification: {e}")
+        return jsonify({"error": "An error occurred during AI file identification."}), 500
+
 @app.route("/api/server/<int:server_index>/ai-edit", methods=["POST"])
 @login_required
 def ai_edit(server_index):
@@ -811,6 +890,8 @@ def ai_edit(server_index):
     prompt = request.json.get("prompt")
     if not prompt:
         return jsonify({"error": "Prompt is required"}), 400
+
+    identified_files = request.json.get("files", [])
 
     # Configure the Google AI API
     google_api_key = os.getenv("GOOGLE_API_KEY")
@@ -861,6 +942,10 @@ def ai_edit(server_index):
 **CURRENT PROJECT CONTEXT:**
 Here is the current file structure and content of the project:
 {json.dumps(file_contents, indent=2)}
+
+**FILES TO EDIT:**
+Based on a previous analysis, you should focus on editing the following files:
+{json.dumps(identified_files, indent=2)}
 
 **RESPONSE FORMAT:**
 Your response must be a JSON object where the keys are the file paths and the values are the new, complete code for that file. Include only the files that need to be created or modified.
@@ -933,413 +1018,6 @@ Your response must be a JSON object where the keys are the file paths and the va
     except Exception as e:
         logger.error(f"Error during AI edit: {e}")
         return jsonify({"error": "An error occurred during the AI edit."}), 500
-
-@app.route("/api/server/<int:server_index>/ai-analyze", methods=["POST"])
-@login_required
-def ai_analyze_code(server_index):
-    """Analyze code for issues, optimizations, and improvements"""
-    logger.info(f"AI code analysis request for server {server_index} by user {current_user.id}")
-
-    # Get the file path and content from the request
-    file_path = request.json.get("file_path")
-    if not file_path:
-        return jsonify({"error": "File path is required"}), 400
-
-    # Configure the Google AI API
-    google_api_key = os.getenv("GOOGLE_API_KEY")
-    if not google_api_key:
-        return jsonify({"error": "AI service is not configured."}), 500
-
-    genai.configure(api_key=google_api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash-latest')
-
-    # Get the bot's data
-    user_data = db.users.find_one({"_id": current_user.id})
-    servers = user_data.get("servers", [])
-    if server_index >= len(servers):
-        return jsonify({"error": "Server not found"}), 404
-
-    bot_data = servers[server_index]
-    bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
-    bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
-
-    # Read the file content
-    try:
-        full_path = os.path.join(bot_dir, file_path)
-        with open(full_path, 'r') as f:
-            file_content = f.read()
-    except Exception as e:
-        return jsonify({"error": f"Error reading file: {str(e)}"}), 500
-
-    # Construct analysis prompt
-    analysis_prompt = f"""Analyze the following Python Discord bot code and provide detailed feedback:
-
-**FILE: {file_path}**
-```python
-{file_content}
-```
-
-Please provide a comprehensive analysis covering:
-
-1. **Code Quality Issues**: Syntax errors, logic problems, potential bugs
-2. **Performance Optimizations**: Areas where the code can be made more efficient
-3. **Best Practices**: Discord.py best practices, Python conventions, security concerns
-4. **Error Handling**: Missing try-catch blocks, error handling improvements
-5. **Code Structure**: Suggestions for better organization and modularity
-6. **Documentation**: Missing docstrings, comments, type hints
-7. **Security**: Potential security vulnerabilities or unsafe practices
-8. **Maintainability**: Code that's hard to read, maintain, or extend
-
-Format your response as a JSON object with the following structure:
-{{
-  "issues": [
-    {{
-      "type": "error|warning|suggestion",
-      "severity": "high|medium|low",
-      "line": line_number,
-      "message": "Description of the issue",
-      "suggestion": "How to fix it"
-    }}
-  ],
-  "optimizations": [
-    {{
-      "area": "performance|memory|readability",
-      "description": "What can be optimized",
-      "suggestion": "How to optimize it"
-    }}
-  ],
-  "overall_score": 85,
-  "summary": "Overall assessment of the code quality"
-}}
-
-Be specific and actionable in your feedback."""
-
-    try:
-        response = model.generate_content(analysis_prompt)
-        
-        # Extract JSON from response
-        text_response = response.text
-        if '```json' in text_response:
-            text_response = text_response.split('```json')[1].split('```')[0]
-        
-        try:
-            analysis_result = json.loads(text_response)
-            return jsonify({"success": True, "analysis": analysis_result})
-        except json.JSONDecodeError:
-            return jsonify({"error": "Failed to parse AI analysis response"}), 500
-
-    except Exception as e:
-        logger.error(f"Error during AI analysis: {e}")
-        return jsonify({"error": "An error occurred during code analysis."}), 500
-
-@app.route("/api/server/<int:server_index>/ai-suggest", methods=["POST"])
-@login_required
-def ai_suggest_improvements(server_index):
-    """Get AI suggestions for code improvements based on context"""
-    logger.info(f"AI suggestions request for server {server_index} by user {current_user.id}")
-
-    # Get the current file and cursor position
-    file_path = request.json.get("file_path")
-    cursor_line = request.json.get("cursor_line", 1)
-    context = request.json.get("context", "")
-
-    if not file_path:
-        return jsonify({"error": "File path is required"}), 400
-
-    # Configure the Google AI API
-    google_api_key = os.getenv("GOOGLE_API_KEY")
-    if not google_api_key:
-        return jsonify({"error": "AI service is not configured."}), 500
-
-    genai.configure(api_key=google_api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash-latest')
-
-    # Get the bot's data
-    user_data = db.users.find_one({"_id": current_user.id})
-    servers = user_data.get("servers", [])
-    if server_index >= len(servers):
-        return jsonify({"error": "Server not found"}), 404
-
-    bot_data = servers[server_index]
-    bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
-    bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
-
-    # Read the file content
-    try:
-        full_path = os.path.join(bot_dir, file_path)
-        with open(full_path, 'r') as f:
-            file_content = f.read()
-    except Exception as e:
-        return jsonify({"error": f"Error reading file: {str(e)}"}), 500
-
-    # Get lines around cursor for context
-    lines = file_content.split('\n')
-    start_line = max(0, cursor_line - 5)
-    end_line = min(len(lines), cursor_line + 5)
-    context_lines = lines[start_line:end_line]
-
-    # Construct suggestion prompt
-    suggestion_prompt = f"""Based on the following Python Discord bot code and cursor position, provide intelligent suggestions:
-
-**FILE: {file_path}**
-**CURSOR POSITION: Line {cursor_line}**
-**CONTEXT: {context}**
-
-**CODE AROUND CURSOR:**
-```python
-{chr(10).join(f"{i+start_line+1:3d}: {line}" for i, line in enumerate(context_lines))}
-```
-
-**FULL FILE:**
-```python
-{file_content}
-```
-
-Provide suggestions for:
-1. **Code Completion**: What could be added at the cursor position
-2. **Refactoring**: How to improve the current code structure
-3. **Best Practices**: Discord.py and Python best practices to apply
-4. **Error Handling**: Missing error handling opportunities
-5. **Performance**: Performance improvements
-6. **Documentation**: Missing docstrings or comments
-
-Format as JSON:
-{{
-  "suggestions": [
-    {{
-      "type": "completion|refactor|best_practice|error_handling|performance|documentation",
-      "priority": "high|medium|low",
-      "title": "Suggestion title",
-      "description": "Detailed description",
-      "code_example": "Code example if applicable",
-      "line_range": [start_line, end_line]
-    }}
-  ],
-  "quick_fixes": [
-    {{
-      "title": "Quick fix title",
-      "description": "What it fixes",
-      "code": "Replacement code"
-    }}
-  ]
-}}"""
-
-    try:
-        response = model.generate_content(suggestion_prompt)
-        
-        # Extract JSON from response
-        text_response = response.text
-        if '```json' in text_response:
-            text_response = text_response.split('```json')[1].split('```')[0]
-        
-        try:
-            suggestions = json.loads(text_response)
-            return jsonify({"success": True, "suggestions": suggestions})
-        except json.JSONDecodeError:
-            return jsonify({"error": "Failed to parse AI suggestions response"}), 500
-
-    except Exception as e:
-        logger.error(f"Error during AI suggestions: {e}")
-        return jsonify({"error": "An error occurred while generating suggestions."}), 500
-
-@app.route("/api/server/<int:server_index>/ai-refactor", methods=["POST"])
-@login_required
-def ai_refactor_code(server_index):
-    """Refactor code using AI suggestions"""
-    logger.info(f"AI refactor request for server {server_index} by user {current_user.id}")
-
-    # Get the refactor request
-    file_path = request.json.get("file_path")
-    refactor_type = request.json.get("type", "general")  # general, optimize, clean, modernize
-    specific_instructions = request.json.get("instructions", "")
-
-    if not file_path:
-        return jsonify({"error": "File path is required"}), 400
-
-    # Configure the Google AI API
-    google_api_key = os.getenv("GOOGLE_API_KEY")
-    if not google_api_key:
-        return jsonify({"error": "AI service is not configured."}), 500
-
-    genai.configure(api_key=google_api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash-latest')
-
-    # Get the bot's data
-    user_data = db.users.find_one({"_id": current_user.id})
-    servers = user_data.get("servers", [])
-    if server_index >= len(servers):
-        return jsonify({"error": "Server not found"}), 404
-
-    bot_data = servers[server_index]
-    bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
-    bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
-
-    # Read the file content
-    try:
-        full_path = os.path.join(bot_dir, file_path)
-        with open(full_path, 'r') as f:
-            file_content = f.read()
-    except Exception as e:
-        return jsonify({"error": f"Error reading file: {str(e)}"}), 500
-
-    # Construct refactor prompt based on type
-    refactor_prompts = {
-        "general": "Refactor this code to improve readability, maintainability, and follow Python best practices.",
-        "optimize": "Optimize this code for better performance, memory usage, and efficiency.",
-        "clean": "Clean up this code by removing redundancy, improving naming, and simplifying complex logic.",
-        "modernize": "Modernize this code to use current Python features, type hints, and Discord.py best practices."
-    }
-
-    refactor_prompt = f"""Refactor the following Python Discord bot code:
-
-**REFACTOR TYPE: {refactor_type.upper()}**
-**SPECIFIC INSTRUCTIONS: {specific_instructions}**
-
-**FILE: {file_path}**
-```python
-{file_content}
-```
-
-**REFACTOR GOALS:**
-{refactor_prompts.get(refactor_type, refactor_prompts["general"])}
-
-**REQUIREMENTS:**
-1. Maintain the same functionality
-2. Improve code quality and readability
-3. Follow Python and Discord.py best practices
-4. Add proper error handling where missing
-5. Include type hints where appropriate
-6. Add docstrings for functions and classes
-7. Optimize performance where possible
-8. Use modern Python features
-
-**RESPONSE FORMAT:**
-Return a JSON object with:
-{{
-  "refactored_code": "The complete refactored code",
-  "changes_made": [
-    {{
-      "type": "error_handling|performance|readability|modernization",
-      "description": "What was changed",
-      "line_range": [start_line, end_line]
-    }}
-  ],
-  "improvements": [
-    "List of specific improvements made"
-  ]
-}}"""
-
-    try:
-        response = model.generate_content(refactor_prompt)
-        
-        # Extract JSON from response
-        text_response = response.text
-        if '```json' in text_response:
-            text_response = text_response.split('```json')[1].split('```')[0]
-        
-        try:
-            refactor_result = json.loads(text_response)
-            
-            # Apply the refactored code
-            with open(full_path, 'w') as f:
-                f.write(refactor_result["refactored_code"])
-            
-            return jsonify({
-                "success": True, 
-                "changes_made": refactor_result.get("changes_made", []),
-                "improvements": refactor_result.get("improvements", []),
-                "message": f"Successfully refactored {file_path}"
-            })
-        except json.JSONDecodeError:
-            return jsonify({"error": "Failed to parse AI refactor response"}), 500
-
-    except Exception as e:
-        logger.error(f"Error during AI refactor: {e}")
-        return jsonify({"error": "An error occurred during code refactoring."}), 500
-
-@app.route("/api/server/<int:server_index>/ai-chat", methods=["POST"])
-@login_required
-def ai_chat(server_index):
-    """AI chat with conversation history and context"""
-    logger.info(f"AI chat request for server {server_index} by user {current_user.id}")
-
-    # Get chat data
-    message = request.json.get("message")
-    conversation_history = request.json.get("history", [])
-    context_type = request.json.get("context_type", "general")  # general, debugging, optimization, learning
-
-    if not message:
-        return jsonify({"error": "Message is required"}), 400
-
-    # Configure the Google AI API
-    google_api_key = os.getenv("GOOGLE_API_KEY")
-    if not google_api_key:
-        return jsonify({"error": "AI service is not configured."}), 500
-
-    genai.configure(api_key=google_api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash-latest')
-
-    # Get the bot's data for context
-    user_data = db.users.find_one({"_id": current_user.id})
-    servers = user_data.get("servers", [])
-    if server_index >= len(servers):
-        return jsonify({"error": "Server not found"}), 404
-
-    bot_data = servers[server_index]
-    bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
-    bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
-
-    # Get current project context
-    files = bot_data.get('files', [])
-    file_contents = {}
-    for file in files[:5]:  # Limit to first 5 files for context
-        try:
-            with open(os.path.join(bot_dir, file['path']), 'r') as f:
-                file_contents[file['path']] = f.read()[:1000]  # Limit file content
-        except Exception:
-            continue
-
-    # Construct chat prompt with context
-    context_prompts = {
-        "general": "You are a helpful Python Discord bot development assistant.",
-        "debugging": "You are a debugging expert specializing in Python Discord bots. Help identify and fix issues.",
-        "optimization": "You are a performance optimization expert for Python Discord bots. Focus on efficiency and best practices.",
-        "learning": "You are a patient teacher helping someone learn Python Discord bot development. Explain concepts clearly."
-    }
-
-    chat_prompt = f"""{context_prompts.get(context_type, context_prompts["general"])}
-
-**CONVERSATION HISTORY:**
-{json.dumps(conversation_history[-10:], indent=2) if conversation_history else "No previous conversation"}
-
-**CURRENT PROJECT CONTEXT:**
-{json.dumps(file_contents, indent=2) if file_contents else "No project files available"}
-
-**USER MESSAGE:**
-{message}
-
-**INSTRUCTIONS:**
-- Provide helpful, accurate, and actionable advice
-- Be conversational and friendly
-- Include code examples when relevant
-- Ask clarifying questions if needed
-- Focus on Discord.py and Python best practices
-- Keep responses concise but comprehensive
-
-Respond as a helpful coding assistant."""
-
-    try:
-        response = model.generate_content(chat_prompt)
-        
-        return jsonify({
-            "success": True,
-            "response": response.text,
-            "timestamp": datetime.datetime.now().isoformat()
-        })
-
-    except Exception as e:
-        logger.error(f"Error during AI chat: {e}")
-        return jsonify({"error": "An error occurred during AI chat."}), 500
 
 if __name__ == "__main__":
     try:
