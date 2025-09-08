@@ -16,6 +16,7 @@ import sys
 import json
 import select
 import logging
+import traceback
 
 load_dotenv()
 
@@ -878,7 +879,7 @@ For example:
         })
 
     except Exception as e:
-        logger.error(f"Error during AI file identification: {e}")
+        logger.error(f"Error during AI file identification: {traceback.format_exc()}")
         return jsonify({"error": "An error occurred during AI file identification."}), 500
 
 @app.route("/api/server/<int:server_index>/ai-edit", methods=["POST"])
@@ -1016,7 +1017,7 @@ Your response must be a JSON object where the keys are the file paths and the va
         })
 
     except Exception as e:
-        logger.error(f"Error during AI edit: {e}")
+        logger.error(f"Error during AI edit: {traceback.format_exc()}")
         return jsonify({"error": "An error occurred during the AI edit."}), 500
 
 if __name__ == "__main__":
