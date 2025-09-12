@@ -42,7 +42,7 @@ else:
     mongo_client = MongoClient(os.getenv("MONGO_URI"))
     db = mongo_client['dash-bot']
     # Clear any stale processes on startup
-    if db.bot_processes:
+    if 'bot_processes' in db.list_collection_names():
         db.bot_processes.delete_many({})
 
 # Bot process management
