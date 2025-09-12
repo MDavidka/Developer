@@ -1,9 +1,10 @@
 Flask
-python-dotenv
 requests
 pymongo
 Flask-Login
-Flask-SocketIO
+Flask-SocketIO==5.3.0
+python-engineio==4.3.4
+python-socketio==5.7.2
 mongomock
 pytest
 python-dotenv==0.19.2

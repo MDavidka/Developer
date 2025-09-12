@@ -33,12 +33,20 @@ if not os.path.exists(BOT_WORKSPACES_PATH):
     os.makedirs(BOT_WORKSPACES_PATH)
 
 # MongoDB setup
-mongo_client = MongoClient(os.getenv("MONGO_URI"))
-db = mongo_client['dash-bot']
+if os.environ.get("FLASK_ENV") == "testing":
+    from mongomock import MongoClient
+    mongo_client = MongoClient()
+    db = mongo_client['dash-bot-test']
+else:
+    from pymongo import MongoClient
+    mongo_client = MongoClient(os.getenv("MONGO_URI"))
+    db = mongo_client['dash-bot']
+    # Clear any stale processes on startup
+    if db.bot_processes:
+        db.bot_processes.delete_many({})
 
 # Bot process management
 running_processes = {}
-db.bot_processes.delete_many({}) # Clear any stale processes on startup
 
 # Discord OAuth2 settings
 DISCORD_CLIENT_ID = os.getenv("DISCORD_CLIENT_ID")
