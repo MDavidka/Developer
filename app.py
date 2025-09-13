@@ -212,10 +212,15 @@ def dashboard():
             with open(os.path.join(bot_dir, '.env'), 'w') as f:
                 f.write(f"BOT_TOKEN={server.get('botToken', '')}")
 
+            # Create witf.json
+            with open(os.path.join(bot_dir, 'witf.json'), 'w') as f:
+                json.dump({}, f)
+
             # Update database
             new_files = [
                 {"path": "main.py", "type": "file"},
-                {"path": ".env", "type": "file"}
+                {"path": ".env", "type": "file"},
+                {"path": "witf.json", "type": "file"}
             ]
 
             db.users.update_one(
@@ -841,15 +846,30 @@ def ai_identify_files(server_index):
         return jsonify({"error": "Server not found"}), 404
 
     bot_data = servers[server_index]
+    bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
+    bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
+
+    # Read WITF data
+    witf_data = {}
+    witf_path = os.path.join(bot_dir, 'witf.json')
+    if os.path.exists(witf_path):
+        with open(witf_path, 'r') as f:
+            try:
+                witf_data = json.load(f)
+            except json.JSONDecodeError:
+                logger.warning(f"witf.json for bot {bot_id} is corrupted.")
 
     # Get the file list
     files = bot_data.get('files', [])
     file_paths = [file['path'] for file in files]
 
     # Construct the prompt for the AI
-    ai_prompt = f"""You are an expert code architect. Based on the user's request and the following file list, identify which files need to be edited.
+    ai_prompt = f"""You are an expert code architect. Based on the user's request, the file descriptions (WITF), and the file list, identify which files need to be edited.
 
 User request: "{prompt}"
+
+File Descriptions (WITF):
+{json.dumps(witf_data, indent=2)}
 
 File list:
 {json.dumps(file_paths, indent=2)}
@@ -918,6 +938,16 @@ def ai_edit(server_index):
     bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
     bot_dir = os.path.join(BOT_WORKSPACES_PATH, bot_id)
 
+    # Read WITF data
+    witf_data = {}
+    witf_path = os.path.join(bot_dir, 'witf.json')
+    if os.path.exists(witf_path):
+        with open(witf_path, 'r') as f:
+            try:
+                witf_data = json.load(f)
+            except json.JSONDecodeError:
+                logger.warning(f"witf.json for bot {bot_id} is corrupted.")
+
     # Get the file list and their contents
     files = bot_data.get('files', [])
     file_contents = {}
@@ -934,18 +964,18 @@ def ai_edit(server_index):
 {prompt}
 
 **VERY IMPORTANT INSTRUCTIONS:**
-1. Do not put all the code in `main.py`. Follow proper separation of concerns.
-2. For new commands or features, you **must** create new files inside a `functions` directory. If the directory does not exist, you can create it.
-3. This is a Discord.py project that uses Cogs for organizing commands. New commands should be in their own cog file inside the `functions` directory.
-4. After creating a new cog file in `functions/`, you **must** update `main.py` to load the new cog.
-5. Follow Python best practices: proper error handling, type hints, docstrings, and clean code principles.
-6. Use async/await properly for Discord.py operations.
-7. Include proper logging and error handling.
-8. Optimize code for performance and maintainability.
-9. Add comprehensive comments for complex logic.
-10. Ensure all imports are properly organized and necessary.
+1.  First, analyze the user's request, the provided WITF, and the file contents to understand which files to modify.
+2.  If you need to modify an existing function, locate it in the correct file based on the WITF.
+3.  If you need to create a new function, create a new file in the `functions` directory.
+4.  Do not put all the code in `main.py`. Follow proper separation of concerns.
+5.  This is a Discord.py project that uses Cogs for organizing commands. New commands should be in their own cog file inside the `functions` directory.
+6.  After creating a new cog file in `functions/`, you **must** update `main.py` to load the new cog.
+7.  Follow Python best practices: proper error handling, type hints, docstrings, and clean code principles.
 
-**CURRENT PROJECT CONTEXT:**
+**PROJECT CONTEXT:**
+Here is a description of the files in the project (What Is This File - WITF):
+{json.dumps(witf_data, indent=2)}
+
 Here is the current file structure and content of the project:
 {json.dumps(file_contents, indent=2)}
 
@@ -954,22 +984,21 @@ Based on a previous analysis, you should focus on editing the following files:
 {json.dumps(identified_files, indent=2)}
 
 **RESPONSE FORMAT:**
-Your response must be a JSON object where the keys are the file paths and the values are the new, complete code for that file. Include only the files that need to be created or modified.
+Your response must be a JSON object with two keys: "file_edits" and "witf_updates".
+- "file_edits" should be an object where keys are file paths and values are the new file content.
+- "witf_updates" should be an object where keys are file paths and values are the new file descriptions.
 
-**EXAMPLE STRUCTURE:**
+**EXAMPLE:**
 {{
-  "functions/new_cog.py": "import discord\\nfrom discord.ext import commands\\nimport logging\\n\\nlogger = logging.getLogger(__name__)\\n\\nclass NewCog(commands.Cog):\\n    def __init__(self, bot):\\n        self.bot = bot\\n\\n    @commands.command(name='newcommand')\\n    async def new_command(self, ctx):\\n        \\\"\\\"\\\"A new command that does something useful.\\\"\\\"\\\"\\n        try:\\n            await ctx.send('This is a new command!')\\n        except Exception as e:\\n            logger.error(f'Error in new_command: {{e}}')\\n            await ctx.send('An error occurred while executing the command.')\\n\\ndef setup(bot):\\n    bot.add_cog(NewCog(bot))",
-  "main.py": "# ... (existing main.py code) ...\\n# Add this at the end to load the cog\\nbot.load_extension('functions.new_cog')"
+  "file_edits": {{
+    "functions/new_cog.py": "...",
+    "main.py": "..."
+  }},
+  "witf_updates": {{
+    "functions/new_cog.py": "This cog contains the new 'newcommand'.",
+    "main.py": "This is the main file. It now loads the 'new_cog'."
+  }}
 }}
-
-**CODE QUALITY REQUIREMENTS:**
-- Use proper error handling with try-catch blocks
-- Include type hints where appropriate
-- Add docstrings for all functions and classes
-- Use meaningful variable and function names
-- Follow PEP 8 style guidelines
-- Include logging for debugging and monitoring
-- Optimize for performance and readability
 """
 
     try:
@@ -986,14 +1015,16 @@ Your response must be a JSON object where the keys are the file paths and the va
 
         # Parse the AI's response
         try:
-            edited_files = json.loads(text_response)
+            response_data = json.loads(text_response)
+            file_edits = response_data.get("file_edits", {})
+            witf_updates = response_data.get("witf_updates", {})
         except json.JSONDecodeError:
             logger.error("Failed to decode JSON from AI response.")
             return jsonify({"error": "The AI returned an invalid response. Please try again."}), 500
 
-        # Apply the changes
+        # Apply the file edits
         modified_files = []
-        for filepath, new_content in edited_files.items():
+        for filepath, new_content in file_edits.items():
             full_path = os.path.join(bot_dir, filepath)
 
             # Create directories if they don't exist
@@ -1014,6 +1045,15 @@ Your response must be a JSON object where the keys are the file paths and the va
                 modified_files.append(f"Created: {filepath}")
             else:
                 modified_files.append(f"Modified: {filepath}")
+
+        # Update the WITF file
+        if witf_updates:
+            witf_data.update(witf_updates)
+            with open(witf_path, 'w') as f:
+                json.dump(witf_data, f, indent=2)
+
+            if "witf.json" not in modified_files:
+                 modified_files.append("Modified: witf.json")
 
         return jsonify({
             "success": True, 
