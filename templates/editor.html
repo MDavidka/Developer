@@ -416,6 +416,46 @@
             color: #ffffff;
         }
 
+        .console-toggle {
+            overflow: hidden;
+        }
+
+        .custom-icon-shape {
+            width: 100%;
+            height: 100%;
+            background-color: #808080;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .custom-icon-cutout {
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            background-color: #fff;
+            border-radius: 50%;
+            bottom: 3px;
+            right: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .custom-icon-cutout > i {
+            color: #808080;
+            width: 14px;
+            height: 14px;
+        }
+
+        .console-status-dot {
+            top: 4px;
+            left: 4px;
+            right: auto;
+            bottom: auto;
+            z-index: 1; /* Make sure it's on top */
+        }
+
         /* Editor Mode and File Editing State */
         body.editor-mode .action-buttons-container,
         body.editor-mode .ai-chat-container,
@@ -1943,7 +1983,10 @@
                     <i data-lucide="save"></i>
                 </button>
                 <button class="console-toggle" onclick="toggleConsole()">
-                    <i data-lucide="terminal"></i>
+                    <div class="custom-icon-shape"></div>
+                    <div class="custom-icon-cutout">
+                        <i data-lucide="terminal"></i>
+                    </div>
                     <div class="console-status-dot" id="consoleStatusDot"></div>
                     <i data-lucide="pause-circle" class="pause-icon" id="pauseIcon"></i>
                 </button>
