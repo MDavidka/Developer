@@ -110,9 +110,14 @@ def cleanup_bot_processes():
     """Clean up all running bot processes on shutdown"""
     print("Cleaning up bot processes...")
     for bot_process in db.bot_processes.find():
+        pid = bot_process['pid']
         try:
-            os.kill(bot_process['pid'], signal.SIGTERM)
-            print(f"Terminated bot {bot_process['bot_id']} (PID: {bot_process['pid']})")
+            if sys.platform != "win32":
+                os.killpg(os.getpgid(pid), signal.SIGTERM)
+                print(f"Terminated process group for bot {bot_process['bot_id']} (PGID: {os.getpgid(pid)})")
+            else:
+                os.kill(pid, signal.SIGTERM)
+                print(f"Terminated bot {bot_process['bot_id']} (PID: {pid})")
         except OSError:
             pass # Process already dead
     db.bot_processes.delete_many({})
@@ -646,15 +651,22 @@ def start_bot(server_index):
             "BOT_ID": bot_id
         })
 
+        popen_kwargs = {
+            "stdout": subprocess.PIPE,
+            "stderr": subprocess.PIPE,
+            "text": True,
+            "bufsize": 1,
+            "universal_newlines": True,
+            "env": env,
+            "cwd": bot_dir
+        }
+
+        if sys.platform != "win32":
+            popen_kwargs["preexec_fn"] = os.setsid
+
         process = subprocess.Popen(
             startup_command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            bufsize=1,
-            universal_newlines=True,
-            env=env,
-            cwd=bot_dir
+            **popen_kwargs
         )
 
         log_thread = threading.Thread(target=stream_bot_logs, args=(bot_id, process), daemon=True)
@@ -691,42 +703,36 @@ def stop_bot(server_index):
     bot_data = servers[server_index]
     bot_id = f"{current_user.id}_{bot_data.get('server_name', server_index)}"
 
-    bot_process = db.bot_processes.find_one({"bot_id": bot_id})
-    if not bot_process:
-        socketio.emit('log', {
-            'data': f'⚠️ Bot {bot_id} is not running'
-        }, room=bot_id)
+    bot_process_doc = db.bot_processes.find_one({"bot_id": bot_id})
+    if not bot_process_doc:
+        socketio.emit('log', {'data': f'⚠️ Bot {bot_id} is not running or already stopped.'}, room=bot_id)
         return jsonify({"error": "Bot is not running"}), 400
 
-    pid = bot_process['pid']
-    socketio.emit('log', {
-        'data': f'🛑 Stopping bot {bot_id} (PID: {pid})...'
-    }, room=bot_id)
+    pid = bot_process_doc['pid']
+    socketio.emit('log', {'data': f'🛑 Stopping bot {bot_id} (PID: {pid})...'}, room=bot_id)
 
-    if bot_id in running_processes:
-        process = running_processes[bot_id]
-        try:
-            process.terminate()
-            try:
-                process.wait(timeout=10)
-                socketio.emit('log', {'data': '✅ Bot stopped gracefully'}, room=bot_id)
-            except subprocess.TimeoutExpired:
-                process.kill()
-                process.wait()
-                socketio.emit('log', {'data': '💀 Bot terminated forcefully'}, room=bot_id)
-            del running_processes[bot_id]
-        except Exception as e:
-            logger.error(f"Error stopping bot {bot_id} with PID {pid}: {e}")
-            socketio.emit('log', {'data': f'💥 Error stopping bot: {e}'}, room=bot_id)
-    else:
-        try:
+    try:
+        if sys.platform != "win32":
+            os.killpg(os.getpgid(pid), signal.SIGTERM)
+            socketio.emit('log', {'data': f'✅ Sent SIGTERM to process group {os.getpgid(pid)}'}, room=bot_id)
+        else:
+            # On Windows, we can't kill a process group in the same way.
+            # Terminating the main process should be sufficient if using CREATE_NEW_PROCESS_GROUP.
             os.kill(pid, signal.SIGTERM)
-            socketio.emit('log', {'data': '✅ Bot stopped gracefully (by PID)'}, room=bot_id)
-        except OSError:
-            socketio.emit('log', {'data': f'⚠️ Bot process with PID {pid} not found.'}, room=bot_id)
+            socketio.emit('log', {'data': '✅ Sent SIGTERM to process'}, room=bot_id)
 
-    # Clean up
-    db.bot_processes.delete_one({"bot_id": bot_id})
+        # Remove the process from our in-memory tracker if it's there
+        if bot_id in running_processes:
+            del running_processes[bot_id]
+
+    except ProcessLookupError:
+        socketio.emit('log', {'data': f'⚠️ Process with PID {pid} not found. It might have already stopped.'}, room=bot_id)
+    except Exception as e:
+        logger.error(f"Error stopping bot {bot_id} with PID {pid}: {e}")
+        socketio.emit('log', {'data': f'💥 Error stopping bot: {e}'}, room=bot_id)
+        # Still try to clean up the DB record
+    finally:
+        db.bot_processes.delete_one({"bot_id": bot_id})
 
     return jsonify({"success": True})
 
