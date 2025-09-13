@@ -958,7 +958,7 @@ Your response must be a JSON object where the keys are the file paths and the va
 
 **EXAMPLE STRUCTURE:**
 {{
-  "functions/new_cog.py": "import discord\\nfrom discord.ext import commands\\nimport logging\\n\\nlogger = logging.getLogger(__name__)\\n\\nclass NewCog(commands.Cog):\\n    def __init__(self, bot):\\n        self.bot = bot\\n\\n    @commands.command(name='newcommand')\\n    async def new_command(self, ctx):\\n        \\\"\\\"\\\"A new command that does something useful.\\\"\\\"\\\"\\n        try:\\n            await ctx.send('This is a new command!')\\n        except Exception as e:\\n            logger.error(f'Error in new_command: {e}')\\n            await ctx.send('An error occurred while executing the command.')\\n\\ndef setup(bot):\\n    bot.add_cog(NewCog(bot))",
+  "functions/new_cog.py": "import discord\\nfrom discord.ext import commands\\nimport logging\\n\\nlogger = logging.getLogger(__name__)\\n\\nclass NewCog(commands.Cog):\\n    def __init__(self, bot):\\n        self.bot = bot\\n\\n    @commands.command(name='newcommand')\\n    async def new_command(self, ctx):\\n        \\\"\\\"\\\"A new command that does something useful.\\\"\\\"\\\"\\n        try:\\n            await ctx.send('This is a new command!')\\n        except Exception as e:\\n            logger.error(f'Error in new_command: {{e}}')\\n            await ctx.send('An error occurred while executing the command.')\\n\\ndef setup(bot):\\n    bot.add_cog(NewCog(bot))",
   "main.py": "# ... (existing main.py code) ...\\n# Add this at the end to load the cog\\nbot.load_extension('functions.new_cog')"
 }}
 
