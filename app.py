@@ -1076,7 +1076,7 @@ if __name__ == "__main__":
     try:
         print("🚀 Starting Flask application...")
         print(f"BOT_WORKSPACES_PATH: {BOT_WORKSPACES_PATH}")
-        socketio.run(app, host='0.0.0.0', port=30158, debug=True, allow_unsafe_werkzeug=True)
+        socketio.run(app, host='0.0.0.0', port=30158, debug=True)
     except KeyboardInterrupt:
         print("\nShutting down...")
         cleanup_bot_processes()
