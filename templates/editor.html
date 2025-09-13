@@ -403,6 +403,11 @@
             box-shadow: none;
         }
 
+        .console-status-dot.loading {
+            background: #FFA500; /* Orange */
+            animation: pulse 1s infinite;
+        }
+
         .pause-icon {
             display: none;
             position: absolute;
@@ -2333,11 +2338,16 @@
             } else if (status === 'stopped') {
                 dot.classList.add('offline');
                 pauseIcon.style.display = 'block';
+            } else if (status === 'loading') {
+                dot.classList.add('loading');
+            } else {
+                dot.classList.add('offline');
             }
         }
 
         function checkBotStatus() {
             console.log('Checking bot status...');
+            updateConsoleStatus('loading'); // Set loading state
             fetch(`/api/server/${serverIndex}/status`)
                 .then(response => response.json())
                 .then(data => {
@@ -2352,6 +2362,10 @@
                         runBtn.disabled = false;
                         stopBtn.disabled = true;
                     }
+                })
+                .catch(error => {
+                    console.error('Error checking bot status:', error);
+                    updateConsoleStatus('offline');
                 });
         }
 

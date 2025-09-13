@@ -113,10 +113,10 @@ def cleanup_bot_processes():
         pid = bot_process['pid']
         try:
             if sys.platform != "win32":
-                os.killpg(os.getpgid(pid), signal.SIGTERM)
+                os.killpg(os.getpgid(pid), signal.SIGKILL)
                 print(f"Terminated process group for bot {bot_process['bot_id']} (PGID: {os.getpgid(pid)})")
             else:
-                os.kill(pid, signal.SIGTERM)
+                os.kill(pid, signal.SIGKILL)
                 print(f"Terminated bot {bot_process['bot_id']} (PID: {pid})")
         except OSError:
             pass # Process already dead
@@ -713,13 +713,13 @@ def stop_bot(server_index):
 
     try:
         if sys.platform != "win32":
-            os.killpg(os.getpgid(pid), signal.SIGTERM)
-            socketio.emit('log', {'data': f'✅ Sent SIGTERM to process group {os.getpgid(pid)}'}, room=bot_id)
+            os.killpg(os.getpgid(pid), signal.SIGKILL)
+            socketio.emit('log', {'data': f'✅ Sent SIGKILL to process group {os.getpgid(pid)}'}, room=bot_id)
         else:
             # On Windows, we can't kill a process group in the same way.
             # Terminating the main process should be sufficient if using CREATE_NEW_PROCESS_GROUP.
-            os.kill(pid, signal.SIGTERM)
-            socketio.emit('log', {'data': '✅ Sent SIGTERM to process'}, room=bot_id)
+            os.kill(pid, signal.SIGKILL)
+            socketio.emit('log', {'data': '✅ Sent SIGKILL to process'}, room=bot_id)
 
         # Remove the process from our in-memory tracker if it's there
         if bot_id in running_processes:
@@ -977,6 +977,7 @@ def ai_edit(server_index):
 5.  This is a Discord.py project that uses Cogs for organizing commands. New commands should be in their own cog file inside the `functions` directory.
 6.  After creating a new cog file in `functions/`, you **must** update `main.py` to load the new cog.
 7.  Follow Python best practices: proper error handling, type hints, docstrings, and clean code principles.
+8.  This project uses discord.py version 2.3.0 or higher. Ensure all code is compatible with this version and avoid using any deprecated features.
 
 **PROJECT CONTEXT:**
 Here is a description of the files in the project (What Is This File - WITF):
